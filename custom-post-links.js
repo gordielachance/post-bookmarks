@@ -24,7 +24,7 @@
     });
     
     // remove row
-    $('.custom-post-links-row-remove').on('click', function( event ) {
+    $('#custom-post-links-target').on('click', '.custom-post-links-row-remove', function( event ) {
       var row_index = $( event.target ).attr('title');
       $('.custom-post-links-row.row-index-' + row_index).remove();
       
