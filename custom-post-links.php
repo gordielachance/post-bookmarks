@@ -33,24 +33,48 @@ function custom_post_links_admin_init(){
   wp_register_style( 'custom_post_links_css',  CUSTOM_POST_LINKS_URL.'custom-post-links.css' );
   // js
   wp_register_script( 'custom_post_links_js', CUSTOM_POST_LINKS_URL.'custom-post-links.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable'), '1.0' );
+}
+add_action( 'admin_init', 'custom_post_links_admin_init' );
+
+/*
+ * enqueue admin scripts
+ * https://pippinsplugins.com/loading-scripts-correctly-in-the-wordpress-admin/
+ */
+function custom_post_links_admin_enqueue_scripts( $hook ){
+  $load = false;
   
-  if (isset($_REQUEST['post']) &&
-      in_array(get_post_type($_REQUEST['post']), $post_types) &&
+  // edit pages/posts
+  if ( $hook == 'post.php' &&
       isset($_REQUEST['action']) &&
-      $_REQUEST['action'] == 'edit')
+      $_REQUEST['action'] == 'edit' &&
+      isset($_REQUEST['post']) &&
+      in_array( get_post_type( $_REQUEST['post']), _get_custom_post_links_allowed_post_types() ) )
   {
+    $load = true;
+  }
+  
+  // new post/page
+  if ( $hook == 'post-new.php' ){
+    global $post;
+    if ( in_array($post->post_type, _get_custom_post_links_allowed_post_types() ) ){
+      $load = true;
+    }
+  }
+  
+  // ensure that this is a post type we allow
+  if ( $load ) {
     wp_enqueue_script( 'custom_post_links_js' );
     wp_enqueue_style( 'custom_post_links_css' );
   }
 }
-add_action( 'admin_init', 'custom_post_links_admin_init' );
+add_action( 'admin_enqueue_scripts', 'custom_post_links_admin_enqueue_scripts' );
 
 /*
  * Custom meta box for post links
  */
 function custom_post_links_meta_box( $post ){
-	// Add an nonce field so we can check for it later.
-	wp_nonce_field( 'custom_post_links_meta_box', 'custom_post_links_meta_box_nonce' );
+  // Add an nonce field so we can check for it later.
+  wp_nonce_field( 'custom_post_links_meta_box', 'custom_post_links_meta_box_nonce' );
   
   // default data / options
   $blank_row = array('url' => '', 'title' => '');
@@ -151,51 +175,57 @@ function custom_post_links_edit_link_row_template($index, $values){
  */
 function custom_post_links_meta_box_save_data( $post_id ) {
 
-	/*
-	 * We need to verify this came from our screen and with proper authorization,
-	 * because the save_post action can be triggered at other times.
-	 */
+  /*
+   * We need to verify this came from our screen and with proper authorization,
+   * because the save_post action can be triggered at other times.
+   */
 
-	// Check if our nonce is set.
-	if ( ! isset( $_POST['custom_post_links_meta_box_nonce'] ) ) {
-		return;
-	}
+  // Check if our nonce is set.
+  if ( ! isset( $_POST['custom_post_links_meta_box_nonce'] ) ) {
+    return;
+  }
 
-	// Verify that the nonce is valid.
-	if ( ! wp_verify_nonce( $_POST['custom_post_links_meta_box_nonce'], 'custom_post_links_meta_box' ) ) {
-		return;
-	}
+  // Verify that the nonce is valid.
+  if ( ! wp_verify_nonce( $_POST['custom_post_links_meta_box_nonce'], 'custom_post_links_meta_box' ) ) {
+    return;
+  }
 
-	// If this is an autosave, our form has not been submitted, so we don't want to do anything.
-	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-		return;
-	}
+  // If this is an autosave, our form has not been submitted, so we don't want to do anything.
+  if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+    return;
+  }
 
-	// Check the user's permissions.
-	if ( isset( $_REQUEST['post_type'] ) && 'page' == $_REQUEST['post_type'] ) {
-		if ( ! current_user_can( 'edit_page', $post_id ) ) {
-			return;
-		}
-	}
-  else {
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return;
-		}
-	}
+  // Check the user's permissions.
+  if ( isset( $_REQUEST['post_type'] ) ){
+    // ensure it's an allowed post_type
+    if ( !in_array( $_REQUEST['post_type'], _get_custom_post_links_allowed_post_types() ) ){
+      return;
+    }
+    
+    // ensure user can edit page
+    if ( 'page' == $_REQUEST['post_type'] && !current_user_can( 'edit_page', $post_id ) ) {
+      return;
+    }
+    
+    // ensure user can edit post
+    else if ( ! current_user_can( 'edit_post', $post_id ) ) {
+      return;
+    }
+  }
+  
 
-	/* OK, its safe for us to save the data now. */
-	
-	// Make sure that it is set.
-	if ( ! isset( $_POST['custom_post_links'] ) ) {
+  /* OK, its safe for us to save the data now. */
+  
+  // Make sure that it is set.
+  if ( ! isset( $_POST['custom_post_links'] ) ) {
     if ( isset( $_POST['custom_post_links_output'] ) ) {
       // metabox was submitted, but all links were removed
       delete_post_meta( $post_id, '_custom_post_links');
       update_post_meta( $post_id, '_custom_post_links_output', '_none_' );
       update_post_meta( $post_id, '_custom_post_links_title', $_POST['custom_post_links_title'] );
     }
-    
-		return;
-	}
+    return;
+  }
 
   // sort links by weight
   $sorted = array();
@@ -207,10 +237,10 @@ function custom_post_links_meta_box_save_data( $post_id ) {
   
   ksort($sorted);
   
-	// Update the meta field in the database.
-	update_post_meta( $post_id, '_custom_post_links', $sorted );
-	update_post_meta( $post_id, '_custom_post_links_title', $_POST['custom_post_links_title'] );
-	update_post_meta( $post_id, '_custom_post_links_output', $_POST['custom_post_links_output'] );
+  // Update the meta field in the database.
+  update_post_meta( $post_id, '_custom_post_links', $sorted );
+  update_post_meta( $post_id, '_custom_post_links_title', $_POST['custom_post_links_title'] );
+  update_post_meta( $post_id, '_custom_post_links_output', $_POST['custom_post_links_output'] );
 }
 add_action( 'save_post', 'custom_post_links_meta_box_save_data' );
 
