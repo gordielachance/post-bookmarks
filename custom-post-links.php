@@ -1,10 +1,14 @@
 <?php
 /*
 Plugin Name: Daggerhart - Custom Post Links
-Description: Add Fields to post types for links
-Author: Me
+Description: Add Fields to post types for appending/prepending arbitrary links to the post output
+Plugin URI: https://github.com/daggerhart/custom-post-links
+Author: Jonathan Daggerhart
+Author URI: http://daggerhart.com
 Version: 1.0
+License: GPL2
 */
+
 define( 'CUSTOM_POST_LINKS_FILE', __FILE__);
 define( 'CUSTOM_POST_LINKS_DIR', dirname( __FILE__ ) );
 define( 'CUSTOM_POST_LINKS_URL', plugin_dir_url( __FILE__ ) );
