@@ -1,0 +1,44 @@
+#custom-post-links-add-new,
+.custom-post-links-row-remove {
+  display: block;
+  float: right;
+  border: 1px solid #bbb;
+  background: #eee;
+  padding: 3px 6px;
+  line-height: 18px;
+}
+.custom-post-links-row-remove {
+  clear: right;
+  margin-top: 4px;
+  margin-right: 1%;
+}
+.custom-post-links-drag-handle {
+  float: left;
+  clear: left;
+  width: 9%;
+  height: 24px;
+  background: transparent url('drag_handle.png') 8px 8px no-repeat;
+}
+.custom-post-links-more-options {
+  padding-left: 10%;
+}
+#custom-post-links-target {
+  padding-top: 36px;
+}
+.custom-post-links-row {
+  line-height: 2em;
+  border-top: 1px dashed #bbb;
+  padding-top: 8px;
+  margin-bottom: 8px;
+  background: #fff;
+}
+.custom-post-links-row label.text-field {
+  display: block;
+  float: left;
+  width: 10%;
+  height: 2em;
+}
+.custom-post-links-row span input {
+  width: 89%;
+  height: 2em;
+}
