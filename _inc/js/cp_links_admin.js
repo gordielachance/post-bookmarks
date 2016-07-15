@@ -9,6 +9,22 @@
   
   
   $(document).ready(function(){
+      
+      var add_new_section =  $('#cp_links_wrapper_new');
+      
+      //hide add new section
+      add_new_section.addClass('hidden');
+      
+      //add new link
+      //$('#cp_links_add_new').click(function(event){
+          //event.preventDefault();
+            var new_table_line = add_new_section.find('> div').clone();
+            new_table_line = new_table_line.unwrap().wrap( "<tr></tr>" );
+
+            new_table_line.appendTo( "#custom-post-links #the-list" );
+      
+            console.log("yo");
+      //});
     
     // add new row
     $('#custom-post-links-add-new').click(function(){
@@ -33,12 +49,12 @@
     });
     
     // sort links
-    $('#custom-post-links-target').sortable({
-      handle: '.custom-post-links-drag-handle',
+    $('#custom-post-links .wp-list-table #the-list').sortable({
+      handle: '.cp-links-link-draghandle',
       
       update: function(event, ui) {
         // update row weights
-        _custom_post_links_update_links_weight();
+        //_custom_post_links_update_links_weight();
       }
     });
     

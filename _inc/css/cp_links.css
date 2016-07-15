@@ -1,0 +1,7 @@
+li.cp-links {
+    background-image: url('http://placehold.it/16x16');
+    background-position: left center;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    padding-left: 20px; /* Adjust according to image size to push text across. */
+}

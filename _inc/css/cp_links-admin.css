@@ -1,0 +1,11 @@
+.cp-links-link-draghandle{
+    cursor: pointer; cursor: hand;
+}
+
+#custom-post-links .column-reorder{
+    width:20px;
+}
+
+#custom-post-links #the-list .cp-links-link-draghandle{
+    text-align:center;
+}
