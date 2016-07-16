@@ -9,22 +9,23 @@
   
   
   $(document).ready(function(){
+
+      /* NOT WORKING YET (when submitting table)
       
-      var add_new_section =  $('#cp_links_wrapper_new');
+      var add_new_section =  $('#cp_links_new_wrapper');
+      var table = add_new_section.find("table");
+      var table_line = table.find(".cp_links_new").clone();
       
-      //hide add new section
-      add_new_section.addClass('hidden');
+      table.hide();
       
       //add new link
-      //$('#cp_links_add_new').click(function(event){
-          //event.preventDefault();
-            var new_table_line = add_new_section.find('> div').clone();
-            new_table_line = new_table_line.unwrap().wrap( "<tr></tr>" );
+      $('#cp_links_add_new').click(function(event){
+        console.log("to");
+        event.preventDefault();
+        table_line.appendTo( "#custom-post-links #the-list" );
+      });
+      */
 
-            new_table_line.appendTo( "#custom-post-links #the-list" );
-      
-            console.log("yo");
-      //});
     
     // add new row
     $('#custom-post-links-add-new').click(function(){

@@ -99,9 +99,8 @@ class CP_Links {
         
     }
     function setup_actions(){  
-        
-        //enable Link Manager
-        add_filter( 'pre_option_link_manager_enabled', '__return_true' );
+
+        add_filter( 'pre_option_link_manager_enabled', '__return_true' ); //enable Link Manager plugin
 
         add_action( 'plugins_loaded', array($this, 'upgrade'));
         
@@ -265,10 +264,6 @@ class CP_Links {
         $post_types = $this->allowed_post_types();
         
         $title = __('Custom Post Links','cp_links');
-            
-        if ( current_user_can( 'manage_links' ) ) {
-            $title .= sprintf( ' <a id="cp_links_add_new" href="#cp_links_wrapper_new">%s</a>',__('Add New') );
-        }
 
         foreach ( $post_types as $post_type ) {
             add_meta_box( 'custom-post-links', $title,array($this,'metabox_content'),$post_type, 'normal', 'high' );
@@ -317,9 +312,18 @@ class CP_Links {
         <?php 
         if ( current_user_can( 'manage_links' ) ){
             ?>
-            <div id="cp_links_wrapper_new">
+            <div id="cp_links_new_wrapper">
                 <h4><?php _e('Add Link');?></h4>
-                <?php $this->add_link_row();?>
+                <table>
+                    <?php $this->add_link_row();?>
+                </table>
+                <?php
+                if ( current_user_can( 'manage_links' ) ) {
+                    ?>
+                    <p><input type="submit" id="cp_links_add_new" class="button" value="<?php _e("Add Link");?>"></input></p>
+                    <?php
+                }
+                ?>
             </div>
             <?php
         }
@@ -336,23 +340,23 @@ class CP_Links {
     
     function add_link_row($index = 0){
         ?>
-        <div>
-            <p scope="row" class="check-column"></p>
-            <p class="name column-name has-row-actions column-primary">
+        <tr class="cp_links_new">
+            <th scope="row" class="check-column"></th>
+            <td class="reorder column-reorder has-row-actions column-primary" data-colname=""></td>
+            <td class="name column-name has-row-actions column-primary">
                 <label><?php _e('Name');?></label>
                 <input type="text" name="custom_post_links[new][<?php echo $index;?>][name]">
-            </p>
-            <p class="url column-url">
+            </td>
+            <td class="url column-url">
                 <label><?php _e('URL');?></label>
                 <input type="text" name="custom_post_links[new][<?php echo $index;?>][url]">
-            </p>
-            <p class="target column-target">
+            </td>
+            <td class="target column-target">
                 <label><?php _e('Target');?></label>
                 <input id="link_target_blank" type="checkbox" name="custom_post_links[new][<?php echo $index;?>][target]" value="_blank" />
                 <small><?php _e('<code>_blank</code> &mdash; new window or tab.'); ?></small>
-            </p>
-            <p class="remove column-remove"></p>
-        </div>
+            </td>
+        </tr>
         <?php
     }
 
@@ -425,36 +429,7 @@ class CP_Links {
         
         update_post_meta( $post_id, '_custom_post_links', $cp_links_ids );
         
-        return;
-
-        // Make sure that it is set.
-        if ( ! $save_links ) {
-            
-            if ( isset( $_POST['custom_post_links_output'] ) ) {
-              // metabox was submitted, but all links were removed
-              delete_post_meta( $post_id, '_custom_post_links');
-              update_post_meta( $post_id, '_custom_post_links_output', '_none_' );
-              update_post_meta( $post_id, '_custom_post_links_title', $_POST['custom_post_links_title'] );
-            }
-            
-        }else{
-
-            
-            //sort by weight
-            usort($save_links, function ($a, $b) {
-                return $a['weight'] - $b['weight'];
-            });
-
-            
-            // Update the meta field in the database.
-            update_post_meta( $post_id, '_custom_post_links', $cp_links_ids );
-            update_post_meta( $post_id, '_custom_post_links_title', $_POST['custom_post_links_title'] );
-            update_post_meta( $post_id, '_custom_post_links_output', $_POST['custom_post_links_output'] );
-            
-            
-        }
-
-
+        return $cp_links_ids;
 
     }
     
