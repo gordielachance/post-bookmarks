@@ -35,8 +35,8 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 Use the *data-cp-link-domain* attribute, for example : 
 
-li.cp-links[data-cp-link-domain='wordpress.org'] {
-  background-image: url('http://placehold.it/16x16');
+li.cp-links[data-cp-link-domain='wikipedia.org'] {
+    background-image: url('https://wikipedia.org/static/favicon/wikipedia.ico');
 }
 `
 
