@@ -64,9 +64,11 @@ function cp_links_output_links( $content ){
 function cp_links_output_single_link($link){
     //get domain url
     $domain = cp_links_get_domain($link->link_url);
-
+    
     $link_classes_arr = array('cp-links');
+    $link_classes_arr = apply_filters('cp_links_single_link_classes',$link_classes_arr,$link,$domain);
     $link_classes = cp_links_get_classes($link_classes_arr);
+    
     $output = sprintf('<li id="%1s" %2s data-cp-link-domain="%3s"><a href="%4$s">%5$s</a></li>','cp-link-'.$link->link_id,$link_classes,$domain,$link->link_url,$link->link_name);
     return apply_filters('cp_links_output_single_link',$output,$link);
     
