@@ -31,15 +31,27 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 == Frequently Asked Questions ==
 
-= How can I style a link based on its domain ? =
+= How can I style a link based on its domain, using CSS ? =
 
 Use the *data-cp-link-domain* attribute, for example : 
 
 li.cp-links[data-cp-link-domain='wikipedia.org'] {
     background-image: url('https://wikipedia.org/static/favicon/wikipedia.ico');
 }
-`
 
+= How can I change the way links are displayed ? =
+
+Use the filter *cp_links_output_single_link* (located in the **cp_links_output_single_link** function), for example : 
+
+`<?php
+
+function custom_output_single_link($output,$link){
+    return $output;
+}
+
+add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
+
+?>`
 
 == Screenshots ==
 
@@ -47,11 +59,13 @@ li.cp-links[data-cp-link-domain='wikipedia.org'] {
 == Changelog ==
 
 = 0.1.1 =
-
-* wrapped in a class
+* set the link domain as class in the link output
+* display entries in metabox using class CP_Links_List_Table (extends WP_List_Table)
+* store / read entries from the Link Manager plugin (Worpress core) instead of metas
+* wrapped in a class, better code structure
 * use fontAwesome css, deleted drag_handle.png
-* better plugin structure
 * new function allowed_post_types() to get dynamically the post types allowed for the plugin
+* various other improvements
 
 = 0.1 =
 * Forked from [Custom Post Links](https://github.com/daggerhart/custom-post-links) by Jonathan Daggerhart.
