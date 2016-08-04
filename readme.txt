@@ -1,22 +1,29 @@
 === Custom Post Links ===
-Contributors:grosbouff,daggerhart
+Contributors:grosbouff
 Donate link:http://bit.ly/gbreant
-Tags: links,quick links,related links
+Tags: links,quick links,related links,custom links, post links
 Requires at least: 3.5
 Tested up to: 4.5.3
 Stable tag: trunk
 License: GPLv2 or later
 
-Add Fields to post types for appending/prepending arbitrary links to the post output.
+Adds a new metabox to the editor, allowing you to attach a set of related links to any post.
+
 
 == Description ==
 
-Add Fields to post types for appending/prepending arbitrary links to the post output.
+Adds a new metabox to the editor, allowing you to attach a set of related links to any post.
 
+* Nice GUI
+* Options page
+* Each link has a data attribute whose the value is the link domain url, making it very simple to style (for example, all links from Wikipedia could have a wikipedia icon — see the FAQ section)
+* Links are handled by the bookmark functions from the WP core
+* actions and filters hooks allows you to tweak the plugin for your own needs
+* links can be ordered by name or by a custom order
 
 = Contributors =
 
-The first version of this plugin has been forked from [Custom Post Links](https://github.com/daggerhart/custom-post-links) by Jonathan Daggerhart.
+The first version of this plugin has been forked from [Custom Post Links](https://github.com/daggerhart/custom-post-links) by Jonathan Daggerhart.  The code has been deeply rewritten since.
 Other contributors [are listed here](https://github.com/gordielachance/custom-post-links/contributors)
 
 = Notes =
@@ -58,16 +65,17 @@ add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
 
 == Changelog ==
 
-= 0.1.1 =
+= 2.0 =
+* custom sorting
+* options page
 * set the link domain as class in the link output
 * display entries in metabox using class CP_Links_List_Table (extends WP_List_Table)
 * store / read entries from the Link Manager plugin (Worpress core) instead of metas
 * wrapped in a class, better code structure
 * use fontAwesome css, deleted drag_handle.png
-* new function allowed_post_types() to get dynamically the post types allowed for the plugin
 * various other improvements
 
-= 0.1 =
+= 1.0 =
 * Forked from [Custom Post Links](https://github.com/daggerhart/custom-post-links) by Jonathan Daggerhart.
 
 == Upgrade Notice ==
