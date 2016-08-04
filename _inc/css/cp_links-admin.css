@@ -1,19 +1,23 @@
-.cp-links-link-draghandle{
-    cursor: pointer; cursor: hand;
+/* line 1, ../scss/cp_links-admin.scss */
+.cp-links-link-draghandle {
+  cursor: pointer;
+  cursor: hand;
 }
 
-#custom-post-links .column-reorder{
-    width:20px;
+/* line 7, ../scss/cp_links-admin.scss */
+#custom-post-links .column-reorder {
+  width: 20px;
+}
+/* line 11, ../scss/cp_links-admin.scss */
+#custom-post-links #the-list .cp-links-link-draghandle {
+  text-align: center;
+}
+/* line 14, ../scss/cp_links-admin.scss */
+#custom-post-links #the-list tr.cp_links_new label {
+  display: none;
 }
 
-#custom-post-links #the-list .cp-links-link-draghandle{
-    text-align:center;
-}
-
-#the-list tr.cp_links_new label{
-    display:none;
-}
-
-#cp_links_new_wrapper p{
-    text-align:right;
+/* line 20, ../scss/cp_links-admin.scss */
+#cp_links_new_wrapper p {
+  text-align: right;
 }

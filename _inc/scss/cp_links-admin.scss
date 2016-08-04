@@ -1,0 +1,22 @@
+.cp-links-link-draghandle {
+  cursor: pointer;
+  cursor: hand;
+}
+
+#custom-post-links {
+  .column-reorder {
+    width: 20px;
+  }
+  #the-list {
+    .cp-links-link-draghandle {
+      text-align: center;
+    }
+    tr.cp_links_new label {
+      display: none;
+    }
+  }
+}
+
+#cp_links_new_wrapper p {
+  text-align: right;
+}
