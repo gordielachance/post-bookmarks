@@ -409,7 +409,9 @@ class CP_Links {
         $new_links = ( isset($form_data['new']) ) ? $form_data['new'] : null;
 
         //new links
-        foreach((array)$new_links as $new_link){
+        foreach((array)$new_links as $key=>$new_link){
+            
+            if ($key==0) continue; //first index is the row that we clone using jQuery, so it is hidden and will be empty.
 
             $linkdata = array(
                 'link_name'     => ( isset($new_link['name']) ) ? $new_link['name'] : null,

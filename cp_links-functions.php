@@ -38,7 +38,12 @@ function cp_links_get_existing_link_id($link_url,$link_name){
     
     //TO FIX sanitize url and name ?
     
-    $args = array( 'hide_invisible' => 0, 'hide_empty' => 0, 'category' => cp_links()->get_options('links_category') );
+    $args = array(
+        'hide_invisible' => 0, 
+        'hide_empty' => 0, 
+        'category' => cp_links()->get_options('links_category') 
+    );
+    
     $all_links = get_bookmarks( $args );
     
     foreach($all_links as $link){
