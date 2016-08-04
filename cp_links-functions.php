@@ -53,6 +53,16 @@ function cp_links_get_existing_link_id($link_url,$link_name){
 }
 
 function cp_links_sort_using_ids_array($links,$sort_ids){
-    //TO FIX to write
-    return $links;
+
+    foreach ((array)$sort_ids as $id){ //correct order
+        //select link
+        foreach ((array)$links as $key=>$link){
+            if ($link->link_id != $id) continue;
+            $ordered[] = $link;
+            unset($links[$key]);
+        }
+        
+    }
+    return $ordered;
+    
 }
