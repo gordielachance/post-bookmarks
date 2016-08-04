@@ -10,11 +10,9 @@
   
   $(document).ready(function(){
 
-      var add_new_section =  $('#cp_links_new_wrapper');
+      var add_new_section =  $('#add-link-section');
       var table = add_new_section.find("table");
-      
-      table.hide();
-      
+
       //add new link
       $('#cp_links_add_new').click(function(event){
           
@@ -24,7 +22,8 @@
           
         //count existing new link rows
         var new_link_rows = $("#custom-post-links #the-list .cp_links_new");
-        var new_link_idx = new_link_rows.length + 1;
+        var new_link_idx = new_link_rows.length -1;
+        if (new_link_idx < 0) new_link_idx = 0;
 
         //increment input names
         table_line.find('input').each(function() {
@@ -33,7 +32,13 @@
             $( this ).attr('name',new_name);
         });
           
-        table_line.appendTo( "#custom-post-links #the-list" );
+        table_line.prependTo( "#custom-post-links #the-list" );
+
+        //focus input
+        table_line.find('input').first().focus();
+
+          
+          
       });
 
     // add new row

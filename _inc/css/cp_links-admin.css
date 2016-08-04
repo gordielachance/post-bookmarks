@@ -1,23 +1,46 @@
-/* line 1, ../scss/cp_links-admin.scss */
-.cp-links-link-draghandle {
-  cursor: pointer;
-  cursor: hand;
-}
-
-/* line 7, ../scss/cp_links-admin.scss */
-#custom-post-links .column-reorder {
+/* line 4, ../scss/cp_links-admin.scss */
+body .postbox#custom-post-links .column-reorder {
   width: 20px;
 }
-/* line 11, ../scss/cp_links-admin.scss */
-#custom-post-links #the-list .cp-links-link-draghandle {
+/* line 9, ../scss/cp_links-admin.scss */
+body .postbox#custom-post-links #the-list .cp-links-link-draghandle {
+  cursor: pointer;
+  cursor: hand;
   text-align: center;
 }
-/* line 14, ../scss/cp_links-admin.scss */
-#custom-post-links #the-list tr.cp_links_new label {
+/* line 15, ../scss/cp_links-admin.scss */
+body .postbox#custom-post-links #the-list tr.cp_links_new label {
   display: none;
 }
-
 /* line 20, ../scss/cp_links-admin.scss */
-#cp_links_new_wrapper p {
+body .postbox#custom-post-links .cpl-metabox-section {
+  padding: 1em;
+}
+/* line 24, ../scss/cp_links-admin.scss */
+body .postbox#custom-post-links .cpl-metabox-section#add-link-section #cp_links_add_new {
+  display: none;
+}
+/* line 29, ../scss/cp_links-admin.scss */
+body .postbox#custom-post-links .cpl-metabox-section#search-links-section #search-links-form {
+  padding: 1em;
+}
+/* line 32, ../scss/cp_links-admin.scss */
+body .postbox#custom-post-links .cpl-metabox-section#search-links-section .wp-list-table {
+  display: none;
+}
+/* line 36, ../scss/cp_links-admin.scss */
+body .postbox#custom-post-links .cpl-metabox-section#search-links-section.has-search-term .wp-list-table {
+  display: table;
+}
+/* line 50, ../scss/cp_links-admin.scss */
+body .postbox#custom-post-links #cp_links_new_wrapper p {
   text-align: right;
+}
+/* line 57, ../scss/cp_links-admin.scss */
+body.js .postbox#custom-post-links #add-link-section #cp_links_add_new {
+  display: inherit;
+}
+/* line 60, ../scss/cp_links-admin.scss */
+body.js .postbox#custom-post-links #add-link-section h4, body.js .postbox#custom-post-links #add-link-section table {
+  display: none;
 }

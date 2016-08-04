@@ -270,7 +270,7 @@ class CP_Links {
         }
         
     }
-    
+
     function metabox_content( $post ){
         
         $display_links = array();
@@ -282,6 +282,9 @@ class CP_Links {
         $display_links = array_merge(cp_links_get_for_post($post->ID),$display_links);
         
         $links_table = new CP_Links_List_Table();
+        $links_table->items = $display_links;
+        
+        $links_search_table = new CP_Links_List_Table();
         
         if ($this->search_links_text){
             $search_links_args = array(
@@ -289,30 +292,15 @@ class CP_Links {
                 //'category'  => cp_links()->get_options('links_category')
             );
 
-            $search_links = get_bookmarks( $search_links_args );
-            $display_links = array_merge($search_links,$display_links);
+            $links_search_table->items = get_bookmarks( $search_links_args );
         }
 
-        $links_table->items = $display_links;
         
-        ?>
-        <p class="search-box">
-            <label class="screen-reader-text" for="link-search-input"></label>
-            <input type="search" id="link-search-input" name="custom_post_links[search]" value="<?php echo $this->search_links_text;?>">
-            <input type="submit" id="search-submit" class="button" value="<?php _e('Search Links');?>">
-        </p>
-        <?php
         
-        $links_table->prepare_items();
-        $links_table->display();
-
-        ?>
-
-
-        <?php 
+        //add link
         if ( current_user_can( 'manage_links' ) ){
             ?>
-            <div id="cp_links_new_wrapper">
+            <div class="cpl-metabox-section" id="add-link-section">
                 <h4><?php _e('Add Link');?></h4>
                 <table>
                     <?php $this->add_link_row();?>
@@ -327,7 +315,35 @@ class CP_Links {
             </div>
             <?php
         }
-        
+
+        ?>
+        <!--current links list-->
+        <div class="cpl-metabox-section" id="list-links-section">
+            <?php
+                $links_table->prepare_items();
+                $links_table->display();
+            ?>
+        </div>
+        <!--search links-->
+        <?php
+            $search_section_classes=array('cpl-metabox-section');
+            if($this->search_links_text){
+                $search_section_classes[]='has-search-term';
+            }
+        ?>
+        <div<?php cp_links_classes($search_section_classes);?> id="search-links-section">
+            <h4><?php _e('Search into existing link','cp_links');?></h4>
+            <div id="search-links-form">
+                <label class="screen-reader-text" for="link-search-input"></label>
+                <input type="search" id="link-search-input" name="custom_post_links[search]" value="<?php echo $this->search_links_text;?>">
+                <input type="submit" id="search-submit" class="button" value="<?php _e('Search Links');?>">
+            </div>
+            <?php
+                $links_search_table->prepare_items();
+                $links_search_table->display();
+            ?>
+        </div>
+        <?php 
       // Add an nonce field so we can check for it later.
       wp_nonce_field( 'custom_post_links_meta_box', 'custom_post_links_meta_box_nonce' );
 
@@ -345,11 +361,11 @@ class CP_Links {
             <td class="reorder column-reorder has-row-actions column-primary" data-colname=""></td>
             <td class="name column-name has-row-actions column-primary">
                 <label><?php _e('Name');?></label>
-                <input type="text" name="custom_post_links[new][<?php echo $index;?>][name]">
+                <input type="text" name="custom_post_links[new][<?php echo $index;?>][name]" value="">
             </td>
             <td class="url column-url">
                 <label><?php _e('URL');?></label>
-                <input type="text" name="custom_post_links[new][<?php echo $index;?>][url]">
+                <input type="text" name="custom_post_links[new][<?php echo $index;?>][url]" value="">
             </td>
             <td class="target column-target">
                 <label><?php _e('Target');?></label>
@@ -407,6 +423,8 @@ class CP_Links {
         
         $cp_links_ids = ( isset($form_data['ids']) ) ? $form_data['ids'] : null; //existing links to attach to post
         $new_links = ( isset($form_data['new']) ) ? $form_data['new'] : null;
+        
+        print_r($new_links);die();
 
         //new links
         foreach((array)$new_links as $key=>$new_link){
@@ -419,6 +437,8 @@ class CP_Links {
                 'link_target'      => ( isset($new_link['target']) ) ? $new_link['target'] : null,
                 'link_category' => $this->get_options('links_category')
             );
+            
+            
 
             if ( !$link_id = cp_links_get_existing_link_id($linkdata['link_url'],$linkdata['link_name']) ){ //check the link does not exists yet
                 $link_id = wp_insert_link( $linkdata, true );
