@@ -15,22 +15,32 @@ function cp_links_get_links_ids_for_post($post_id = null){
     return get_post_meta( $post_id, '_custom_post_links', true );
 }
 
-function cp_links_get_for_post($post_id = null,$order='user'){
+function cp_links_get_for_post($post_id = null,$orderby= null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
+    if (!$post_id) return;
     
     $cp_links_ids = cp_links_get_links_ids_for_post($post_id);
+    if (!$cp_links_ids) return;
     
+    $orderby_allowed = array('name','custom');
+    if ( $orderby && !in_array($orderby,$orderby_allowed) ) $orderby = null;
+    if (!$orderby) $orderby = cp_links()->get_options('links_orderby');
+
     $args = array( 
         'include' => implode(',',$cp_links_ids)
     );
+    
+    if ( $orderby && ($orderby!='custom') ){
+        $args['orderby'] = $orderby;
+        $args['order'] = 'ASC';
+    }
 
     $links = get_bookmarks( $args );
-    
-    if ($order == 'user'){
+
+    if ($orderby == 'custom'){
         $links = cp_links_sort_using_ids_array($links,$cp_links_ids);
     }
-    
 
     return $links;
     
@@ -40,22 +50,22 @@ function cp_links_get_for_post($post_id = null,$order='user'){
  * the_content filter to append custom post links to the post content
  */
 function cp_links_output_links( $content ){
-  global $post;
-  if ( in_array( $post->post_type, cp_links()->allowed_post_types() ) ){
-    $show = get_post_meta($post->ID, '_custom_post_links_output', true);
-    if (!empty($show) && $show != '_none_'){
-      $links = cp_links_get_links_output($post->ID);
-      if ($links){
-        if ($show == 'above'){
-          $content = $links."\n".$content;
-        }
-        else if ($show == 'below'){
-          $content.= "\n".$links;
-        }
-      }
+    global $post;
+    if ( !in_array( $post->post_type, cp_links()->allowed_post_types() ) ) return $content;
+    
+    $option = cp_links()->get_options('display_links');
+    $links = cp_links_output_for_post($post->ID);
+    
+    switch($option){
+        case 'before':
+            $content = $links."\n".$content;
+        break;
+        case 'after':
+            $content.= "\n".$links;
+        break;
     }
-  }
-  return $content;
+
+    return $content;
 }
 
 /*
@@ -77,26 +87,32 @@ function cp_links_output_single_link($link){
 /*
  * Generate the output for links on this post
  */
-function cp_links_get_links_output($post_id){
+function cp_links_output_for_post($post_id = null){
+    global $post;
     
+    if (!$post_id) $post_id = $post->ID;
+    if (!$post_id) return false;
+
     $links_html = null;
     $title_el = null;
-    $blogroll = null;
+    $blogroll = array();
     
     if ( $cp_links = cp_links_get_for_post($post_id) ){
         
         foreach ((array)$cp_links as $link){
-            $blogroll .= cp_links_output_single_link($link);
+            $blogroll[] = cp_links_output_single_link($link);
         }
         
-        if ($blogroll) {
+        $blogroll_str = implode("\n",$blogroll);
+        
+        if ($blogroll_str) {
             
             //title
             if ( $title = get_post_meta( $post_id, '_custom_post_links_title', true) ){
                 $title_el = sprintf('<h3>%s</h3>',$title);
             }
 
-            $links_html = sprintf('<div class="custom-post-links">%1s<ul>%2s</ul>',$title_el,$blogroll);
+            $links_html = sprintf('<div class="custom-post-links">%1s<ul>%2s</ul>',$title_el,$blogroll_str);
         }
 
     }

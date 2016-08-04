@@ -21,7 +21,7 @@
         var table_line = table.find(".cp_links_new").clone();
           
         //count existing new link rows
-        var new_link_rows = $("#custom-post-links #the-list .cp_links_new");
+        var new_link_rows = $("#custom-post-links #the-list tr.cp_links_new");
         var new_link_idx = new_link_rows.length -1;
         if (new_link_idx < 0) new_link_idx = 0;
 

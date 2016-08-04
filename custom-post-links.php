@@ -71,7 +71,10 @@ class CP_Links {
         
         $this->options_default = array(
             'ignored_post_type'     => array('attachment','revision','nav_menu_item'),
-            'links_category'        => null
+            'links_category'        => null,
+            'display_links'         => 'after',
+            'default_target'        => '_blank',
+            'links_orderby'           => 'name'
         );
         $this->options = wp_parse_args(get_option( self::$meta_name_options), $this->options_default);
         
@@ -96,6 +99,7 @@ class CP_Links {
         require $this->plugin_dir . 'cp_links-table.php';
         require $this->plugin_dir . 'cp_links-templates.php';
         require $this->plugin_dir . 'cp_links-functions.php';
+        require $this->plugin_dir . 'cp_links-settings.php';
         
     }
     function setup_actions(){  
@@ -198,6 +202,7 @@ class CP_Links {
         // js
         wp_register_script( 'cp_links_admin', $this->plugin_url . '_inc/js/cp_links_admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable'),$this->version);
     }
+    
 
     
     /*
@@ -205,31 +210,20 @@ class CP_Links {
      * https://pippinsplugins.com/loading-scripts-correctly-in-the-wordpress-admin/
      */
     function enqueue_scripts_styles_admin( $hook ){
-        $load = false;
 
-        // edit pages/posts
-        if ( $hook == 'post.php' &&
-          isset($_REQUEST['action']) &&
-          $_REQUEST['action'] == 'edit' &&
-          isset($_REQUEST['post']) &&
-          in_array( get_post_type( $_REQUEST['post']), $this->allowed_post_types() ) )
-        {
-            $load = true;
-        }
+        $screen = get_current_screen();
 
-        // new post/page
-        if ( $hook == 'post-new.php' ){
-            global $post;
-            if ( in_array($post->post_type, $this->allowed_post_types() ) ){
-              $load = true;
-            }
-        }
-
-        // ensure that this is a post type we allow
-        if ( $load ) {
+        if ( 
+            ( 
+                //($screen->action == 'add') || ($screen->action == 'edit') && 
+                ( in_array($screen->base, $this->allowed_post_types() ) ) 
+            ) || //add or edit
+            ( $screen->base == 'settings_page_cpl_settings') //option  
+        ){ 
             wp_enqueue_script( 'cp_links_admin' );
             wp_enqueue_style( 'cp_links_admin' );
         }
+
     }
     
     function enqueue_scripts_styles(){
@@ -272,14 +266,12 @@ class CP_Links {
     }
 
     function metabox_content( $post ){
-        
+
         $display_links = array();
         
         //attached links
-        
-        $links = cp_links_get_for_post($post->ID);
 
-        $display_links = array_merge(cp_links_get_for_post($post->ID),$display_links);
+        $display_links = array_merge((array)cp_links_get_for_post($post->ID),$display_links);
         
         $links_table = new CP_Links_List_Table();
         $links_table->items = $display_links;
@@ -332,7 +324,7 @@ class CP_Links {
             }
         ?>
         <div<?php cp_links_classes($search_section_classes);?> id="search-links-section">
-            <h4><?php _e('Search into existing link','cp_links');?></h4>
+            <h4><?php _e('Search for existing links','cp_links');?></h4>
             <div id="search-links-form">
                 <label class="screen-reader-text" for="link-search-input"></label>
                 <input type="search" id="link-search-input" name="custom_post_links[search]" value="<?php echo $this->search_links_text;?>">
@@ -355,21 +347,22 @@ class CP_Links {
     */
     
     function add_link_row($index = 0){
+        $option_target = cp_links()->get_options('default_target');
         ?>
         <tr class="cp_links_new">
             <th scope="row" class="check-column"></th>
             <td class="reorder column-reorder has-row-actions column-primary" data-colname=""></td>
             <td class="name column-name has-row-actions column-primary">
                 <label><?php _e('Name');?></label>
-                <input type="text" name="custom_post_links[new][<?php echo $index;?>][name]" value="">
+                <input type="text" name="custom_post_links[new][<?php echo $index;?>][name]" value="" />
             </td>
             <td class="url column-url">
                 <label><?php _e('URL');?></label>
-                <input type="text" name="custom_post_links[new][<?php echo $index;?>][url]" value="">
+                <input type="text" name="custom_post_links[new][<?php echo $index;?>][url]" value="" />
             </td>
             <td class="target column-target">
                 <label><?php _e('Target');?></label>
-                <input id="link_target_blank" type="checkbox" name="custom_post_links[new][<?php echo $index;?>][target]" value="_blank" />
+                <input id="link_target_blank" type="checkbox" name="custom_post_links[new][<?php echo $index;?>][target]" value="_blank" <?php checked( $option_target, '_blank');?>/>
                 <small><?php _e('<code>_blank</code> &mdash; new window or tab.'); ?></small>
             </td>
         </tr>
@@ -423,13 +416,9 @@ class CP_Links {
         
         $cp_links_ids = ( isset($form_data['ids']) ) ? $form_data['ids'] : null; //existing links to attach to post
         $new_links = ( isset($form_data['new']) ) ? $form_data['new'] : null;
-        
-        print_r($new_links);die();
 
         //new links
         foreach((array)$new_links as $key=>$new_link){
-            
-            if ($key==0) continue; //first index is the row that we clone using jQuery, so it is hidden and will be empty.
 
             $linkdata = array(
                 'link_name'     => ( isset($new_link['name']) ) ? $new_link['name'] : null,
@@ -438,8 +427,8 @@ class CP_Links {
                 'link_category' => $this->get_options('links_category')
             );
             
+            if (!$linkdata['link_name'] || !$linkdata['link_url']) continue;
             
-
             if ( !$link_id = cp_links_get_existing_link_id($linkdata['link_url'],$linkdata['link_name']) ){ //check the link does not exists yet
                 $link_id = wp_insert_link( $linkdata, true );
             }
