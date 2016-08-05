@@ -40,11 +40,3 @@ body .postbox#custom-post-links .cpl-metabox-section#search-links-section .cp-li
 body .postbox#custom-post-links #cp_links_new_wrapper p {
   text-align: right;
 }
-/* line 60, ../scss/cp_links-admin.scss */
-body.js .postbox#custom-post-links #add-link-section #cp_links_add_new {
-  display: inherit;
-}
-/* line 63, ../scss/cp_links-admin.scss */
-body.js .postbox#custom-post-links #add-link-section h4, body.js .postbox#custom-post-links #add-link-section table {
-  display: none;
-}
