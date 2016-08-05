@@ -42,9 +42,9 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 Use the *data-cp-link-domain* attribute, for example : 
 
-li.cp-links[data-cp-link-domain='wikipedia.org'] {
+`li.cp-links[data-cp-link-domain='wikipedia.org'] {
     background-image: url('https://wikipedia.org/static/favicon/wikipedia.ico');
-}
+}`
 
 = How can I change the way links are displayed ? =
 
@@ -62,6 +62,8 @@ add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
 
 == Screenshots ==
 
+1. Custom Post Links metabox in the backend editor
+2. Settings page
 
 == Changelog ==
 
