@@ -37,32 +37,8 @@
         //focus input
         table_line.find('input').first().focus();
 
-          
-          
       });
 
-    // add new row
-    $('#custom-post-links-add-new').click(function(){
-      // custom_post_links_next_index
-      var new_row = custom_post_links_row_template.replace(/---NEXT-INDEX---/g, custom_post_links_next_index);
-      $('#custom-post-links-target').append(new_row);
-      
-      // update row weights
-      _custom_post_links_update_links_weight();
-      
-      // increment next index
-      custom_post_links_next_index++;
-    });
-    
-    // remove row
-    $('#custom-post-links-target').on('click', '.custom-post-links-row-remove', function( event ) {
-      var row_index = $( event.target ).attr('title');
-      $('.custom-post-links-row.row-index-' + row_index).remove();
-      
-      // update row weights
-      _custom_post_links_update_links_weight();      
-    });
-    
     // sort links
     $('#custom-post-links .wp-list-table #the-list').sortable({
       handle: '.cp-links-link-draghandle',

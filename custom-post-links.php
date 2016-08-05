@@ -216,7 +216,7 @@ class CP_Links {
         if ( 
             ( 
                 //($screen->action == 'add') || ($screen->action == 'edit') && 
-                ( in_array($screen->base, $this->allowed_post_types() ) ) 
+                ( in_array($screen->id, $this->allowed_post_types() ) ) 
             ) || //add or edit
             ( $screen->base == 'settings_page_cpl_settings') //option  
         ){ 
