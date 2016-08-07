@@ -444,47 +444,6 @@ class CP_Links {
 
     }
     
-    
-    /*
-     * A single link row
-     */
-    function edit_link_row_template($index, $values){
-      ob_start();
-      ?>
-        <div class="custom-post-links-row row-index-<?php print $index; ?>">
-          <div class="custom-post-links-row-url">
-            <label class="text-field">URL:</label>
-            <span><input type="text" name="custom_post_links[<?php print $index; ?>][url]" value="<?php print $values['url']; ?>" /></span>
-          </div>
-          <div class="custom-post-links-row-title">
-            <label class="text-field">Title:</label>
-            <span><input type="text" name="custom_post_links[<?php print $index; ?>][title]" value="<?php print $values['title']; ?>" /></span>
-          </div>
-
-          <div class="custom-post-links-drag-handle"><i class="fa fa-arrows" aria-hidden="true"></i></div>
-
-          <div class="custom-post-links-row-remove" title="<?php print $index;?>" >Remove</div>
-
-          <div class="custom-post-links-more-options">
-            <div class="custom-post-links-row-new_window">
-              <label>
-                <input type="checkbox" name="custom_post_links[<?php print $index; ?>][new_window]" <?php checked($values['new_window'], 'on', 1); ?> /> Open link in new browser window. ( target="_blank" )
-              </label>
-            </div>
-            <div class="custom-post-links-row-nofollow">
-              <label>
-                <input type="checkbox" name="custom_post_links[<?php print $index; ?>][nofollow]" <?php checked($values['nofollow'], 'on', 1); ?> /> Tell bots to not follow this link. ( rel="nofollow" )
-              </label>
-            </div>
-            <div class="custom-post-links-row-weight">
-              <input type="text" size=3 class="custom-post-links-weight" name="custom_post_links[<?php print $index; ?>][weight]" value="<?php print $index; ?>" />
-            </div>
-          </div>
-        </div>
-      <?php
-      return ob_get_clean();
-    }
-
 }
 
 function cp_links() {

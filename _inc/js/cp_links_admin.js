@@ -1,13 +1,5 @@
 (function($){
-  
-  // update row weights
-  function _custom_post_links_update_links_weight(){
-    $('#custom-post-links-target .custom-post-links-row').each(function( weight ){
-      $( this ).find('.custom-post-links-weight').val( weight );
-    });
-  }
-  
-  
+
   $(document).ready(function(){
 
       var add_new_section =  $('#add-link-section');
