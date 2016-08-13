@@ -438,7 +438,7 @@ class CP_Links {
             }
         }
         
-        update_post_meta( $post_id, '_custom_post_links', $cp_links_ids );
+        update_post_meta( $post_id, '_custom_post_links_ids', $cp_links_ids );
         
         return $cp_links_ids;
 
