@@ -33,26 +33,22 @@ function cp_links_get_domain($url){
 }
 
 function cp_links_get_existing_link_id($link_url,$link_name){
+
+    global $wpdb;
     
-    //TO FIX TO CHECK, not working yet
+    $query = sprintf('SELECT * FROM %s WHERE link_url = "%s" AND link_name = "%s"',$wpdb->links,$link_url,$link_name);
     
-    //TO FIX sanitize url and name ?
+    $r = $wpdb->get_row( $query );
     
-    $args = array(
-        'hide_invisible' => 0, 
-        'hide_empty' => 0, 
-        'category' => cp_links()->get_options('links_category') 
-    );
-    
-    $all_links = get_bookmarks( $args );
-    
-    foreach($all_links as $link){
-        if ( ($link->link_url == $link_url) && ($link->link_name == $link_name) ) return $link->link_id;
+    if ($r){
+        return $r->link_id;
     }
 
 }
 
 function cp_links_sort_using_ids_array($links,$sort_ids){
+    
+    if (!$links) return $links;
 
     foreach ((array)$sort_ids as $id){ //correct order
         //select link
@@ -65,4 +61,41 @@ function cp_links_sort_using_ids_array($links,$sort_ids){
     }
     return $ordered;
     
+}
+
+function cp_links_get_metas( $key, $fields = null, $type = null, $status = null ) {
+
+    global $wpdb;
+    
+    if (!$fields){
+        $fields_str = '*';
+    }else{
+        $fields = (array)$fields; //force array
+        $fields_str = implode(', ',$fields);
+    }
+    
+
+    
+    $query = array(
+        $wpdb->prepare( 'SELECT %1$s FROM %2$s m LEFT JOIN %3$s p ON p.ID = post_id WHERE m.meta_key = "%4$s"',$fields_str,$wpdb->postmeta,$wpdb->posts,$key)
+    );
+                       
+    
+    if ($type){
+        $query[] = $wpdb->prepare( "AND p.post_type = '%s'",$type );
+    }
+    
+    if ($status){
+        $query[] = $wpdb->prepare( "AND p.post_status = '%s'" ,$status );
+    }
+    
+    if ( count($fields) == 1 ){
+        $r = $wpdb->get_col( implode(" ",$query) );
+    }else{
+        $r = $wpdb->get_results( implode(" ",$query) );
+    }
+
+    
+
+    return $r;
 }

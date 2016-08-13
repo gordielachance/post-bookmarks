@@ -67,6 +67,14 @@ add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
 
 == Changelog ==
 
+= 2.0.2 =
+* Importer for links from the original [Custom Post Links](https://github.com/daggerhart/custom-post-links) plugin (metas '_custom_post_links').
+* new function CP_Links::insert_link()
+* Improved (but not fixed) function 'cp_links_get_existing_link_id'
+
+= 2.0.1 =
+* Do not use the same post meta key than than the original [Custom Post Links](https://github.com/daggerhart/custom-post-links) plugin.
+
 = 2.0 =
 * custom sorting
 * options page

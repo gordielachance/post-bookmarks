@@ -106,11 +106,6 @@ function cp_links_output_for_post($post_id = null){
         $blogroll_str = implode("\n",$blogroll);
         
         if ($blogroll_str) {
-            
-            //title
-            if ( $title = get_post_meta( $post_id, '_custom_post_links_title', true) ){
-                $title_el = sprintf('<h3>%s</h3>',$title);
-            }
 
             $links_html = sprintf('<div class="custom-post-links">%1s<ul>%2s</ul>',$title_el,$blogroll_str);
         }

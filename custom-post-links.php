@@ -5,7 +5,7 @@ Description: Adds a new metabox to the editor, allowing you to attach a set of r
 Plugin URI: https://github.com/gordielachance/custom-post-links
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.0
+Version: 2.0.2
 License: GPL2
 */
 
@@ -14,11 +14,11 @@ class CP_Links {
     /**
     * @public string plugin version
     */
-    public $version = '2.0';
+    public $version = '2.0.2';
     /**
     * @public string plugin DB version
     */
-    public $db_version = '200';
+    public $db_version = '202';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -121,6 +121,9 @@ class CP_Links {
         add_filter('the_content', 'cp_links_output_links', 100, 2);
         
         add_filter('redirect_post_location',array($this, 'metabox_variables_redirect')); //redirect with searched links text - http://wordpress.stackexchange.com/a/52052/70449
+        
+        
+
 
     }
     
@@ -128,11 +131,67 @@ class CP_Links {
         load_plugin_textdomain( 'cp_links', false, $this->plugin_dir . '/languages' );
     }
     
+    function upgrade_notice(){
+
+        $link = add_query_arg(array('cpl_do_import_old_links'=>true),admin_url('options-general.php?page=cpl_settings'));
+        
+    ?>
+    <div class="notice notice-success is-dismissible">
+        <p>
+            <?php printf( 
+        __('Click %s to import the links from the %s plugin. %s', 'custom-post-links' ),
+        sprintf(__('<a href="%s">here</a>','custom-post-links'),$link),
+        sprintf('<a href="https://github.com/daggerhart/custom-post-links" target="_blank">Custom Post Links 1.0 (daggerhart)</a>',$link),
+        '<small>'.__("They will be moved to the new plugin's architecture.",'custom-post-links').'</small>'
+        ); ?>
+        </p>
+    </div>
+    <?php
+    }
+    
 
     
     function upgrade(){
         global $wpdb;
         
+
+        //old plugin import
+        $old_metas = cp_links_get_metas('_custom_post_links');
+        if ($old_metas){
+            add_action( 'admin_notices', array(&$this,'upgrade_notice'));
+
+            if (isset($_GET['cpl_do_import_old_links'])){
+                
+                foreach((array)$old_metas as $meta){
+                    
+                    $old_links = maybe_unserialize($meta->meta_value);
+
+                    $cp_links_ids = array();
+                    
+                    foreach((array)$old_links as $old_link){
+                        
+                        $linkdata = array(
+                            'link_name'     => ( isset($old_link['title']) ) ? $old_link['title'] : null,
+                            'link_url'      => ( isset($old_link['url']) ) ? $old_link['url'] : null,
+                            'link_target'      => ( isset($old_link['new_window']) ) ? '_blank' : null
+                        );
+
+                        if ( ($link_id = $this->insert_link($linkdata)) && !is_wp_error($link_id)){
+                            $cp_links_ids[] = $link_id;
+                        }
+                        
+                    }
+                }
+                
+                if ( update_post_meta( $meta->post_id, '_custom_post_links_ids', array_unique($cp_links_ids) ) ){
+                    delete_post_meta( $meta->post_id, '_custom_post_links'); //old plugin
+                }
+                
+            }
+            
+        }
+        
+
         $current_version = get_option("_cp_links-db_version");
         if ($current_version==$this->db_version) return false;
         if(!$current_version){ //not installed
@@ -419,29 +478,49 @@ class CP_Links {
 
         //new links
         foreach((array)$new_links as $key=>$new_link){
-
+            
             $linkdata = array(
                 'link_name'     => ( isset($new_link['name']) ) ? $new_link['name'] : null,
                 'link_url'      => ( isset($new_link['url']) ) ? $new_link['url'] : null,
-                'link_target'      => ( isset($new_link['target']) ) ? $new_link['target'] : null,
-                'link_category' => $this->get_options('links_category')
+                'link_target'      => ( isset($new_link['target']) ) ? $new_link['target'] : null
             );
-            
-            if (!$linkdata['link_name'] || !$linkdata['link_url']) continue;
-            
-            if ( !$link_id = cp_links_get_existing_link_id($linkdata['link_url'],$linkdata['link_name']) ){ //check the link does not exists yet
-                $link_id = wp_insert_link( $linkdata, true );
-            }
+
+            $link_id = $this->insert_link($linkdata);
 
             if ($link_id && !is_wp_error($link_id)){
                 $cp_links_ids[] = $link_id;
             }
         }
         
-        update_post_meta( $post_id, '_custom_post_links_ids', $cp_links_ids );
+        update_post_meta( $post_id, '_custom_post_links_ids', array_unique($cp_links_ids) );
         
         return $cp_links_ids;
 
+    }
+    
+    function insert_link($new_link){
+        
+        $defaults = array(
+            'link_name'     => null,
+            'link_url'      => null,
+            'link_target'   => null,
+            'link_category' => $this->get_options('links_category')
+        );
+
+        
+        $linkdata = wp_parse_args($new_link,$defaults);
+
+
+        if (!$linkdata['link_name'] || !$linkdata['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','custom-post-links') );
+        
+        //TO FIX check url is valid
+        
+        if ( !$link_id = cp_links_get_existing_link_id($linkdata['link_url'],$linkdata['link_name']) ){ //check the link does not exists yet
+            if( !function_exists( 'wp_insert_link' ) ) include_once( ABSPATH . '/wp-admin/includes/bookmark.php' );
+            $link_id = wp_insert_link( $linkdata, true ); //return id
+        }
+        
+        return $link_id;
     }
     
 }
