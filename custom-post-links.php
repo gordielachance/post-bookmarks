@@ -489,7 +489,7 @@ class CP_Links {
             
             $linkdata = array(
                 'link_name'     => ( isset($new_link['name']) ) ? $new_link['name'] : null,
-                'link_url'      => ( isset($new_link['url']) ) ? $new_link['url'] : null,
+                'link_url'      => ( isset($new_link['url']) ) ? urldecode($new_link['url']) : null,
                 'link_target'      => ( isset($new_link['target']) ) ? $new_link['target'] : null
             );
 
