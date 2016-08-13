@@ -96,6 +96,7 @@ function cp_links_output_single_link($link){
 
 /*
  * Generate the output for links on this post
+ * Would be better to use core function '_walk_bookmarks( $cp_links )' here, but it is too limited.
  */
 function cp_links_output_for_post($post_id = null){
     global $post;
@@ -109,11 +110,15 @@ function cp_links_output_for_post($post_id = null){
     
     if ( $cp_links = cp_links_get_for_post($post_id) ){
         
+        //$blogroll_str = _walk_bookmarks( $cp_links );
+        
         foreach ((array)$cp_links as $link){
             $blogroll[] = cp_links_output_single_link($link);
+            
         }
-        
+
         $blogroll_str = implode("\n",$blogroll);
+
         
         if ($blogroll_str) {
 
