@@ -12,7 +12,7 @@ function cp_links_get_classes($classes){
 function cp_links_get_links_ids_for_post($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    return get_post_meta( $post_id, '_custom_post_links', true );
+    return get_post_meta( $post_id, '_custom_post_links_ids', true );
 }
 
 function cp_links_get_for_post($post_id = null,$orderby= null){
