@@ -99,3 +99,16 @@ function cp_links_get_metas( $key, $fields = null, $type = null, $status = null 
 
     return $r;
 }
+
+function cp_links_is_local_url($url){
+
+    $is_local = strpos($url, home_url());
+
+    return (bool)($is_local !== false);
+
+    if ($is_local !== false) {
+        return true;
+    }
+
+
+}

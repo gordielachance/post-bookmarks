@@ -78,8 +78,18 @@ function cp_links_output_single_link($link){
     $link_classes_arr = array('cp-links');
     $link_classes_arr = apply_filters('cp_links_single_link_classes',$link_classes_arr,$link);
     $link_classes = cp_links_get_classes($link_classes_arr);
+    $link_target_str=null;
     
-    $output = sprintf('<li id="%1s" %2s data-cp-link-domain="%3s"><a href="%4$s">%5$s</a></li>','cp-link-'.$link->link_id,$link_classes,$domain,$link->link_url,$link->link_name);
+    if($link->link_target) {
+        if ( cp_links()->get_options('ignore_target_local') && cp_links_is_local_url($link->link_url) ){
+            //nix
+        }else{
+            $link_target_str = sprintf(' target="%s"',$link->link_target);
+        }
+        
+    }
+
+    $output = sprintf('<li id="%1s" %2s data-cp-link-domain="%3s"><a href="%4$s"%5$s>%6$s</a></li>','cp-link-'.$link->link_id,$link_classes,$domain,$link->link_url,$link_target_str,$link->link_name);
     return apply_filters('cp_links_output_single_link',$output,$link);
     
 }

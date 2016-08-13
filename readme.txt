@@ -67,10 +67,16 @@ add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
 
 == Changelog ==
 
+= 2.0.3 -
+* ignore targets (eg. ’_blank’) if a link is a local link
+* backend : use ‘_blank’ target for URLs in the links table
+* implemented links targets
+
 = 2.0.2 =
-* Importer for links from the original [Custom Post Links](https://github.com/daggerhart/custom-post-links) plugin (metas '_custom_post_links').
+* Importer and admin notice for links from the original [Custom Post Links](https://github.com/daggerhart/custom-post-links) plugin (metas '_custom_post_links').
 * new function CP_Links::insert_link()
-* Improved (but not fixed) function 'cp_links_get_existing_link_id'
+* Improved function 'cp_links_get_existing_link_id'
+* new function ‘cp_links_get_metas’
 
 = 2.0.1 =
 * Do not use the same post meta key than than the original [Custom Post Links](https://github.com/daggerhart/custom-post-links) plugin.

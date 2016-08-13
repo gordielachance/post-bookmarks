@@ -108,7 +108,7 @@ class CP_Links_List_Table extends WP_List_Table {
 	public function column_url( $link ) {
 
         $short_url = url_shorten( $link->link_url );
-        echo "<a href='$link->link_url'>$short_url</a>";
+        printf('<a target="_blank" href="%s">%s</a>',$link->link_url,$short_url);
             
 	}
     

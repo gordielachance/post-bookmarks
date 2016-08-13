@@ -5,7 +5,7 @@ Description: Adds a new metabox to the editor, allowing you to attach a set of r
 Plugin URI: https://github.com/gordielachance/custom-post-links
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.0.2
+Version: 2.0.3
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class CP_Links {
     /**
     * @public string plugin version
     */
-    public $version = '2.0.2';
+    public $version = '2.0.3';
     /**
     * @public string plugin DB version
     */
@@ -74,6 +74,7 @@ class CP_Links {
             'links_category'        => null,
             'display_links'         => 'after',
             'default_target'        => '_blank',
+            'ignore_target_local'   => true,
             'links_orderby'           => 'name'
         );
         $this->options = wp_parse_args(get_option( self::$meta_name_options), $this->options_default);
@@ -175,6 +176,13 @@ class CP_Links {
                             'link_url'      => ( isset($old_link['url']) ) ? $old_link['url'] : null,
                             'link_target'      => ( isset($old_link['new_window']) ) ? '_blank' : null
                         );
+                        
+                        //ignore target
+                        /*
+                        if( isset($linkdata['link_target']) && cp_links()->get_options('ignore_target_local') && cp_links_is_local_url($linkdata['link_url']) ){
+                            unset($linkdata['link_target']);
+                        }
+                        */
 
                         if ( ($link_id = $this->insert_link($linkdata)) && !is_wp_error($link_id)){
                             $cp_links_ids[] = $link_id;

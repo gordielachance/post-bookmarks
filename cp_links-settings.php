@@ -41,6 +41,9 @@ class CP_Links_Settings {
                 $new_input['default_target'] = $input['default_target'];
             }
             
+            //ignore_target_local
+            $new_input['ignore_target_local'] = ( isset($input['ignore_target_local']) ) ? true : null;
+            
             //orderby
             $orderby_allowed = array('name','custom');
             if ( isset ($input['links_orderby']) && in_array($input['links_orderby'],$orderby_allowed) ){
@@ -171,6 +174,7 @@ class CP_Links_Settings {
     
     function default_target_field_callback(){
         $option = cp_links()->get_options('default_target');
+        $option_ignore = cp_links()->get_options('ignore_target_local');
 
         printf(
             '<p><input type="radio" name="%1$s[default_target]" value="_blank" %2$s /> %3$s</p>',
@@ -184,6 +188,13 @@ class CP_Links_Settings {
             CP_Links::$meta_name_options,
             checked( $option, '_self', false ),
             '<code>'.__('_self','cp_links').'</code>'
+        );
+        
+        printf(
+            '<p><input type="checkbox" name="%1$s[ignore_target_local]" value="on" %2$s /> %3$s</p>',
+            CP_Links::$meta_name_options,
+            checked( $option_ignore, true, false ),
+            __('Ignore target for local links','cp_links')
         );
 
         
