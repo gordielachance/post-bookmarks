@@ -413,7 +413,7 @@ class CP_Links {
     We'll use jQuery to dynamically move it into the table.
     */
     
-    function add_link_row($index = 0){
+    function add_link_row(){
         $option_target = cp_links()->get_options('default_target');
         ?>
         <tr class="cp_links_new">
@@ -421,15 +421,15 @@ class CP_Links {
             <td class="reorder column-reorder has-row-actions column-primary" data-colname=""></td>
             <td class="name column-name has-row-actions column-primary">
                 <label><?php _e('Name');?></label>
-                <input type="text" name="custom_post_links[new][<?php echo $index;?>][name]" value="" />
+                <input type="text" name="custom_post_links[new][name][]" value="" />
             </td>
             <td class="url column-url">
                 <label><?php _e('URL');?></label>
-                <input type="text" name="custom_post_links[new][<?php echo $index;?>][url]" value="" />
+                <input type="text" name="custom_post_links[new][url][]" value="" />
             </td>
             <td class="target column-target">
                 <label><?php _e('Target');?></label>
-                <input id="link_target_blank" type="checkbox" name="custom_post_links[new][<?php echo $index;?>][target]" value="_blank" <?php checked( $option_target, '_blank');?>/>
+                <input id="link_target_blank" type="checkbox" name="custom_post_links[new][target][]" value="_blank" <?php checked( $option_target, '_blank');?>/>
                 <small><?php _e('<code>_blank</code> &mdash; new window or tab.'); ?></small>
             </td>
         </tr>
@@ -482,7 +482,24 @@ class CP_Links {
 
         
         $cp_links_ids = ( isset($form_data['ids']) ) ? $form_data['ids'] : null; //existing links to attach to post
-        $new_links = ( isset($form_data['new']) ) ? $form_data['new'] : null;
+        
+        $new_links_form = ( isset($form_data['new']) ) ? $form_data['new'] : null;
+        $new_links_form_name = ( isset($new_links_form['name']) ) ? $new_links_form['name'] : array();
+        $new_links_form_url = ( isset($new_links_form['url']) ) ? $new_links_form['url'] : array();
+        $new_links_form_target = ( isset($new_links_form['target']) ) ? $new_links_form['target'] : array();
+        $new_links = array();
+
+        //combine form arrays
+        //TO FIX seems that unchecked target boxes still gets a '_blank' value, why ?
+        foreach ( $new_links_form_url as $key=>$url ) {
+            if ($key == 0) continue; //ignore first item (cloned block)
+            if (!$url) continue;
+            $new_links[] = array( 
+                'name' => $new_links_form_name[ $key ] , 
+                'url' => $url, 
+                'target' => $new_links_form_target[ $key ] 
+            );
+        }
 
         //new links
         foreach((array)$new_links as $key=>$new_link){

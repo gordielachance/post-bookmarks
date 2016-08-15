@@ -6,10 +6,9 @@
       var table = add_new_section.find("table");
 
       //add new link
-      //TO FIX temporary disabled, problem when retrieving the fields values with php
-      //also, uncomment CSS lines.
-      /*
-      $('#cp_links_add_new').click(function(event){
+      var cloneBlock = $('#add-link-section');
+      cloneBlock.addClass('has-js');
+      cloneBlock.find('input[type="submit"]').click(function(event){
           
         event.preventDefault();
           
@@ -33,7 +32,6 @@
         table_line.find('input').first().focus();
 
       });
-      */
 
     // sort links
     $('#custom-post-links .wp-list-table #the-list').sortable({

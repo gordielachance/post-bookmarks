@@ -24,6 +24,14 @@ body{
                 #cp_links_add_new{
                     display:none;
                 }
+                &.has-js{
+                    h4,table{
+                        display:none;
+                    }
+                    #cp_links_add_new{
+                        display:inherit;
+                    }
+                }
             }
             &#search-links-section{
                 #search-links-form{
@@ -53,18 +61,5 @@ body{
         #cp_links_new_wrapper p {
             text-align: right;
         }
-    }
-    &.js{
-        .postbox#custom-post-links{
-            #add-link-section{
-                #cp_links_add_new{
-                    //display:inherit;
-                }
-                h4,table{
-                    //display:none;
-                }
-            }
-        }
-        
     }
 }
