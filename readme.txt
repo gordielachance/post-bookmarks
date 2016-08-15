@@ -67,6 +67,9 @@ add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
 
 == Changelog ==
 
+= 2.0.4 =
+* minor
+
 = 2.0.3 =
 * ignore targets (eg. ’_blank’) if a link is a local link
 * backend : use ‘_blank’ target for URLs in the links table

@@ -5,7 +5,7 @@ Description: Adds a new metabox to the editor, allowing you to attach a set of r
 Plugin URI: https://github.com/gordielachance/custom-post-links
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.0.3
+Version: 2.0.4
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class CP_Links {
     /**
     * @public string plugin version
     */
-    public $version = '2.0.3';
+    public $version = '2.0.4';
     /**
     * @public string plugin DB version
     */
@@ -500,7 +500,7 @@ class CP_Links {
             }
         }
         
-        update_post_meta( $post_id, '_custom_post_links_ids', array_unique($cp_links_ids) );
+        update_post_meta( $post_id, '_custom_post_links_ids', array_unique((array)$cp_links_ids) );
         
         return $cp_links_ids;
 
