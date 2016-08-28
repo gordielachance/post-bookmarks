@@ -42,7 +42,10 @@ class CP_Links_Settings {
             }
             
             //ignore_target_local
-            $new_input['ignore_target_local'] = ( isset($input['ignore_target_local']) ) ? true : null;
+            $new_input['ignore_target_local'] = ( isset($input['ignore_target_local']) ) ? 'on' : 'off';
+            
+            //get favicon
+            $new_input['get_favicon'] = ( isset($input['get_favicon']) ) ? 'on' : 'off';
             
             //orderby
             $orderby_allowed = array('name','custom');
@@ -100,6 +103,14 @@ class CP_Links_Settings {
             'links_orderby', 
             __('Order links by','cp_links'), 
             array( $this, 'links_orderby_field_callback' ), 
+            'cp_links-settings-page', // Page
+            'settings_general' //section
+        );
+        
+        add_settings_field(
+            'get_favicon', 
+            __('Get favicon','cp_links'), 
+            array( $this, 'links_get_favicon_callback' ), 
             'cp_links-settings-page', // Page
             'settings_general' //section
         );
@@ -172,6 +183,16 @@ class CP_Links_Settings {
         
     }
     
+    function links_get_favicon_callback(){
+        $option = cp_links()->get_options('get_favicon');
+        printf(
+            '<p><input type="checkbox" name="%1$s[get_favicon]" value="on" %2$s /> %3$s</p>',
+            CP_Links::$meta_name_options,
+            checked( $option, 'on', false ),
+            __("Load links favicons using the Google API",'cp_links')
+        );
+    }
+    
     function default_target_field_callback(){
         $option = cp_links()->get_options('default_target');
         $option_ignore = cp_links()->get_options('ignore_target_local');
@@ -193,7 +214,7 @@ class CP_Links_Settings {
         printf(
             '<p><input type="checkbox" name="%1$s[ignore_target_local]" value="on" %2$s /> %3$s</p>',
             CP_Links::$meta_name_options,
-            checked( $option_ignore, true, false ),
+            checked( $option_ignore, 'on', false ),
             __('Ignore target for local links','cp_links')
         );
 

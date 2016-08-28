@@ -74,8 +74,9 @@ class CP_Links {
             'links_category'        => null,
             'display_links'         => 'after',
             'default_target'        => '_blank',
-            'ignore_target_local'   => true,
-            'links_orderby'           => 'name'
+            'ignore_target_local'   => 'on',
+            'links_orderby'         => 'name',
+            'get_favicon'           => 'on'
         );
         $this->options = wp_parse_args(get_option( self::$meta_name_options), $this->options_default);
         
@@ -179,7 +180,7 @@ class CP_Links {
                         
                         //ignore target
                         /*
-                        if( isset($linkdata['link_target']) && cp_links()->get_options('ignore_target_local') && cp_links_is_local_url($linkdata['link_url']) ){
+                        if( isset($linkdata['link_target']) && (cp_links()->get_options('ignore_target_local') == 'on') && cp_links_is_local_url($linkdata['link_url']) ){
                             unset($linkdata['link_target']);
                         }
                         */
