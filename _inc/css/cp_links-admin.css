@@ -4,47 +4,54 @@ body .postbox#custom-post-links .column-reorder {
 }
 /* line 9, ../scss/cp_links-admin.scss */
 body .postbox#custom-post-links #the-list .cp-links-link-draghandle {
-  cursor: pointer;
-  cursor: hand;
   text-align: center;
 }
+/* line 11, ../scss/cp_links-admin.scss */
+body .postbox#custom-post-links #the-list .cp-links-link-draghandle:not(.disabled) {
+  cursor: pointer;
+  cursor: hand;
+}
 /* line 15, ../scss/cp_links-admin.scss */
+body .postbox#custom-post-links #the-list .cp-links-link-draghandle.disabled {
+  opacity: 0.5;
+}
+/* line 20, ../scss/cp_links-admin.scss */
 body .postbox#custom-post-links #the-list tr.cp_links_new label {
   display: none;
 }
-/* line 20, ../scss/cp_links-admin.scss */
+/* line 25, ../scss/cp_links-admin.scss */
 body .postbox#custom-post-links .cpl-metabox-section {
   padding: 1em;
 }
-/* line 24, ../scss/cp_links-admin.scss */
+/* line 29, ../scss/cp_links-admin.scss */
 body .postbox#custom-post-links .cpl-metabox-section#add-link-section #cp_links_add_new {
   display: none;
 }
-/* line 28, ../scss/cp_links-admin.scss */
+/* line 33, ../scss/cp_links-admin.scss */
 body .postbox#custom-post-links .cpl-metabox-section#add-link-section.has-js h4, body .postbox#custom-post-links .cpl-metabox-section#add-link-section.has-js table {
   display: none;
 }
-/* line 31, ../scss/cp_links-admin.scss */
+/* line 36, ../scss/cp_links-admin.scss */
 body .postbox#custom-post-links .cpl-metabox-section#add-link-section.has-js #cp_links_add_new {
   display: inherit;
 }
-/* line 37, ../scss/cp_links-admin.scss */
+/* line 42, ../scss/cp_links-admin.scss */
 body .postbox#custom-post-links .cpl-metabox-section#search-links-section #search-links-form {
   padding: 1em;
 }
-/* line 40, ../scss/cp_links-admin.scss */
+/* line 45, ../scss/cp_links-admin.scss */
 body .postbox#custom-post-links .cpl-metabox-section#search-links-section .wp-list-table {
   display: none;
 }
-/* line 44, ../scss/cp_links-admin.scss */
+/* line 49, ../scss/cp_links-admin.scss */
 body .postbox#custom-post-links .cpl-metabox-section#search-links-section.has-search-term .wp-list-table {
   display: table;
 }
-/* line 48, ../scss/cp_links-admin.scss */
+/* line 53, ../scss/cp_links-admin.scss */
 body .postbox#custom-post-links .cpl-metabox-section#search-links-section .cp-links-link-draghandle {
   display: none;
 }
-/* line 61, ../scss/cp_links-admin.scss */
+/* line 66, ../scss/cp_links-admin.scss */
 body .postbox#custom-post-links #cp_links_new_wrapper p {
   text-align: right;
 }

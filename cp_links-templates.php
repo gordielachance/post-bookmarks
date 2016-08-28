@@ -20,26 +20,35 @@ function cp_links_get_for_post($post_id = null,$orderby= null){
     if (!$post_id) $post_id = $post->ID;
     if (!$post_id) return;
     
-    $cp_links_ids = cp_links_get_links_ids_for_post($post_id);
-    if (!$cp_links_ids) return;
-    
-    $orderby_allowed = array('name','custom');
-    if ( $orderby && !in_array($orderby,$orderby_allowed) ) $orderby = null;
-    if (!$orderby) $orderby = cp_links()->get_options('links_orderby');
+    $links = array();
 
-    $args = array( 
-        'include' => implode(',',$cp_links_ids)
-    );
-    
-    if ( $orderby && ($orderby!='custom') ){
-        $args['orderby'] = $orderby;
-        $args['order'] = 'ASC';
+    if ($cp_links_ids = cp_links_get_links_ids_for_post($post_id)){
+        $orderby_allowed = array('name','custom');
+        if ( $orderby && !in_array($orderby,$orderby_allowed) ) $orderby = null;
+        if (!$orderby) $orderby = cp_links()->get_options('links_orderby');
+
+        $args = array( 
+            'include' => implode(',',$cp_links_ids)
+        );
+
+        if ( $orderby && ($orderby!='custom') ){
+            $args['orderby'] = $orderby;
+            $args['order'] = 'ASC';
+        }
+
+        $links = get_bookmarks( $args );
+
+        if ($orderby == 'custom'){
+            $links = cp_links_sort_using_ids_array($links,$cp_links_ids);
+        }
     }
-
-    $links = get_bookmarks( $args );
-
-    if ($orderby == 'custom'){
-        $links = cp_links_sort_using_ids_array($links,$cp_links_ids);
+    
+    //allow plugins to filter this
+    $links = apply_filters('cp_links_get_for_post_pre',$links,$post_id,$orderby);
+    
+    //sanitize links
+    foreach ((array)$links as $key=>$link){
+        $links[$key] = (object)cp_links()->get_blank_link($link);
     }
 
     return $links;

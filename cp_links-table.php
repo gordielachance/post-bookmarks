@@ -60,18 +60,28 @@ class CP_Links_List_Table extends WP_List_Table {
         
         $post_links_ids = cp_links_get_links_ids_for_post();
         
-        $checked = ( in_array($link->link_id,$post_links_ids) ) ? true : false;
+        $disabled = ( $link->link_id == 0);
+        $checked = ( in_array($link->link_id,$post_links_ids) || $disabled ) ? true : false;
         
         
 		?>
 		<label class="screen-reader-text" for="cb-select-<?php echo $link->link_id; ?>"><?php echo sprintf( __( 'Select %s' ), $link->link_name ); ?></label>
-		<input type="checkbox" name="custom_post_links[ids][]" id="cb-select-<?php echo $link->link_id; ?>" value="<?php echo esc_attr( $link->link_id ); ?>" <?php checked($checked, true );?> />
+		<input type="checkbox" name="custom_post_links[ids][]" id="cb-select-<?php echo $link->link_id; ?>" value="<?php echo esc_attr( $link->link_id ); ?>" <?php checked($checked, true );?> <?php disabled($disabled, true );?> />
 		<?php
 	}
     
     public function column_reorder($link){
+        
+        $disabled = ( $link->link_id == 0);
+        
+        $classes = array(
+            'cp-links-link-draghandle'
+        );
+        
+        if ($disabled) $classes[] = 'disabled';
+        
         ?>
-        <div class="cp-links-link-draghandle">
+        <div<?php cp_links_classes($classes);?>>
             <i class="fa fa-arrows-v" aria-hidden="true"></i>
         </div>
         <?php

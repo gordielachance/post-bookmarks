@@ -7,9 +7,14 @@ body{
 
         #the-list {
             .cp-links-link-draghandle {
-                cursor: pointer;
-                cursor: hand;
                 text-align: center;
+                &:not(.disabled) {
+                    cursor: pointer;
+                    cursor: hand;
+                }
+                &.disabled{
+                    opacity:0.5;
+                }
             }
 
             tr.cp_links_new label {

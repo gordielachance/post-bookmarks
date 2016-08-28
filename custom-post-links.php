@@ -517,24 +517,18 @@ class CP_Links {
             }
         }
         
-        update_post_meta( $post_id, '_custom_post_links_ids', array_unique((array)$cp_links_ids) );
+        $cp_links_ids = array_unique((array)$cp_links_ids);
+        
+        update_post_meta( $post_id, '_custom_post_links_ids', $cp_links_ids );
         
         return $cp_links_ids;
 
     }
     
     function insert_link($new_link){
-        
-        $defaults = array(
-            'link_name'     => null,
-            'link_url'      => null,
-            'link_target'   => null,
-            'link_category' => $this->get_options('links_category')
-        );
 
-        
-        $linkdata = wp_parse_args($new_link,$defaults);
-
+        //sanitize
+        $linkdata = $this->get_blank_link($new_link);
 
         if (!$linkdata['link_name'] || !$linkdata['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','custom-post-links') );
         
@@ -546,6 +540,17 @@ class CP_Links {
         }
         
         return $link_id;
+    }
+    
+    function get_blank_link($args = array()){
+        $defaults = array(
+            'link_id'       => 0, //link will not be editable or saved if this is null.  This can be useful when external plugins are appending links using the filter 'cp_links_get_for_post_pre'.
+            'link_name'     => null,
+            'link_url'      => null,
+            'link_target'   => null,
+            'link_category' => $this->get_options('links_category')
+        );
+        return wp_parse_args((array)$args,$defaults);
     }
     
 }
