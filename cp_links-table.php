@@ -98,11 +98,13 @@ class CP_Links_List_Table extends WP_List_Table {
 	public function column_name( $link ) {
 
         $edit_link = get_edit_bookmark_link( $link );
+        $text = $link->link_name;
+        $favicon = cp_links_output_favicon($link);
         printf( '<strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong>',
             $edit_link,
             /* translators: %s: link name */
             esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $link->link_name ) ),
-            $link->link_name
+            $favicon.$text
         );
         
 	}

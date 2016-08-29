@@ -42,7 +42,7 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 Use the *data-cp-link-domain* attribute, for example : 
 
-`li.cp-links[data-cp-link-domain='wikipedia.org'] {
+`li.cp-links[data-cp-link-domain='wikipedia.org'] .cp-links-favicon {
     background-image: url('https://wikipedia.org/static/favicon/wikipedia.ico');
 }`
 

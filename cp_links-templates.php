@@ -80,21 +80,33 @@ function cp_links_output_links( $content ){
 /*
  * Template a single link
  */
-function cp_links_output_single_link($link){
-    $style = null;
+
+function cp_links_output_favicon($link){
+    
+    $favicon = null;
     
     //get domain url
     if ( $domain = cp_links_get_domain($link->link_url) && (cp_links()->get_options('get_favicon')=='on') ){
         //favicon
         $favicon = sprintf('https://www.google.com/s2/favicons?domain=%s',$link->link_url);
-        $style = sprintf(' style="background-image:url(\'%s\')"',$favicon);
+        $favicon_style = sprintf(' style="background-image:url(\'%s\')"',$favicon);
+        $favicon = sprintf('<span class="cp-links-favicon" %s></span>',$favicon_style);
     }
     
+    return $favicon;
+}
+
+function cp_links_output_single_link($link){
+    
+    $favicon_style = null;
+    $domain = cp_links_get_domain($link->link_url);
+
     $link_classes_arr = array('cp-links');
     $link_classes_arr = apply_filters('cp_links_single_link_classes',$link_classes_arr,$link);
     $link_classes = cp_links_get_classes($link_classes_arr);
     $link_target_str=null;
     
+    $favicon = cp_links_output_favicon($link);
 
     
     if($link->link_target) {
@@ -106,14 +118,14 @@ function cp_links_output_single_link($link){
         
     }
 
-    $output = sprintf('<li id="%1s" %2s data-cp-link-domain="%3s" %7$s><a href="%4$s"%5$s>%6$s</a></li>',
+    $output = sprintf('<li id="%1s" %2s data-cp-link-domain="%3s"><i class="fa fa-link" aria-hidden="true"></i><a href="%4$s"%5$s>%6$s%7$s</a></li>',
                       'cp-link-'.$link->link_id,
                       $link_classes,
                       $domain,
                       $link->link_url,
                       $link_target_str,
-                      $link->link_name,
-                      $style
+                      $favicon,
+                      $link->link_name
      );
     return apply_filters('cp_links_output_single_link',$output,$link);
     

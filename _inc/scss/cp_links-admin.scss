@@ -1,3 +1,5 @@
+@import "compass/css3";
+
 body{
     .postbox#custom-post-links{
 
@@ -20,6 +22,22 @@ body{
             tr.cp_links_new label {
                 display: none;
             }
+            
+            .cp-links-favicon{
+
+                display: inline-block;
+                height: 1em;
+                width: 1em;
+                margin-right:0.2em;
+
+                @include border-radius(4px, 4px);
+
+                background-position: center center;
+                background-repeat: no-repeat;
+
+                padding-left: 20px; /* Adjust according to image size to push text across. */
+            }
+            
         }
 
         .cpl-metabox-section{
