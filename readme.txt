@@ -68,7 +68,7 @@ add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
 
 == Changelog ==
 
-= XXX =
+= 2.0.5 =
 * Better output styling
 * Favicons : Option to automatically load URL pictures from Google API
 * New filter ‘cp_links_get_for_post_pre’
