@@ -64,8 +64,15 @@ add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
 
 1. Custom Post Links metabox in the backend editor
 2. Settings page
+3. Links displayed under a post
 
 == Changelog ==
+
+= XXX =
+* Better output styling
+* Favicons : Option to automatically load URL pictures from Google API
+* New filter ‘cp_links_get_for_post_pre’
+* New function ::get_blank_link()
 
 = 2.0.4 =
 * minor
