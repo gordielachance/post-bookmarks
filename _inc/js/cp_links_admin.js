@@ -34,7 +34,7 @@
         new_table_line.prependTo( "#custom-post-links #list-links-section #the-list" );
 
         //focus input
-        //new_table_line.find('input').first().focus();
+        new_table_line.find('input').first().focus();
 
     });
 
