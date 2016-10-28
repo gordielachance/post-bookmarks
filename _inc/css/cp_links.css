@@ -1,19 +1,16 @@
-/* line 4, ../scss/cp_links.scss */
+@import "//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css";
 .custom-post-links ul {
   list-style: none;
 }
-/* line 6, ../scss/cp_links.scss */
 .custom-post-links ul li.cp-links {
   position: relative;
 }
-/* line 10, ../scss/cp_links.scss */
 .custom-post-links ul li.cp-links i.fa-link {
   font-size: 0.75em;
   text-align: center;
   opacity: 0.2;
   margin-right: 0.2em;
 }
-/* line 17, ../scss/cp_links.scss */
 .custom-post-links ul li.cp-links .cp-links-favicon {
   display: inline-block;
   height: 1em;
@@ -27,12 +24,10 @@
   padding-left: 20px;
   /* Adjust according to image size to push text across. */
 }
-/* line 34, ../scss/cp_links.scss */
 .custom-post-links ul li.cp-links[data-cp-link-domain='wikipedia.org'] .cp-links-favicon {
   /* example of custom icon regarding the link domain */
   background-image: url("https://wikipedia.org/static/favicon/wikipedia.ico");
 }
-/* line 39, ../scss/cp_links.scss */
 .custom-post-links ul a {
   box-shadow: none;
 }
