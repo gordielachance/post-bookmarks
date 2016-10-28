@@ -265,7 +265,7 @@ class CP_Links {
     function register_scripts_styles_admin(){
 
         // css
-        wp_register_style( 'cp_links_admin',  $this->plugin_url . '_inc/css/cp_links-admin.css',array('font-awesome'),$this->version );
+        wp_register_style( 'cp_links_admin',  $this->plugin_url . '_inc/css/cp_links-admin.css',$this->version );
         // js
         wp_register_script( 'cp_links_admin', $this->plugin_url . '_inc/js/cp_links_admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable'),$this->version);
     }
@@ -298,7 +298,7 @@ class CP_Links {
         wp_register_style( 'cp_links',  $this->plugin_url . '_inc/css/cp_links.css',false,$this->version );
         
         
-        wp_enqueue_style( 'cp_links', 'font-awesome' );
+        wp_enqueue_style( 'cp_links' );
         
     }
     

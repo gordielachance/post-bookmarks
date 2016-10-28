@@ -1,11 +1,21 @@
 @import "compass/css3";
+@import '//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css';
 
 body{
+
+                tr.cp_links_new{
+                    label{
+                        display:none;
+                    }
+                }
+    
     .postbox#custom-post-links{
 
         .column-reorder {
             width: 20px;
         }
+        
+
 
         #the-list {
             .cp-links-link-draghandle {
