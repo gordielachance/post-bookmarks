@@ -26,7 +26,7 @@
         $( this ).attr('name',new_name);
     });
 
-    table_line.prependTo( "#custom-post-links #the-list" );
+    table_line.prependTo( "#custom-post-links #list-links-section #the-list" );
 
     //focus input
     table_line.find('input').first().focus();
