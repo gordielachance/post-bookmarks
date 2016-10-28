@@ -27,11 +27,14 @@
             $( this ).attr('name',new_name);
         });
 
+        //clear form
+        new_line.find('input[type="text"]').val('');
+
         //add line
         new_table_line.prependTo( "#custom-post-links #list-links-section #the-list" );
 
         //focus input
-        new_table_line.find('input').first().focus();
+        //new_table_line.find('input').first().focus();
 
     });
 
