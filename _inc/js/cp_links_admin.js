@@ -10,26 +10,28 @@
     cloneBlock.addClass('has-js');
     cloneBlock.find('input[type="submit"]').click(function(event){
 
-    event.preventDefault();
+        event.preventDefault();
 
-    var table_line = table.find(".cp_links_new").clone();
+        var new_line = table.find(".cp_links_new");
+        var new_table_line = new_line.clone();
 
-    //count existing new link rows
-    var new_link_rows = $("#custom-post-links #the-list tr.cp_links_new");
-    var new_link_idx = new_link_rows.length -1;
-    if (new_link_idx < 0) new_link_idx = 0;
+        //count existing new link rows
+        var new_link_rows = $("#custom-post-links #the-list tr.cp_links_new");
+        var new_link_idx = new_link_rows.length -1;
+        if (new_link_idx < 0) new_link_idx = 0;
 
-    //increment input names
-    table_line.find('input').each(function() {
-        var current_name = $( this ).attr('name');
-        var new_name = current_name.replace('[new][0]', '[new]['+new_link_idx+']');
-        $( this ).attr('name',new_name);
-    });
+        //increment input names
+        new_table_line.find('input').each(function() {
+            var current_name = $( this ).attr('name');
+            var new_name = current_name.replace('[new][0]', '[new]['+new_link_idx+']');
+            $( this ).attr('name',new_name);
+        });
 
-    table_line.prependTo( "#custom-post-links #list-links-section #the-list" );
+        //add line
+        new_table_line.prependTo( "#custom-post-links #list-links-section #the-list" );
 
-    //focus input
-    table_line.find('input').first().focus();
+        //focus input
+        new_table_line.find('input').first().focus();
 
     });
 
