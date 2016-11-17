@@ -19,6 +19,17 @@
         var new_link_rows = $("#custom-post-links #the-list tr.cp_links_new");
         var new_link_idx = new_link_rows.length -1;
         if (new_link_idx < 0) new_link_idx = 0;
+        
+        //check last entry is filled
+        var first_line = new_link_rows.first();
+        if (first_line.length > 0) {
+            var first_line_url_input = first_line.find('.column-url input');
+            console.log(first_line_url_input);
+            if( first_line_url_input.val().length === 0 ) {
+                first_line_url_input.focus();
+                return;
+            }
+        }
 
         //increment input names
         new_table_line.find('input').each(function() {

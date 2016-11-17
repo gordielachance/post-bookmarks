@@ -415,13 +415,14 @@ class CP_Links {
         <tr class="cp_links_new">
             <th scope="row" class="check-column"></th>
             <td class="reorder column-reorder has-row-actions column-primary" data-colname=""></td>
-            <td class="name column-name has-row-actions column-primary">
-                <label><?php _e('Name');?></label>
-                <input type="text" name="custom_post_links[new][name][]" value="" />
-            </td>
+            <td class="reorder column-favicon"></td>
             <td class="url column-url">
                 <label><?php _e('URL');?></label>
                 <input type="text" name="custom_post_links[new][url][]" value="" />
+            </td>
+            <td class="name column-name has-row-actions column-primary">
+                <label><?php _e('Name');?></label>
+                <input type="text" name="custom_post_links[new][name][]" value="" />
             </td>
             <td class="target column-target">
                 <label><?php _e('Target');?></label>

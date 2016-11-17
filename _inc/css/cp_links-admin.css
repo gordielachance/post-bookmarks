@@ -1,6 +1,18 @@
 @import "//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css";
-body .postbox#custom-post-links .column-reorder {
-  width: 20px;
+body .postbox#metabox-job-settings #job-settings-client-id {
+  max-height: 200px;
+  overflow: auto;
+}
+body .postbox#custom-post-links .column-reorder, body .postbox#custom-post-links .column-favicon {
+  width: 2em;
+  text-align: center;
+}
+body .postbox#custom-post-links .cp-links-favicon {
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 body .postbox#custom-post-links #the-list .cp-links-link-draghandle {
   text-align: center;
@@ -14,19 +26,6 @@ body .postbox#custom-post-links #the-list .cp-links-link-draghandle.disabled {
 }
 body .postbox#custom-post-links #the-list tr.cp_links_new label {
   display: none;
-}
-body .postbox#custom-post-links #the-list .cp-links-favicon {
-  display: inline-block;
-  height: 1em;
-  width: 1em;
-  margin-right: 0.2em;
-  -moz-border-radius: 4px / 4px;
-  -webkit-border-radius: 4px 4px;
-  border-radius: 4px / 4px;
-  background-position: center center;
-  background-repeat: no-repeat;
-  padding-left: 20px;
-  /* Adjust according to image size to push text across. */
 }
 body .postbox#custom-post-links .cpl-metabox-section {
   padding: 1em;

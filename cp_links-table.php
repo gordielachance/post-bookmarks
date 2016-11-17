@@ -28,10 +28,11 @@ class CP_Links_List_Table extends WP_List_Table {
     function get_columns(){
         $columns = array(
             'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
-            'reorder'        => '',
-            'url'       => __('URL'),
-            'name'      => __('Name'),
-            'target'       => __('Target')
+            'reorder'       => '',
+            'favicon'       => '',
+            'url'           => __('URL'),
+            'name'          => __('Name'),
+            'target'        => __('Target')
         );
         
         if ( cp_links()->get_options('links_orderby') != 'custom' ){
@@ -99,14 +100,19 @@ class CP_Links_List_Table extends WP_List_Table {
 
         $edit_link = get_edit_bookmark_link( $link );
         $text = $link->link_name;
-        $favicon = cp_links_output_favicon($link);
+        
         printf( '<strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong>',
             $edit_link,
             /* translators: %s: link name */
-            esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $link->link_name ) ),
-            $favicon.$text
+            esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $text ) ),
+            $text
         );
         
+	}
+    
+	public function column_favicon( $link ) {
+        return cp_links_output_favicon($link);
+            
 	}
 
 	/**
