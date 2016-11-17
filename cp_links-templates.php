@@ -86,7 +86,7 @@ function cp_links_output_favicon($link){
     $favicon = null;
     
     //get domain url
-    if ( $domain = cp_links_get_domain($link->link_url) && (cp_links()->get_options('get_favicon')=='on') ){
+    if ( $domain = cp_links_get_url_domain($link->link_url) && (cp_links()->get_options('get_favicon')=='on') ){
         //favicon
         $favicon = sprintf('https://www.google.com/s2/favicons?domain=%s',$link->link_url);
         $favicon_style = sprintf(' style="background-image:url(\'%s\')"',$favicon);
@@ -99,7 +99,7 @@ function cp_links_output_favicon($link){
 function cp_links_output_single_link($link){
     
     $favicon_style = null;
-    $domain = cp_links_get_domain($link->link_url);
+    $domain = cp_links_get_url_domain($link->link_url);
 
     $link_classes_arr = array('cp-links');
     $link_classes_arr = apply_filters('cp_links_single_link_classes',$link_classes_arr,$link);

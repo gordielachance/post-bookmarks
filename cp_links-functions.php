@@ -23,7 +23,19 @@ function cp_links_get_array_value($keys = null, $array){
     return false;
 }
 
-function cp_links_get_domain($url){
+function cp_links_validate_link_name($name,$url){
+    if ( $name = trim($name) ) return $name;
+
+    //try to get page title
+    if ( !$name = cp_links_get_url_title($url) ){
+        $name = cp_links_get_url_domain($url);
+    }
+
+    return $name;
+    
+}
+
+function cp_links_get_url_domain($url){
   $pieces = parse_url($url);
   $domain = isset($pieces['host']) ? $pieces['host'] : '';
   if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $domain, $regs)) {
@@ -31,6 +43,21 @@ function cp_links_get_domain($url){
   }
   return false;
 }
+
+function cp_links_get_url_title($url){
+
+    $response = wp_remote_get( $url );
+    
+    if ( $response && !is_wp_error($response) ){
+        if ( $body = wp_remote_retrieve_body($response) ){
+            $str = trim(preg_replace('/\s+/', ' ', $body)); // supports line breaks inside <title>
+            preg_match("/\<title\>(.*)\<\/title\>/i",$body,$title); // ignore case
+            return $title[1];
+        }
+    }
+
+}
+
 
 function cp_links_get_existing_link_id($link_url,$link_name){
 

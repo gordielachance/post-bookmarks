@@ -501,14 +501,19 @@ class CP_Links {
         //new links
         foreach((array)$new_links as $key=>$new_link){
             
+            $url = ( isset($new_link['url']) ) ? urldecode($new_link['url']) : null;
+            $name = ( isset($new_link['name']) ) ? $new_link['name'] : null;
+            
             $linkdata = array(
-                'link_name'     => ( isset($new_link['name']) ) ? $new_link['name'] : null,
-                'link_url'      => ( isset($new_link['url']) ) ? urldecode($new_link['url']) : null,
-                'link_target'      => ( isset($new_link['target']) ) ? $new_link['target'] : null
+                'link_name'     => $name,
+                'link_url'      => $url,
+                'link_target'   => ( isset($new_link['target']) ) ? $new_link['target'] : null
             );
-
+            
+            //validate for the new link
+            $linkdata = array_filter($linkdata);
             $link_id = $this->insert_link($linkdata);
-
+            
             if ($link_id && !is_wp_error($link_id)){
                 $cp_links_ids[] = $link_id;
             }
@@ -528,9 +533,10 @@ class CP_Links {
         $linkdata = $this->get_blank_link($new_link);
 
         if ( !$linkdata['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','custom-post-links') );
+
+        $linkdata['link_name'] = cp_links_validate_link_name($linkdata['link_name'],$linkdata['link_url']);
         
         //TO FIX check url is valid
-        
         if ( !$link_id = cp_links_get_existing_link_id($linkdata['link_url'],$linkdata['link_name']) ){ //check the link does not exists yet
             if( !function_exists( 'wp_insert_link' ) ) include_once( ABSPATH . '/wp-admin/includes/bookmark.php' );
             $link_id = wp_insert_link( $linkdata, true ); //return id
