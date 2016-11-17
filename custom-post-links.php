@@ -263,7 +263,6 @@ class CP_Links {
     }
 
     function register_scripts_styles_admin(){
-
         // css
         wp_register_style( 'cp_links_admin',  $this->plugin_url . '_inc/css/cp_links-admin.css',$this->version );
         // js
@@ -279,18 +278,14 @@ class CP_Links {
     function enqueue_scripts_styles_admin( $hook ){
 
         $screen = get_current_screen();
-
-        if ( 
-            ( 
-                //($screen->action == 'add') || ($screen->action == 'edit') && 
-                ( in_array($screen->id, $this->allowed_post_types() ) ) 
-            ) || //add or edit
-            ( $screen->base == 'settings_page_cpl_settings') //option  
-        ){ 
-            wp_enqueue_script( 'cp_links_admin' );
-            wp_enqueue_style( 'cp_links_admin' );
+        
+        if( is_object( $screen ) ) {
+            if( ( in_array($hook, array('post.php', 'post-new.php','edit.php') ) &&  in_array($screen->id, $this->allowed_post_types() ) ) || ( $screen->base == 'settings_page_cpl_settings') ) {
+                wp_enqueue_script( 'cp_links_admin' );
+                wp_enqueue_style( 'cp_links_admin' );
+                
+            }
         }
-
     }
     
     function enqueue_scripts_styles(){
@@ -517,7 +512,7 @@ class CP_Links {
                 $cp_links_ids[] = $link_id;
             }
         }
-        
+
         $cp_links_ids = array_unique((array)$cp_links_ids);
         
         update_post_meta( $post_id, '_custom_post_links_ids', $cp_links_ids );
