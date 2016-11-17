@@ -29,8 +29,8 @@ class CP_Links_List_Table extends WP_List_Table {
         $columns = array(
             'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
             'reorder'        => '',
-            'name'      => __('Name'),
             'url'       => __('URL'),
+            'name'      => __('Name'),
             'target'       => __('Target')
         );
         

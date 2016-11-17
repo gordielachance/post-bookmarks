@@ -526,7 +526,7 @@ class CP_Links {
         //sanitize
         $linkdata = $this->get_blank_link($new_link);
 
-        if (!$linkdata['link_name'] || !$linkdata['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','custom-post-links') );
+        if ( !$linkdata['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','custom-post-links') );
         
         //TO FIX check url is valid
         
