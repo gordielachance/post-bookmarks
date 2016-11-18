@@ -17,8 +17,8 @@ Adds a new metabox to the editor, allowing you to attach a set of related links 
 * Nice GUI
 * Options page
 * Default link title and image based on its url (ajaxed)
-* Links are handled by the bookmark functions from the WP core
-* links can be ordered by name or by a custom order
+* Sort links by name or a custom order
+* Powered by the core bookmark functions from the Wordpress
 * actions and filters hooks for developpers
 
 = Contributors =
