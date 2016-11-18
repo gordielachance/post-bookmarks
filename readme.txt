@@ -3,7 +3,7 @@ Contributors:grosbouff
 Donate link:http://bit.ly/gbreant
 Tags: links,quick links,related links,custom links, post links
 Requires at least: 3.5
-Tested up to: 4.5.3
+Tested up to: 4.6.1
 Stable tag: trunk
 License: GPLv2 or later
 
