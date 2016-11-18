@@ -23,8 +23,9 @@ function cp_links_get_array_value($keys = null, $array){
     return false;
 }
 
-function cp_links_validate_link_name($name,$url){
-    if ( $name = trim($name) ) return $name;
+function cp_links_get_name_from_url($url){
+    
+    $name = null;
 
     //try to get page title
     if ( !$name = cp_links_get_url_title($url) ){

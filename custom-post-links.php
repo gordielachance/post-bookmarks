@@ -102,6 +102,7 @@ class CP_Links {
         require $this->plugin_dir . 'cp_links-templates.php';
         require $this->plugin_dir . 'cp_links-functions.php';
         require $this->plugin_dir . 'cp_links-settings.php';
+        require $this->plugin_dir . 'cp_links-ajax.php';
         
     }
     function setup_actions(){  
@@ -534,7 +535,10 @@ class CP_Links {
 
         if ( !$linkdata['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','custom-post-links') );
 
-        $linkdata['link_name'] = cp_links_validate_link_name($linkdata['link_name'],$linkdata['link_url']);
+        if ( !$linkdata['link_name'] ){
+            $linkdata['link_name'] = cp_links_get_name_from_url($linkdata['link_url']);
+        }
+        
         
         //TO FIX check url is valid
         if ( !$link_id = cp_links_get_existing_link_id($linkdata['link_url'],$linkdata['link_name']) ){ //check the link does not exists yet

@@ -1,4 +1,10 @@
 @import "//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css";
+.loading {
+  pointer-events: none;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  opacity: 0.5;
+}
+
 body .postbox#metabox-job-settings #job-settings-client-id {
   max-height: 200px;
   overflow: auto;
