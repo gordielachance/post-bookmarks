@@ -9,6 +9,9 @@ body .postbox#metabox-job-settings #job-settings-client-id {
   max-height: 200px;
   overflow: auto;
 }
+body .postbox#custom-post-links td input[type='text'] {
+  width: 100%;
+}
 body .postbox#custom-post-links .column-reorder, body .postbox#custom-post-links .column-favicon {
   width: 2em;
   text-align: center;

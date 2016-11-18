@@ -5,8 +5,8 @@ jQuery(function($){
         // Look for changes in the value
         $('.cp_links_new .column-url input').live("change paste", function(event){
             
-            var cell = $(this).parents('td');
-            var row = cell.parents('.cp_links_new');
+            var cell_url = $(this).parents('td');
+            var row = cell_url.parents('.cp_links_new');
             var cell_name = row.find('.column-name');
             var name_input = cell_name.find('input');
             
@@ -24,13 +24,13 @@ jQuery(function($){
                 data:ajax_data,
                 dataType: 'json',
                 beforeSend: function() {
-                    cell.addClass('loading');
+                    cell_url.addClass('loading');
                     cell_name.addClass('loading');
                 },
                 success: function(data){
                     console.log(data);
                     if (data.success === false) {
-                        cell.addClass('berror');
+                        cell_url.addClass('berror');
                         console.log(data.message);
                     }else{
                         name_input.val(data.name);
@@ -41,7 +41,7 @@ jQuery(function($){
                     console.log(thrownError);
                 },
                 complete: function() {
-                    cell.removeClass('loading');
+                    cell_url.removeClass('loading');
                     cell_name.removeClass('loading');
                 }
             })
