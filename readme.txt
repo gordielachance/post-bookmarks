@@ -16,10 +16,10 @@ Adds a new metabox to the editor, allowing you to attach a set of related links 
 
 * Nice GUI
 * Options page
-* Each link has a data attribute whose the value is the link domain url, making it very simple to style (for example, all links from Wikipedia could have a wikipedia icon — see the FAQ section)
+* Default link title and image based on its url (ajaxed)
 * Links are handled by the bookmark functions from the WP core
-* actions and filters hooks allows you to tweak the plugin for your own needs
 * links can be ordered by name or by a custom order
+* actions and filters hooks for developpers
 
 = Contributors =
 
