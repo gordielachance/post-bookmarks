@@ -35,10 +35,6 @@ class CP_Links_List_Table extends WP_List_Table {
             'target'        => __('Target')
         );
         
-        if ( cp_links()->get_options('links_orderby') != 'custom' ){
-            unset($columns['reorder']);
-        }
-        
         return $columns;
     }
     /*

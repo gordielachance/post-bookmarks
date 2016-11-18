@@ -416,7 +416,7 @@ class CP_Links {
         <tr class="cp_links_new">
             <th scope="row" class="check-column"></th>
             <td class="reorder column-reorder has-row-actions column-primary" data-colname=""></td>
-            <td class="reorder column-favicon"></td>
+            <td class="column-favicon"></td>
             <td class="url column-url">
                 <label><?php _e('URL');?></label>
                 <input type="text" name="custom_post_links[new][url][]" value="" />
