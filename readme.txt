@@ -18,13 +18,12 @@ Adds a new metabox to the editor, allowing you to attach a set of related links 
 * Options page
 * Default link title and image based on its url (ajaxed)
 * Sort links by names or a custom order
-* Powered by the core bookmark functions from the Wordpress
+* Powered by the WP core bookmark functions
 * actions and filters hooks for developpers
 
 = Contributors =
 
-The first version of this plugin has been forked from [Custom Post Links](https://github.com/daggerhart/custom-post-links) by Jonathan Daggerhart.  The code has been deeply rewritten since.
-Other contributors [are listed here](https://github.com/gordielachance/custom-post-links/contributors)
+Contributors [are listed here](https://github.com/gordielachance/custom-post-links/contributors)
 
 = Notes =
 
