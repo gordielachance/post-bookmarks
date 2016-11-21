@@ -67,6 +67,9 @@ add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
 
 == Changelog ==
 
+= 2.0.7 =
+* cleaner code for blank row link + links tabe actions
+
 = 2.0.6 =
 * try to guess the link name from remote page title or domain (ajaxed)
 * URL as first column
