@@ -39,6 +39,16 @@ body .postbox#custom-post-links #the-list tr.cp_links_new label {
 body .postbox#custom-post-links .cpl-metabox-section {
   padding: 1em;
 }
+body .postbox#custom-post-links .cpl-metabox-section#add-link-section table {
+  border: none;
+  margin: 1em 0;
+}
+body .postbox#custom-post-links .cpl-metabox-section#add-link-section table thead, body .postbox#custom-post-links .cpl-metabox-section#add-link-section table tfoot {
+  display: none;
+}
+body .postbox#custom-post-links .cpl-metabox-section#add-link-section table tr {
+  background: none;
+}
 body .postbox#custom-post-links .cpl-metabox-section#add-link-section #cp_links_add_new {
   display: none;
 }

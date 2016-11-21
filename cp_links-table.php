@@ -4,7 +4,6 @@ if(!class_exists('WP_List_Table')){
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 }
 
-
 class CP_Links_List_Table extends WP_List_Table {
 
     function display_tablenav($which){
@@ -12,7 +11,6 @@ class CP_Links_List_Table extends WP_List_Table {
     }
     
     function prepare_items() {
-
         $columns = $this->get_columns();
         $hidden = array();
         $sortable = $this->get_sortable_columns();
@@ -93,16 +91,23 @@ class CP_Links_List_Table extends WP_List_Table {
 	 * @param object $link The current link object.
 	 */
 	public function column_name( $link ) {
-
-        $edit_link = get_edit_bookmark_link( $link );
-        $text = $link->link_name;
         
-        printf( '<strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong>',
-            $edit_link,
-            /* translators: %s: link name */
-            esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $text ) ),
-            $text
-        );
+        if ($link->link_id == 'new'){
+            ?>
+            <input type="text" name="custom_post_links[new][name][]" value="" />
+            <?php
+        }else{
+            
+            $edit_link = get_edit_bookmark_link( $link );
+            $text = $link->link_name;
+
+            printf( '<strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong>',
+                $edit_link,
+                /* translators: %s: link name */
+                esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $text ) ),
+                $text
+            );
+        }
         
 	}
     
@@ -120,21 +125,33 @@ class CP_Links_List_Table extends WP_List_Table {
 	 * @param object $link The current link object.
 	 */
 	public function column_url( $link ) {
+        if ($link->link_id == 'new'){
+            ?>
+            <input type="text" name="custom_post_links[new][url][]" value="" />
+            <?php
+        }else{
+            $short_url = url_shorten( $link->link_url );
+            printf('<a target="_blank" href="%s">%s</a>',$link->link_url,$short_url);
+        }
 
-        $short_url = url_shorten( $link->link_url );
-        printf('<a target="_blank" href="%s">%s</a>',$link->link_url,$short_url);
             
 	}
     
 	public function column_target( $link ) {
-
-        if($link->link_target){
-            printf('<code>%s</code>',$link->link_target);
-            
+        if ($link->link_id == 'new'){
+            $option_target = cp_links()->get_options('default_target');
+            ?>
+            <input id="link_target_blank" type="checkbox" name="custom_post_links[new][target][]" value="_blank" <?php checked( $option_target, '_blank');?>/>
+            <small><?php _e('<code>_blank</code> &mdash; new window or tab.'); ?></small>
+            <?php
         }else{
-            printf('<code>%s</code>','_none');
-        }
-        
+            if($link->link_target){
+                printf('<code>%s</code>',$link->link_target);
 
+            }else{
+                printf('<code>%s</code>','_none');
+            }
+        }
 	}
+    
 }

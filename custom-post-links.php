@@ -331,15 +331,12 @@ class CP_Links {
 
     function metabox_content( $post ){
 
-        $display_links = array();
-        
         //attached links
-
-        $display_links = array_merge((array)cp_links_get_for_post($post->ID),$display_links);
-        
+        $display_links = cp_links_get_for_post($post->ID);
         $links_table = new CP_Links_List_Table();
         $links_table->items = $display_links;
         
+        //links results
         $links_search_table = new CP_Links_List_Table();
         
         if ($this->search_links_text){
@@ -351,23 +348,30 @@ class CP_Links {
             $links_search_table->items = get_bookmarks( $search_links_args );
         }
 
-        
+
         
         //add link
-        if ( current_user_can( 'manage_links' ) ){
+        if ( current_user_can( 'manage_links' ) ){            
             ?>
             <div class="cpl-metabox-section" id="add-link-section">
-                <h4><?php _e('Add Link');?></h4>
-                <table>
-                    <?php $this->add_link_row();?>
-                </table>
+                <a href="link-add.php" class="page-title-action"><?php echo esc_html_x('Add New', 'link'); ?></a>
                 <?php
-                if ( current_user_can( 'manage_links' ) ) {
-                    ?>
-                    <p><input type="submit" id="cp_links_add_new" class="button" value="<?php _e("Add Link");?>"></input></p>
-                    <?php
-                }
+                //blank link
+                $blank_link_table = new CP_Links_List_Table();
+                $blank_link = (object)array(
+                    'link_id'       => 'new',
+                    'link_url'      => null,
+                    'link_name'     => null,
+                    'link_target'   => null
+                );
+                $blank_link_table->items = array($blank_link);
+                $blank_link_table->prepare_items();
+                $blank_link_table->display();
                 ?>
+                <table>
+                    <?php //$this->add_link_row();?>
+                </table>
+                
             </div>
             <?php
         }
@@ -444,7 +448,6 @@ class CP_Links {
         
         $form_data = ( isset($_POST['custom_post_links']) ) ? $_POST['custom_post_links'] : null;
 
-
         /*
         * We need to verify this came from our screen and with proper authorization,
         * because the save_post action can be triggered at other times.
@@ -474,10 +477,8 @@ class CP_Links {
             }
 
         }
-
-
+        
         /* OK, its safe for us to save the data now. */
-
         
         $cp_links_ids = ( isset($form_data['ids']) ) ? $form_data['ids'] : null; //existing links to attach to post
         
@@ -490,7 +491,7 @@ class CP_Links {
         //combine form arrays
         //TO FIX seems that unchecked target boxes still gets a '_blank' value, why ?
         foreach ( $new_links_form_url as $key=>$url ) {
-            if ($key == 0) continue; //ignore first item (cloned block)
+            if ($key == 0) continue; //ignore first item (cloned row)
             if (!$url) continue;
             $new_links[] = array( 
                 'name' => $new_links_form_name[ $key ] , 

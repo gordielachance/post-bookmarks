@@ -54,12 +54,13 @@ jQuery(function($){
         //add new link
         var blankBlock = $('#add-link-section');
         blankBlock.addClass('has-js');
-        blankBlock.find('input[type="submit"]').click(function(event){
+        blankBlock.find('a').click(function(event){
 
             event.preventDefault();
 
-            var new_line = table.find(".cp_links_new");
+            var new_line = table.find("tbody tr");
             var new_table_line = new_line.clone();
+            new_table_line.addClass('cp_links_new');
 
             //count existing new link rows
             var new_link_rows = $("#custom-post-links #the-list tr.cp_links_new");
@@ -76,13 +77,6 @@ jQuery(function($){
                     return;
                 }
             }
-
-            //increment input names
-            new_table_line.find('input').each(function() {
-                var current_name = $( this ).attr('name');
-                var new_name = current_name.replace('[new][0]', '[new]['+new_link_idx+']');
-                $( this ).attr('name',new_name);
-            });
 
             //clear form
             new_line.find('input[type="text"]').val('');

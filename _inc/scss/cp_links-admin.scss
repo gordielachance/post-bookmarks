@@ -62,6 +62,16 @@ body{
                 padding:1em;
                 //border-bottom:1px solid #ddd;
                 &#add-link-section{
+                    table{
+                        border:none;
+                        margin:1em 0;
+                        thead,tfoot{
+                            display:none;
+                        }
+                        tr{
+                            background:none;
+                        }
+                    }
                     #cp_links_add_new{
                         display:none;
                     }
