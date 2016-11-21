@@ -154,4 +154,28 @@ class CP_Links_List_Table extends WP_List_Table {
         }
 	}
     
+	/**
+	 * Generates and displays row action links.
+	 *
+	 * @since 4.3.0
+	 * @access protected
+	 *
+	 * @param object $link        Link being acted upon.
+	 * @param string $column_name Current column name.
+	 * @param string $primary     Primary column name.
+	 * @return string Row action output for links.
+	 */
+	protected function handle_row_actions( $link, $column_name, $primary ) {
+		if ( 'name' !== $column_name ) {
+			return '';
+		}
+
+		$edit_link = get_edit_bookmark_link( $link );
+
+		$actions = array();
+		$actions['edit'] = '<a href="' . $edit_link . '">' . __('Edit') . '</a>';
+		$actions['delete'] = "<a class='submitdelete' href='" . wp_nonce_url("link.php?action=delete&amp;link_id=$link->link_id", 'delete-bookmark_' . $link->link_id) . "' onclick=\"if ( confirm( '" . esc_js(sprintf(__("You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete."), $link->link_name)) . "' ) ) { return true;}return false;\">" . __('Delete') . "</a>";
+		return $this->row_actions( $actions );
+	}
+    
 }
