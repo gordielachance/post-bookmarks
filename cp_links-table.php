@@ -33,13 +33,14 @@ class CP_Links_List_Table extends WP_List_Table {
             'target'        => __('Target')
         );
         
-        return $columns;
+        return apply_filters('cp_links_list_table_columns',$columns); //allow plugins to filter the columns
     }
     /*
     function get_sortable_columns(){
         return array();
     }
     */
+    
     
 	/**
 	 * Handles the checkbox column output.
@@ -50,109 +51,92 @@ class CP_Links_List_Table extends WP_List_Table {
 	 * @param object $link The current link object.
 	 */
 	public function column_cb( $link ) {
-        
-        $link_is_attached = false;
-        
         $post_links_ids = cp_links_get_links_ids_for_post();
-        
         $disabled = ( $link->link_id == 0);
         $checked = ( in_array($link->link_id,$post_links_ids) || $disabled ) ? true : false;
-        
-        
-		?>
-		<label class="screen-reader-text" for="cb-select-<?php echo $link->link_id; ?>"><?php echo sprintf( __( 'Select %s' ), $link->link_name ); ?></label>
-		<input type="checkbox" name="custom_post_links[ids][]" id="cb-select-<?php echo $link->link_id; ?>" value="<?php echo esc_attr( $link->link_id ); ?>" <?php checked($checked, true );?> <?php disabled($disabled, true );?> />
-		<?php
+
+        $label = sprintf( __( 'Select %s' ), $link->link_name );
+        $label_el = sprintf('<label class="screen-reader-text" for="cb-select-%s">%s</label>',$link->link_id,$label);
+        $input_el = sprintf( '<input type="checkbox" name="custom_post_links[ids][]" id="cb-select-%s" value="%s" %s %s />',$link->link_id,esc_attr( $link->link_id ),checked($checked, true,false),disabled($disabled, true,false ) );
+
+        return $label_el . $input_el;
 	}
-    
-    public function column_reorder($link){
+
+    /**
+     * Handles the columns output.
+     */
+    function column_default( $link, $column_name ){
+
+        switch($column_name){
+                
+            case 'reorder':
+                $disabled = ( $link->link_id == 0);
+
+                $classes = array(
+                    'cp-links-link-draghandle'
+                );
+
+                if ($disabled) $classes[] = 'disabled';
+
+                return sprintf('<div %s><i class="fa fa-arrows-v" aria-hidden="true"></i></div>',cp_links_get_classes($classes));
+                
+            break;
+                
+            case 'favicon':
+                return cp_links_output_favicon($link);
+            break;
+                
+            case 'name':
+                if ($link->link_id == 'new'){
+
+                    return '<input type="text" name="custom_post_links[new][name][]" value="" />';
+
+                }else{
+
+                    $edit_link = get_edit_bookmark_link( $link );
+                    $text = $link->link_name;
+
+                    return sprintf( '<strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong>',
+                        $edit_link,
+                        /* translators: %s: link name */
+                        esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $text ) ),
+                        $text
+                    );
+                }
+            break;
+
+            case 'url':
+                if ($link->link_id == 'new'){
+                    return '<input type="text" name="custom_post_links[new][url][]" value="" />';
+                }else{
+                    $short_url = url_shorten( $link->link_url );
+                    return sprintf('<a target="_blank" href="%s">%s</a>',$link->link_url,$short_url);
+                }
+            break;
+                
+            case 'target':
+                if ($link->link_id == 'new'){
+                    $option_target = cp_links()->get_options('default_target');
+                    return sprintf('<input id="link_target_blank" type="checkbox" name="custom_post_links[new][target][]" value="_blank" %s/><small>%s</small>',checked( $option_target, '_blank',false),__('<code>_blank</code> &mdash; new window or tab.','cp_links'));
+                }else{
+                    if($link->link_target){
+                        return sprintf('<code>%s</code>',$link->link_target);
+
+                    }else{
+                        return sprintf('<code>%s</code>','_none');
+                    }
+                }
+            break;
+                
+            default:
+                $output = null;
+                return apply_filters('cp_links_list_table_column_content',$output,$link,$column_name); //allow plugins to filter the content
+            break;
+
+        }
         
-        $disabled = ( $link->link_id == 0);
-        
-        $classes = array(
-            'cp-links-link-draghandle'
-        );
-        
-        if ($disabled) $classes[] = 'disabled';
-        
-        ?>
-        <div<?php cp_links_classes($classes);?>>
-            <i class="fa fa-arrows-v" aria-hidden="true"></i>
-        </div>
-        <?php
     }
 
-	/**
-	 * Handles the link name column output.
-	 *
-	 * @since 4.3.0
-	 * @access public
-	 *
-	 * @param object $link The current link object.
-	 */
-	public function column_name( $link ) {
-        
-        if ($link->link_id == 'new'){
-            ?>
-            <input type="text" name="custom_post_links[new][name][]" value="" />
-            <?php
-        }else{
-            
-            $edit_link = get_edit_bookmark_link( $link );
-            $text = $link->link_name;
-
-            printf( '<strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong>',
-                $edit_link,
-                /* translators: %s: link name */
-                esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $text ) ),
-                $text
-            );
-        }
-        
-	}
-    
-	public function column_favicon( $link ) {
-        return cp_links_output_favicon($link);
-            
-	}
-
-	/**
-	 * Handles the link URL column output.
-	 *
-	 * @since 4.3.0
-	 * @access public
-	 *
-	 * @param object $link The current link object.
-	 */
-	public function column_url( $link ) {
-        if ($link->link_id == 'new'){
-            ?>
-            <input type="text" name="custom_post_links[new][url][]" value="" />
-            <?php
-        }else{
-            $short_url = url_shorten( $link->link_url );
-            printf('<a target="_blank" href="%s">%s</a>',$link->link_url,$short_url);
-        }
-
-            
-	}
-    
-	public function column_target( $link ) {
-        if ($link->link_id == 'new'){
-            $option_target = cp_links()->get_options('default_target');
-            ?>
-            <input id="link_target_blank" type="checkbox" name="custom_post_links[new][target][]" value="_blank" <?php checked( $option_target, '_blank');?>/>
-            <small><?php _e('<code>_blank</code> &mdash; new window or tab.'); ?></small>
-            <?php
-        }else{
-            if($link->link_target){
-                printf('<code>%s</code>',$link->link_target);
-
-            }else{
-                printf('<code>%s</code>','_none');
-            }
-        }
-	}
     
 	/**
 	 * Generates and displays row action links.
