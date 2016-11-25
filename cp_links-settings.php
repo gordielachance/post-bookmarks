@@ -43,15 +43,15 @@ class CP_Links_Settings {
             
             //ignore_target_local
             $new_input['ignore_target_local'] = ( isset($input['ignore_target_local']) ) ? 'on' : 'off';
-            
-            //get favicon
-            $new_input['get_favicon'] = ( isset($input['get_favicon']) ) ? 'on' : 'off';
-            
+
             //orderby
             $orderby_allowed = array('name','custom');
             if ( isset ($input['links_orderby']) && in_array($input['links_orderby'],$orderby_allowed) ){
                 $new_input['links_orderby'] = $input['links_orderby'];
             }
+            
+            //get favicon
+            $new_input['hide_from_bookmarks'] = ( isset($input['hide_from_bookmarks']) ) ? 'on' : 'off';
 
         }
         
@@ -120,6 +120,14 @@ class CP_Links_Settings {
             __('System','cp_links'), // Title
             array( $this, 'cp_links_settings_system_desc' ), // Callback
             'cp_links-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'hide_from_bookmarks', 
+            __('Hide from bookmarks','cp_links'), 
+            array( $this, 'hide_from_bookmarks_callback' ), 
+            'cp_links-settings-page', // Page
+            'settings_system'//section
         );
         
         add_settings_field(
@@ -223,6 +231,16 @@ class CP_Links_Settings {
     
     function cp_links_settings_system_desc(){
         
+    }
+    
+    function hide_from_bookmarks_callback(){
+        $option = cp_links()->get_options('hide_from_bookmarks');
+        printf(
+            '<p><input type="checkbox" name="%1$s[hide_from_bookmarks]" value="on" %2$s /> %3$s</p>',
+            CP_Links::$meta_name_options,
+            checked( $option, 'on', false ),
+            __("Hide links created with this plugin from regular links queries.",'cp_links')
+        );
     }
     
     function reset_options_callback(){
