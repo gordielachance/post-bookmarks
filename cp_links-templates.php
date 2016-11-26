@@ -36,7 +36,7 @@ function cp_links_get_for_post($post_id = null,$orderby= null){
             $args['order'] = 'ASC';
         }
 
-        $links = get_bookmarks( $args );
+        $links = cp_links_get_bookmarks( $args );
 
         if ($orderby == 'custom'){
             $links = cp_links_sort_using_ids_array($links,$cp_links_ids);

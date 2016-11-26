@@ -51,15 +51,13 @@ class CP_Links_Settings {
             }
             
             //get favicon
-            $new_input['hide_from_bookmarks'] = ( isset($input['hide_from_bookmarks']) ) ? 'on' : 'off';
+            $new_input['get_favicon'] = ( isset($input['get_favicon']) ) ? "on" : "off";
+            
+            //hide from bookmarks
+            $new_input['hide_from_bookmarks'] = ( isset($input['hide_from_bookmarks']) ) ? "on" : "off";
 
         }
         
-        //remove default values
-        foreach($input as $slug => $value){
-            $default = cp_links()->get_default_option($slug);
-            if ($value == $default) unset ($input[$slug]);
-        }
 
         $new_input = array_filter($new_input);
 
@@ -234,12 +232,12 @@ class CP_Links_Settings {
     }
     
     function hide_from_bookmarks_callback(){
-        $option = cp_links()->get_options('hide_from_bookmarks');
+        $hide_from_bookmarks = ( cp_links()->get_options('hide_from_bookmarks') == "on" ) ? true : false;
         printf(
             '<p><input type="checkbox" name="%1$s[hide_from_bookmarks]" value="on" %2$s /> %3$s</p>',
             CP_Links::$meta_name_options,
-            checked( $option, 'on', false ),
-            __("Hide links created with this plugin from regular links queries.",'cp_links')
+            checked( $hide_from_bookmarks, true, false ),
+            __("Hide links created with this plugin from regular bookmarks.",'cp_links')
         );
     }
     

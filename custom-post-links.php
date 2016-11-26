@@ -74,9 +74,10 @@ class CP_Links {
             'links_category'        => null,
             'display_links'         => 'after',
             'default_target'        => '_blank',
-            'ignore_target_local'   => 'on',
             'links_orderby'         => 'name',
-            'get_favicon'           => 'on'
+            'ignore_target_local'   => 'on',
+            'get_favicon'           => 'on',
+            'hide_from_bookmarks'   => 'on'
         );
         $this->options = wp_parse_args(get_option( self::$meta_name_options), $this->options_default);
         
@@ -122,6 +123,10 @@ class CP_Links {
         add_action( 'save_post', array(&$this,'metabox_save'));
         
         add_filter('the_content', 'cp_links_output_links', 100, 2);
+        
+        add_filter( 'get_bookmarks', array(&$this,'filter_bookmarks'),10,2);
+        add_filter( 'get_bookmarks', array(&$this,'exclude_from_bookmarks'),10,2);
+        
         
         add_filter('redirect_post_location',array($this, 'metabox_variables_redirect')); //redirect with searched links text - http://wordpress.stackexchange.com/a/52052/70449
         
@@ -297,6 +302,69 @@ class CP_Links {
         wp_enqueue_style( 'cp_links' );
         
     }
+
+    function exclude_from_bookmarks($bookmarks,$r){
+        $hide_from_bookmarks = ( cp_links()->get_options('hide_from_bookmarks') == "on" ) ? true : false;
+        if (!$hide_from_bookmarks) return $bookmarks;
+        
+        remove_filter( 'get_bookmarks', array(&$this,'exclude_from_bookmarks'),10,2); //unhook to avoid infinite loop
+
+        $r['cp_links'] = false;
+        $bookmarks = get_bookmarks($r);
+        
+        add_filter( 'get_bookmarks', array(&$this,'exclude_from_bookmarks'),10,2); //rehook
+
+        return $bookmarks;
+        
+    }
+    
+    function filter_bookmarks($bookmarks,$r){
+
+        if ( isset($r['cp_links']) ){
+            
+            $do_include = (bool)$r['cp_links'];
+            $cpl_category = cp_links()->get_options('links_category');
+            $args_categories = array();
+
+            // category already set, abord
+            if ( isset($r['category']) ){
+                if ( $args_categories = explode(',',$r['category']) ){
+                    if (in_array($cpl_category,$args_categories)) return $bookmarks; //already there, abord
+                }
+            }
+            
+            switch( $do_include ){
+
+                case true: //include only our links
+
+                    $args_categories[] = $cpl_category;
+                    $r['category'] = implode(',',$args_categories);
+
+                break;
+
+                case false: //exclude our links
+
+                    //re-run query.
+                    //there is no 'exclude_category' parameter, so exclude all links IDs
+                    if ( $cpl_links = get_bookmarks( array('cp_links' => true) ) ){
+                        $cpl_links_ids = array();
+                        foreach((array)$cpl_links as $link){
+                            $cpl_links_ids[] = $link->link_id;
+                        }
+
+                        $r['exclude'] = implode(',',$cpl_links_ids);
+                    }
+
+                break;
+            }
+
+            unset($r['cp_links']);
+            $bookmarks = get_bookmarks($r);
+
+        }
+
+        return $bookmarks;
+    }
     
     function metabox_variables_redirect($location) {
         
@@ -470,6 +538,7 @@ class CP_Links {
             
             if ( !in_array( $_REQUEST['post_type'], $this->allowed_post_types() ) ) return;//is not allowed post type
             
+            //TO FIX TO CHECK
             if ( 'page' == $_REQUEST['post_type'] ){
                 if ( !current_user_can( 'edit_page', $post_id ) ) return;//user cannot edit page
             }else{
@@ -511,6 +580,8 @@ class CP_Links {
                 'link_url'      => $url,
                 'link_target'   => ( isset($new_link['target']) ) ? $new_link['target'] : null
             );
+            
+            apply_filters('cp_links_before_save_data',$linkdata,$new_link);
             
             //validate for the new link
             $linkdata = array_filter($linkdata);
