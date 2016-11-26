@@ -83,7 +83,7 @@ class CP_Links_List_Table extends WP_List_Table {
             break;
                 
             case 'favicon':
-                return cp_links_output_favicon($link);
+                return cp_links_get_favicon($link->link_url);
             break;
                 
             case 'name':

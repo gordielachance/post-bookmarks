@@ -81,14 +81,14 @@ function cp_links_output_links( $content ){
  * Template a single link
  */
 
-function cp_links_output_favicon($link){
+function cp_links_get_favicon($url){
     
     $favicon = null;
     
     //get domain url
-    if ( $domain = cp_links_get_url_domain($link->link_url) && (cp_links()->get_options('get_favicon')=='on') ){
+    if ( $domain = cp_links_get_url_domain($url) && (cp_links()->get_options('get_favicon')=='on') ){
         //favicon
-        $favicon = sprintf('https://www.google.com/s2/favicons?domain=%s',$link->link_url);
+        $favicon = sprintf('https://www.google.com/s2/favicons?domain=%s',$url);
         $favicon_style = sprintf(' style="background-image:url(\'%s\')"',$favicon);
         $favicon = sprintf('<span class="cp-links-favicon" %s></span>',$favicon_style);
     }
@@ -106,7 +106,7 @@ function cp_links_output_single_link($link){
     $link_classes = cp_links_get_classes($link_classes_arr);
     $link_target_str=null;
     
-    $favicon = cp_links_output_favicon($link);
+    $favicon = cp_links_get_favicon($link);
 
     
     if($link->link_target) {
