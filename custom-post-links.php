@@ -209,19 +209,21 @@ class CP_Links {
 
         $current_version = get_option("_cp_links-db_version");
         if ($current_version==$this->db_version) return false;
+        
         if(!$current_version){ //not installed
             
             //add default category
 
             if ( !$parent_cat = get_term_by( 'slug', self::$links_category_slug, 'link_category') ){
                 $cat_id = wp_insert_term( 
-                    __('Custom Post Links','cp_links'), 
+                    __('Post Links','cp_links'), 
                     'link_category',
                      array(
                          'description'  =>__('Parent category for all the links added using the <em>Custom Post Links</em> plugin','cp_links'),
                          'slug'         => self::$links_category_slug
                      ) 
                 );
+                //TO FIX save cat_id ?
             }
             
             
@@ -231,9 +233,8 @@ class CP_Links {
              */
 
             
-        }else{
-
         }
+        
         //update DB version
         update_option("_cp_links-db_version", $this->db_version );
     }
@@ -410,7 +411,7 @@ class CP_Links {
         if ($this->search_links_text){
             $search_links_args = array(
                 'search'    => $this->search_links_text,
-                //'category'  => cp_links()->get_options('links_category')
+                //'cp_links'  => true
             );
 
             $links_search_table->items = get_bookmarks( $search_links_args );
@@ -615,6 +616,9 @@ class CP_Links {
         //TO FIX check url is valid
         if ( !$link_id = cp_links_get_existing_link_id($linkdata['link_url'],$linkdata['link_name']) ){ //check the link does not exists yet
             if( !function_exists( 'wp_insert_link' ) ) include_once( ABSPATH . '/wp-admin/includes/bookmark.php' );
+            
+            $linkdata = apply_filters('cp_links_insert_link_pre',$linkdata);
+            
             $link_id = wp_insert_link( $linkdata, true ); //return id
         }
         
