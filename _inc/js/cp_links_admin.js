@@ -5,40 +5,41 @@ jQuery(function($){
         // Look for changes in the value
         $('.cp_links_new .column-url input').live("change paste", function(event){
             
+            var row = $(this).parents('tr');
+            
             var cell_url = $(this).parents('td');
-            var row = cell_url.parents('tr');
+            var link_url = $(this).val().trim();
+            
             var cell_name = row.find('.column-name');
             var name_input = row.find('.column-name input');
+            var link_name = name_input.val().trim();
             
-            //validate URL
-            
-            url = $(this).val().trim();
-            if (!url) return;
+            var cell_favicon = row.find('.column-favicon');
 
-            var link = $('<a>',{href: url});
+            var link = $('<a>',{href: link_url});
             var uri = link.uri();
-            
+
             //check for protocol
             var protocol = uri.protocol();
             if ( !protocol ){
-                url = 'http://' + url;
-                $(this).val(url);
+                link_url = 'http://' + link_url;
+                $(this).val(link_url);
                 $(this).trigger( "change" );
                 return;
             }
-            
-            //check for domain
-            var domain = uri.domain();
-            
-            if (domain){ //ok for ajax
 
-                var name = name_input.val();
-                if (name.length) return;
+            //check for domain and top level domain
+            var domain = uri.domain();
+            var tld = uri.tld();
+
+            if (domain && tld){ //ok for ajax
 
                 var ajax_data = {
-                    'action': 'cp_links_get_url_title',
-                    'url': url
+                    'action': 'cp_links_refresh_url',
+                    'url':  link_url,
+                    'name': link_name
                 };
+
                 $.ajax({
 
                     type: "post",
@@ -52,7 +53,11 @@ jQuery(function($){
                         if (data.success === false) {
                             console.log(data);
                         }else{
-                            name_input.val(data.name);
+                            if (!link_name){ //if field was empty
+                                name_input.val(data.name);
+                            }
+                            cell_favicon.html(data.favicon);
+                            
                         }
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
@@ -63,7 +68,8 @@ jQuery(function($){
                         row.removeClass('loading');
                     }
                 })
-                
+            }else{
+                cell_favicon.html('');
             }
 
         });
@@ -120,18 +126,4 @@ jQuery(function($){
         });
     })
 })
-
-function cp_links_get_url_domain(url) {
-    if (typeof url != 'undefined'){
-        var link = document.createElement('a');
-        link.setAttribute('href',url);
-
-        console.log(link);
-
-
-        return link.hostname;
-    }
-    
-
-}
 
