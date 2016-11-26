@@ -4,20 +4,40 @@ jQuery(function($){
 
         // Look for changes in the value
         $('.cp_links_new .column-url input').live("change paste", function(event){
+            
+            var cell_url = $(this).parents('td');
+            var row = cell_url.parents('tr');
+            var cell_name = row.find('.column-name');
+            var name_input = row.find('.column-name input');
+            
+            //validate URL
+            
+            url = $(this).val().trim();
+            if (!url) return;
 
-            if ( validate_url( $(this).val() ) ){
+            var link = $('<a>',{href: url});
+            var uri = link.uri();
+            
+            //check for protocol
+            var protocol = uri.protocol();
+            if ( !protocol ){
+                url = 'http://' + url;
+                $(this).val(url);
+                $(this).trigger( "change" );
+                return;
+            }
+            
+            //check for domain
+            var domain = uri.domain();
+            
+            if (domain){ //ok for ajax
 
-                var cell_url = $(this).parents('td');
-                var row = cell_url.parents('tr');
-                var cell_name = row.find('.column-name');
-                var name_input = cell_name.find('input');
-
-                var name = cell_name.find('input').val();
+                var name = name_input.val();
                 if (name.length) return;
 
                 var ajax_data = {
                     'action': 'cp_links_get_url_title',
-                    'url': $(this).val()
+                    'url': url
                 };
                 $.ajax({
 
@@ -101,26 +121,17 @@ jQuery(function($){
     })
 })
 
-//TO FIX TO IMPROVE
-function validate_url(url) {
+function cp_links_get_url_domain(url) {
+    if (typeof url != 'undefined'){
+        var link = document.createElement('a');
+        link.setAttribute('href',url);
 
-    if ( !url.trim() ) return false;
-    
-    //TO FIX
+        console.log(link);
 
-    /*
-    //trick to get URL informations - http://stackoverflow.com/a/6944772/782013
-    var link = document.createElement('a');
-    link.href = url;
 
-    if ( !link.hostname ){
-        alert("no host");
-        return false;
-    }else{
-        alert("host : " + link.hostname);
+        return link.hostname;
     }
-    */
+    
 
-    return true;
 }
 
