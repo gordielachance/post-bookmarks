@@ -8,7 +8,7 @@ jQuery(function($){
             if ( validate_url( $(this).val() ) ){
 
                 var cell_url = $(this).parents('td');
-                var row = cell_url.parents('.cp_links_new');
+                var row = cell_url.parents('tr');
                 var cell_name = row.find('.column-name');
                 var name_input = cell_name.find('input');
 
@@ -26,12 +26,10 @@ jQuery(function($){
                     data:ajax_data,
                     dataType: 'json',
                     beforeSend: function() {
-                        cell_url.addClass('loading');
-                        cell_name.addClass('loading');
+                        row.addClass('loading');
                     },
                     success: function(data){
                         if (data.success === false) {
-                            cell_url.addClass('berror');
                             console.log(data);
                         }else{
                             name_input.val(data.name);
@@ -42,8 +40,7 @@ jQuery(function($){
                         console.log(thrownError);
                     },
                     complete: function() {
-                        cell_url.removeClass('loading');
-                        cell_name.removeClass('loading');
+                        row.removeClass('loading');
                     }
                 })
                 
