@@ -270,10 +270,18 @@ class CP_Links {
     }
 
     function register_scripts_styles_admin(){
-        // css
+        
+        // CSS
+        
         wp_register_style( 'cp_links_admin',  $this->plugin_url . '_inc/css/cp_links-admin.css',$this->version );
-        // js
-        wp_register_script( 'cp_links_admin', $this->plugin_url . '_inc/js/cp_links_admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable'),$this->version);
+        
+        // JS
+        
+        // uri.js (https://github.com/medialize/URI.js)
+        wp_register_script( 'uri', $this->plugin_url . '_inc/js/URI.min.js', null, '1.18.3');
+        wp_register_script( 'jquery-uri', $this->plugin_url . '_inc/js/jquery.URI.min.js', array('uri'), '1.18.3');
+        
+        wp_register_script( 'cp_links_admin', $this->plugin_url . '_inc/js/cp_links_admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','jquery-uri'),$this->version);
     }
     
 
