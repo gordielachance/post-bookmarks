@@ -1,44 +1,53 @@
 jQuery(function($){
 
     $(document).ready(function(){
+        
+        //'Edit' row action
+        
+        $('#custom-post-links .row-actions .edit a').live("click", function(event){
+            event.preventDefault();
+            var row = $(this).parents('tr');
+            row.addClass('cp-links-row-edit');
+        });
 
         // Look for changes in the value
-        $('.cp_links_new .column-url input').live("change paste", function(event){
+        $('#custom-post-links .cp-links-row-edit .column-url input').live("change paste", function(event){
+            
+            var row = $(this).parents('tr');
             
             var cell_url = $(this).parents('td');
-            var row = cell_url.parents('tr');
+            var link_url = $(this).val().trim();
+            
             var cell_name = row.find('.column-name');
             var name_input = row.find('.column-name input');
+            var link_name = name_input.val().trim();
             
-            //validate URL
-            
-            url = $(this).val().trim();
-            if (!url) return;
+            var cell_favicon = row.find('.column-favicon');
 
-            var link = $('<a>',{href: url});
+            var link = $('<a>',{href: link_url});
             var uri = link.uri();
-            
+
             //check for protocol
             var protocol = uri.protocol();
             if ( !protocol ){
-                url = 'http://' + url;
-                $(this).val(url);
+                link_url = 'http://' + link_url;
+                $(this).val(link_url);
                 $(this).trigger( "change" );
                 return;
             }
-            
-            //check for domain
-            var domain = uri.domain();
-            
-            if (domain){ //ok for ajax
 
-                var name = name_input.val();
-                if (name.length) return;
+            //check for domain and top level domain
+            var domain = uri.domain();
+            var tld = uri.tld();
+
+            if (domain && tld){ //ok for ajax
 
                 var ajax_data = {
-                    'action': 'cp_links_get_url_title',
-                    'url': url
+                    'action': 'cp_links_refresh_url',
+                    'url':  link_url,
+                    'name': link_name
                 };
+
                 $.ajax({
 
                     type: "post",
@@ -52,7 +61,11 @@ jQuery(function($){
                         if (data.success === false) {
                             console.log(data);
                         }else{
-                            name_input.val(data.name);
+                            if (!link_name){ //if field was empty
+                                name_input.val(data.name);
+                            }
+                            cell_favicon.html(data.favicon);
+                            
                         }
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
@@ -63,75 +76,68 @@ jQuery(function($){
                         row.removeClass('loading');
                     }
                 })
-                
+            }else{
+                cell_favicon.html('');
             }
 
         });
 
-        var add_new_section =  $('#add-link-section');
-        var table = add_new_section.find("table");
+        var section_new =   $("#custom-post-links #add-link-section");
+        var section_list =  $("#custom-post-links #list-links-section")
+        
+        var table_new =     section_new.find("table");
+        var table_list =    section_list.find("table");
 
         //add new link
-        var blankBlock = $('#add-link-section');
-        blankBlock.addClass('has-js');
-        blankBlock.find('a').click(function(event){
+        section_new.find('a.page-title-action').click(function(event){
 
             event.preventDefault();
-
-            var new_line = table.find("tbody tr");
-            var new_table_line = new_line.clone();
-            new_table_line.addClass('cp_links_new');
-
-            //count existing new link rows
-            var new_link_rows = $("#custom-post-links #the-list tr.cp_links_new");
-            var new_link_idx = new_link_rows.length -1;
-            if (new_link_idx < 0) new_link_idx = 0;
-
+            
+            var list_rows = table_list.find("#the-list tr:not(.no-items)");
+            var clone_row = table_new.find("tbody tr");
+            
             //check last entry is filled
-            var first_line = new_link_rows.first();
-            if (first_line.length > 0) {
-                var first_line_url_input = first_line.find('.column-url input');
-                console.log(first_line_url_input);
-                if( first_line_url_input.val().length === 0 ) {
-                    first_line_url_input.focus();
+            var list_first_row = list_rows.first();
+            if (list_first_row.length > 0) {
+                var first_row_url_input = list_first_row.find('.column-url input');
+                if( first_row_url_input.val().length === 0 ) {
+                    first_row_url_input.focus();
                     return;
                 }
             }
 
-            //clear form
-            new_line.find('input[type="text"]').val('');
+            clone_row.find('input[type="text"]').val(''); //clear form
+            var new_row = clone_row.clone();
 
+            //increment input name prefixes
+            new_row.html(function(index,html){
+                var pattern = 'custom_post_links[links][0]';
+                var replaceby = 'custom_post_links[links]['+list_rows.length+']';
+                return html.split(pattern).join(replaceby);
+            }); 
+ 
             //add line
-            new_table_line.prependTo( "#custom-post-links #list-links-section #the-list" );
+            new_row.prependTo( "#custom-post-links #list-links-section #the-list" );
 
             //focus input
-            new_table_line.find('input').first().focus();
+            new_row.find('input').first().focus();
 
         });
 
         // sort links
-        $('#custom-post-links .wp-list-table #the-list').sortable({
+        $('#list-links-section #the-list').sortable({
           handle: '.cp-links-link-draghandle',
 
           update: function(event, ui) {
-            // update row weights
-            //_custom_post_links_update_links_weight();
+                var all_rows = $('#list-links-section #the-list tr');
+                $.each( all_rows, function( key, value ) {
+                  var order_input = $(this).find('.column-reorder input');
+                    order_input.val(key);
+                });
           }
         });
     })
 })
 
-function cp_links_get_url_domain(url) {
-    if (typeof url != 'undefined'){
-        var link = document.createElement('a');
-        link.setAttribute('href',url);
 
-        console.log(link);
-
-
-        return link.hostname;
-    }
-    
-
-}
 

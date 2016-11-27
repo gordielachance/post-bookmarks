@@ -23,7 +23,20 @@ function cp_links_get_array_value($keys = null, $array){
     return false;
 }
 
+function cp_links_validate_url($url){
+
+    if ( $url && (!$protocol = parse_url($url, PHP_URL_SCHEME) ) ){
+        $url = 'http://' . $url; //add default protocol
+    }
+    
+    return $url;
+
+}
+
 function cp_links_get_name_from_url($url){
+    
+    $url = cp_links_validate_url($url);
+    if (filter_var($url, FILTER_VALIDATE_URL) === false) return;
     
     $name = null;
 
@@ -37,15 +50,22 @@ function cp_links_get_name_from_url($url){
 }
 
 function cp_links_get_url_domain($url){
-  $pieces = parse_url($url);
-  $domain = isset($pieces['host']) ? $pieces['host'] : '';
-  if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $domain, $regs)) {
-    return $regs['domain'];
-  }
-  return false;
+    
+    $url = cp_links_validate_url($url);
+    if (filter_var($url, FILTER_VALIDATE_URL) === false) return;
+    
+      $pieces = parse_url($url);
+      $domain = isset($pieces['host']) ? $pieces['host'] : '';
+      if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $domain, $regs)) {
+        return $regs['domain'];
+      }
+      return false;
 }
 
 function cp_links_get_url_title($url){
+    
+    $url = cp_links_validate_url($url);
+    if (filter_var($url, FILTER_VALIDATE_URL) === false) return;
 
     $response = wp_remote_get( $url );
     

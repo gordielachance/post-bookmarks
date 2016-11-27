@@ -77,15 +77,11 @@ class CP_Links {
             'links_orderby'         => 'name',
             'ignore_target_local'   => 'on',
             'get_favicon'           => 'on',
-            'hide_from_bookmarks'   => 'on'
+            'hide_from_bookmarks'   => 'on',
+            'links_category'        => $this->get_links_category()
         );
         $this->options = wp_parse_args(get_option( self::$meta_name_options), $this->options_default);
-        
-        //parent category
-        if ( $parent_cat = get_term_by( 'slug', self::$links_category_slug, 'link_category') ){
-            $this->options['links_category'] = (int)$parent_cat->term_id;
-        }
-        
+
         //search links
         $this->search_links_text = ( isset($_GET['cp_links_search']) ) ? $_GET['cp_links_search'] : null; //existing links to attach to post
         
@@ -156,12 +152,9 @@ class CP_Links {
     </div>
     <?php
     }
-    
 
-    
     function upgrade(){
         global $wpdb;
-        
 
         //old plugin import
         $old_metas = cp_links_get_metas('_custom_post_links');
@@ -190,7 +183,6 @@ class CP_Links {
                             unset($linkdata['link_target']);
                         }
                         */
-
                         if ( ($link_id = $this->insert_link($linkdata)) && !is_wp_error($link_id)){
                             $cp_links_ids[] = $link_id;
                         }
@@ -212,21 +204,6 @@ class CP_Links {
         
         if(!$current_version){ //not installed
             
-            //add default category
-
-            if ( !$parent_cat = get_term_by( 'slug', self::$links_category_slug, 'link_category') ){
-                $cat_id = wp_insert_term( 
-                    __('Post Links','cp_links'), 
-                    'link_category',
-                     array(
-                         'description'  =>__('Parent category for all the links added using the <em>Custom Post Links</em> plugin','cp_links'),
-                         'slug'         => self::$links_category_slug
-                     ) 
-                );
-                //TO FIX save cat_id ?
-            }
-            
-            
             /*
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
             dbDelta($sql);
@@ -246,6 +223,31 @@ class CP_Links {
     public function get_default_option($keys = null){
         return cp_links_get_array_value($keys,$this->options_default);
     }
+    
+    /*
+    Get our links category (based on slug) or create it if it does not exists
+    */
+    
+    public function get_links_category(){
+        
+        $cat_id = null;
+        $cat_slug = self::$links_category_slug;
+        
+        if ( $cat = get_term_by( 'slug', $cat_slug, 'link_category') ){
+            $cat_id = $cat->term_id;
+        }else{
+            $cat_id = wp_insert_term( 
+                __('Post Links','cp_links'), 
+                'link_category',
+                 array(
+                     'description'  => __('Parent category for all the links added using the <em>Custom Post Links</em> plugin','cp_links'),
+                     'slug'         => $cat_slug
+                 ) 
+            );
+        }
+        return $cat_id;
+    }
+
     
     /* get post types that supports Custom Post Links */
     
@@ -435,12 +437,7 @@ class CP_Links {
                 <?php
                 //blank link
                 $blank_link_table = new CP_Links_List_Table();
-                $blank_link = (object)array(
-                    'link_id'       => 'new',
-                    'link_url'      => null,
-                    'link_name'     => null,
-                    'link_target'   => null
-                );
+                $blank_link = (object)$this->sanitize_link(array('default_checked' => true,'row_classes' => 'cp-links-row-new cp-links-row-edit'));
                 $blank_link_table->items = array($blank_link);
                 $blank_link_table->prepare_items();
                 $blank_link_table->display();
@@ -485,36 +482,6 @@ class CP_Links {
       wp_nonce_field( 'custom_post_links_meta_box', 'custom_post_links_meta_box_nonce' );
 
     }
-    
-    /*
-    This should act like a line from the CP_Links_List_Table.
-    We'll use jQuery to dynamically move it into the table.
-    */
-    
-    function add_link_row(){
-        $option_target = cp_links()->get_options('default_target');
-        ?>
-        <tr class="cp_links_new">
-            <th scope="row" class="check-column"></th>
-            <td class="reorder column-reorder has-row-actions column-primary" data-colname=""></td>
-            <td class="column-favicon"></td>
-            <td class="url column-url">
-                <label><?php _e('URL');?></label>
-                <input type="text" name="custom_post_links[new][url][]" value="" />
-            </td>
-            <td class="name column-name has-row-actions column-primary">
-                <label><?php _e('Name');?></label>
-                <input type="text" name="custom_post_links[new][name][]" value="" />
-            </td>
-            <td class="target column-target">
-                <label><?php _e('Target');?></label>
-                <input id="link_target_blank" type="checkbox" name="custom_post_links[new][target][]" value="_blank" <?php checked( $option_target, '_blank');?>/>
-                <small><?php _e('<code>_blank</code> &mdash; new window or tab.'); ?></small>
-            </td>
-        </tr>
-        <?php
-    }
-
 
     /**
     * When the post is saved, saves our custom data.
@@ -522,8 +489,6 @@ class CP_Links {
     * @param int $post_id The ID of the post being saved.
     */
     function metabox_save( $post_id ) {
-        
-        $form_data = ( isset($_POST['custom_post_links']) ) ? $_POST['custom_post_links'] : null;
 
         /*
         * We need to verify this came from our screen and with proper authorization,
@@ -557,54 +522,60 @@ class CP_Links {
         }
         
         /* OK, its safe for us to save the data now. */
-        
-        $cp_links_ids = ( isset($form_data['ids']) ) ? $form_data['ids'] : null; //existing links to attach to post
-        
-        $new_links_form = ( isset($form_data['new']) ) ? $form_data['new'] : null;
-        $new_links_form_name = ( isset($new_links_form['name']) ) ? $new_links_form['name'] : array();
-        $new_links_form_url = ( isset($new_links_form['url']) ) ? $new_links_form['url'] : array();
-        $new_links_form_target = ( isset($new_links_form['target']) ) ? $new_links_form['target'] : array();
-        $new_links = array();
+        $form_data = ( isset($_POST['custom_post_links']) ) ? $_POST['custom_post_links'] : null;
+        $cp_links_ids = array();
 
-        //combine form arrays
-        //TO FIX seems that unchecked target boxes still gets a '_blank' value, why ?
-        foreach ( $new_links_form_url as $key=>$url ) {
-            if ($key == 0) continue; //ignore first item (cloned row)
-            if (!$url) continue;
-            $new_links[] = array( 
-                'name' => $new_links_form_name[ $key ] , 
-                'url' => $url, 
-                'target' => $new_links_form_target[ $key ] 
-            );
-        }
+        $form_data_links = (isset($form_data['links'])) ? $form_data['links'] : array();
+        $form_data_links = stripslashes_deep($form_data_links); //strip slashes for $_POST args if any
+        $default_category = cp_links()->get_options('links_category');
 
-        //new links
-        foreach((array)$new_links as $key=>$new_link){
-            
-            $url = ( isset($new_link['url']) ) ? urldecode($new_link['url']) : null;
-            $name = ( isset($new_link['name']) ) ? $new_link['name'] : null;
-            
-            $linkdata = array(
-                'link_name'     => $name,
-                'link_url'      => $url,
-                'link_target'   => ( isset($new_link['target']) ) ? $new_link['target'] : null
-            );
-            
-            apply_filters('cp_links_before_save_data',$linkdata,$new_link);
-            
-            //validate for the new link
-            $linkdata = array_filter($linkdata);
-            $link_id = $this->insert_link($linkdata);
-            
-            if ($link_id && !is_wp_error($link_id)){
-                $cp_links_ids[] = $link_id;
+        foreach($form_data_links as $form_data_link){
+            if ( isset($form_data_link['enabled']) ){
+                $link_id = null;
+                $link_data = $this->sanitize_link($form_data_link);
+
+                //force default category
+                if ( !in_array($default_category,$link_data['link_category']) ){
+                    $link_data['link_category'][] = $default_category;
+                }
+
+                $link_data = apply_filters('cp_links_before_save_data',$link_data,$form_data_link);
+
+                //existing links
+                if ($link_id = $link_data['link_id']){
+
+                    //get stored bookmark
+                    $bookmark = get_bookmark($link_id,ARRAY_A);
+
+                    //compare keys that are shared by both arrays
+                    $link_data_reduced = array_intersect_key($link_data, $bookmark); //keep only keys shared in both arrays - values are from the first one
+                    $bookmark_reduced = array_intersect_key($bookmark, $link_data);
+
+                    /*
+                    print_r($link_data_reduced);
+                    print_r('<br/>VS<br/>');
+                    print_r($bookmark_reduced);
+                    die();
+                    */
+
+                    //update link only if data has been changed
+                    if ($link_data_reduced != $bookmark_reduced){
+                        wp_update_link( $link_data );
+                    }
+
+                }else{ //create new link
+                    $link_id = $this->insert_link($link_data);
+                }
+
+                //add to IDs list
+                if ($link_id && !is_wp_error($link_id)){
+                    $cp_links_ids[] = $link_id;
+                }
             }
         }
-
+        
         $cp_links_ids = array_unique((array)$cp_links_ids);
-        
         update_post_meta( $post_id, '_custom_post_links_ids', $cp_links_ids );
-        
         return $cp_links_ids;
 
     }
@@ -612,36 +583,50 @@ class CP_Links {
     function insert_link($new_link){
 
         //sanitize
-        $linkdata = $this->get_blank_link($new_link);
+        $linkdata = $this->sanitize_link($new_link);
 
         if ( !$linkdata['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','custom-post-links') );
 
+        //force name
         if ( !$linkdata['link_name'] ){
             $linkdata['link_name'] = cp_links_get_name_from_url($linkdata['link_url']);
         }
-        
-        
+
         //TO FIX check url is valid
         if ( !$link_id = cp_links_get_existing_link_id($linkdata['link_url'],$linkdata['link_name']) ){ //check the link does not exists yet
             if( !function_exists( 'wp_insert_link' ) ) include_once( ABSPATH . '/wp-admin/includes/bookmark.php' );
             
             $linkdata = apply_filters('cp_links_insert_link_pre',$linkdata);
-            
+
             $link_id = wp_insert_link( $linkdata, true ); //return id
         }
         
         return $link_id;
     }
     
-    function get_blank_link($args = array()){
+    function sanitize_link($args = array()){
         $defaults = array(
-            'link_id'       => 0, //link will not be editable or saved if this is null.  This can be useful when external plugins are appending links using the filter 'cp_links_get_for_post_pre'.
-            'link_name'     => null,
+            'link_id'       => 0,
             'link_url'      => null,
+            'link_name'     => null,
             'link_target'   => null,
-            'link_category' => $this->get_options('links_category')
+            'link_category' => (array)$this->get_options('links_category'),
+            'default_checked'   => null,
+            'row_classes'   => null, //class for the row, in the links table. eg. 'cp-links-row-edit cp-links-row-new cp-links-row-suggest'
         );
-        return wp_parse_args((array)$args,$defaults);
+
+        $args = wp_parse_args((array)$args,$defaults);
+        
+        //$args['link_name'] = sanitize_text_field($args['link_name']);
+        
+        //check by default if no 'default_checked' set and that we have a link ID
+        if ( $args['default_checked']===null ){
+            if ( $args['link_id'] ){
+                $args['default_checked'] = true;
+            } 
+        }
+        
+        return $args;
     }
     
 }
