@@ -17,6 +17,14 @@ class CP_Links_List_Table extends WP_List_Table {
         $this->_column_headers = array($columns, $hidden, $sortable);
         
     }
+    
+    //override parent function so we can add class to our rows
+	public function single_row( $item ) {
+		printf( '<tr class="%s" data-link-id="%s">',$item->row_classes,$item->link_id );
+		$this->single_row_columns( $item );
+		echo '</tr>';
+	}
+    
     /*
     function display_tablenav($which){
         
@@ -52,12 +60,11 @@ class CP_Links_List_Table extends WP_List_Table {
 	 */
 	public function column_cb( $link ) {
         $post_links_ids = cp_links_get_links_ids_for_post();
-        $disabled = ( $link->link_id == 0);
-        $checked = ( in_array($link->link_id,$post_links_ids) || $disabled ) ? true : false;
+        $checked = ( in_array($link->link_id,$post_links_ids) || $link->default_checked ) ? true : false;
 
         $label = sprintf( __( 'Select %s' ), $link->link_name );
         $label_el = sprintf('<label class="screen-reader-text" for="cb-select-%s">%s</label>',$link->link_id,$label);
-        $input_el = sprintf( '<input type="checkbox" name="custom_post_links[ids][]" id="cb-select-%s" value="%s" %s %s />',$link->link_id,esc_attr( $link->link_id ),checked($checked, true,false),disabled($disabled, true,false ) );
+        $input_el = sprintf( '<input type="checkbox" name="custom_post_links[ids][]" id="cb-select-%s" value="%s" %s />',$link->link_id,esc_attr( $link->link_id ),checked($checked, true,false) );
 
         return $label_el . $input_el;
 	}
@@ -66,6 +73,10 @@ class CP_Links_List_Table extends WP_List_Table {
      * Handles the columns output.
      */
     function column_default( $link, $column_name ){
+        
+        $classes = array('cp-links-data');
+        $display_classes = array_merge( $classes,array('cp-links-data-display') );
+        $edit_classes = array_merge( $classes,array('cp-links-data-edit') );
 
         switch($column_name){
                 
@@ -87,45 +98,56 @@ class CP_Links_List_Table extends WP_List_Table {
             break;
                 
             case 'name':
-                if ($link->link_id == 'new'){
+                
+                $name = ($link->link_name) ? $link->link_name : null;
 
-                    return '<input type="text" name="custom_post_links[new][name][]" value="" />';
+                //edit
+                $edit_el = sprintf('<input type="text" name="custom_post_links[new][name][]" value="%s" />',$name);
+                
+                //display
 
-                }else{
+                $edit_link = get_edit_bookmark_link( $link );
 
-                    $edit_link = get_edit_bookmark_link( $link );
-                    $text = $link->link_name;
+                $display_el = sprintf( '<p%s><strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong></p>',
+                    cp_links_get_classes($display_classes),
+                    $edit_link,
+                    /* translators: %s: link name */
+                    esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $name ) ),
+                    $name
+                );
+                
+                return sprintf( '<span%s>%s</span>',cp_links_get_classes($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes($edit_classes),$edit_el );
 
-                    return sprintf( '<strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong>',
-                        $edit_link,
-                        /* translators: %s: link name */
-                        esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $text ) ),
-                        $text
-                    );
-                }
             break;
 
             case 'url':
-                if ($link->link_id == 'new'){
-                    return '<input type="text" name="custom_post_links[new][url][]" value="" />';
-                }else{
-                    $short_url = url_shorten( $link->link_url );
-                    return sprintf('<a target="_blank" href="%s">%s</a>',$link->link_url,$short_url);
-                }
+                
+                $url = ($link->link_url) ? $link->link_url : null;
+
+                //edit
+                $edit_el = sprintf('<input type="text" name="custom_post_links[new][url][]" value="%s" />',$url);
+
+                //display
+                $short_url = url_shorten( $link->link_url );
+                $display_el = sprintf('<a target="_blank" href="%s">%s</a>',$link->link_url,$short_url);
+                
+                return sprintf( '<span%s>%s</span>',cp_links_get_classes($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes($edit_classes),$edit_el );
+                
             break;
                 
             case 'target':
-                if ($link->link_id == 'new'){
-                    $option_target = cp_links()->get_options('default_target');
-                    return sprintf('<input id="link_target_blank" type="checkbox" name="custom_post_links[new][target][]" value="_blank" %s/><small>%s</small>',checked( $option_target, '_blank',false),__('<code>_blank</code> &mdash; new window or tab.','cp_links'));
-                }else{
-                    if($link->link_target){
-                        return sprintf('<code>%s</code>',$link->link_target);
+                
+                $target = ($link->link_target) ? $link->link_target : '_none';
 
-                    }else{
-                        return sprintf('<code>%s</code>','_none');
-                    }
-                }
+                $option_target = cp_links()->get_options('default_target');
+
+                //edit
+                $edit_el = sprintf('<input id="link_target_blank" type="checkbox" name="custom_post_links[new][target][]" value="_blank" %s/><small>%s</small>',checked( $option_target, '_blank',false),__('<code>_blank</code> &mdash; new window or tab.','cp_links'));
+
+                //display
+                $display_el = sprintf('<code>%s</code>',$target);
+                return sprintf( '<span%s>%s</span>',cp_links_get_classes($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes($edit_classes),$edit_el );
+                
             break;
                 
             default:
@@ -150,15 +172,18 @@ class CP_Links_List_Table extends WP_List_Table {
 	 * @return string Row action output for links.
 	 */
 	protected function handle_row_actions( $link, $column_name, $primary ) {
-		if ( 'name' !== $column_name ) {
+		if ( 'url' !== $column_name ) {
 			return '';
 		}
+        
+        $actions = array();
 
-		$edit_link = get_edit_bookmark_link( $link );
+        if ( $link->link_id ){
+            $edit_link = get_edit_bookmark_link( $link );
+            $actions['edit'] = '<a href="' . $edit_link . '">' . __('Edit') . '</a>';
+            $actions['delete'] = "<a class='submitdelete' href='" . wp_nonce_url("link.php?action=delete&amp;link_id=$link->link_id", 'delete-bookmark_' . $link->link_id) . "' onclick=\"if ( confirm( '" . esc_js(sprintf(__("You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete."), $link->link_name)) . "' ) ) { return true;}return false;\">" . __('Delete') . "</a>";
+        }
 
-		$actions = array();
-		$actions['edit'] = '<a href="' . $edit_link . '">' . __('Edit') . '</a>';
-		$actions['delete'] = "<a class='submitdelete' href='" . wp_nonce_url("link.php?action=delete&amp;link_id=$link->link_id", 'delete-bookmark_' . $link->link_id) . "' onclick=\"if ( confirm( '" . esc_js(sprintf(__("You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete."), $link->link_name)) . "' ) ) { return true;}return false;\">" . __('Delete') . "</a>";
 		return $this->row_actions( $actions );
 	}
     

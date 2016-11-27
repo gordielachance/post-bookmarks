@@ -435,12 +435,7 @@ class CP_Links {
                 <?php
                 //blank link
                 $blank_link_table = new CP_Links_List_Table();
-                $blank_link = (object)array(
-                    'link_id'       => 'new',
-                    'link_url'      => null,
-                    'link_name'     => null,
-                    'link_target'   => null
-                );
+                $blank_link = (object)$this->sanitize_link(array('default_checked' => true,'row_classes' => 'cp-links-row-new cp-links-row-edit'));
                 $blank_link_table->items = array($blank_link);
                 $blank_link_table->prepare_items();
                 $blank_link_table->display();
@@ -485,36 +480,6 @@ class CP_Links {
       wp_nonce_field( 'custom_post_links_meta_box', 'custom_post_links_meta_box_nonce' );
 
     }
-    
-    /*
-    This should act like a line from the CP_Links_List_Table.
-    We'll use jQuery to dynamically move it into the table.
-    */
-    
-    function add_link_row(){
-        $option_target = cp_links()->get_options('default_target');
-        ?>
-        <tr class="cp_links_new">
-            <th scope="row" class="check-column"></th>
-            <td class="reorder column-reorder has-row-actions column-primary" data-colname=""></td>
-            <td class="column-favicon"></td>
-            <td class="url column-url">
-                <label><?php _e('URL');?></label>
-                <input type="text" name="custom_post_links[new][url][]" value="" />
-            </td>
-            <td class="name column-name has-row-actions column-primary">
-                <label><?php _e('Name');?></label>
-                <input type="text" name="custom_post_links[new][name][]" value="" />
-            </td>
-            <td class="target column-target">
-                <label><?php _e('Target');?></label>
-                <input id="link_target_blank" type="checkbox" name="custom_post_links[new][target][]" value="_blank" <?php checked( $option_target, '_blank');?>/>
-                <small><?php _e('<code>_blank</code> &mdash; new window or tab.'); ?></small>
-            </td>
-        </tr>
-        <?php
-    }
-
 
     /**
     * When the post is saved, saves our custom data.
@@ -612,7 +577,7 @@ class CP_Links {
     function insert_link($new_link){
 
         //sanitize
-        $linkdata = $this->get_blank_link($new_link);
+        $linkdata = $this->sanitize_link($new_link);
 
         if ( !$linkdata['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','custom-post-links') );
 
@@ -633,15 +598,27 @@ class CP_Links {
         return $link_id;
     }
     
-    function get_blank_link($args = array()){
+    function sanitize_link($args = array()){
         $defaults = array(
-            'link_id'       => 0, //link will not be editable or saved if this is null.  This can be useful when external plugins are appending links using the filter 'cp_links_get_for_post_pre'.
+            'link_id'       => null,
             'link_name'     => null,
             'link_url'      => null,
             'link_target'   => null,
-            'link_category' => $this->get_options('links_category')
+            'link_category' => $this->get_options('links_category'),
+            'default_checked'   => null,
+            'row_classes'   => null, //class for the row, in the links table. eg. 'cp-links-row-edit cp-links-row-new cp-links-row-suggest'
         );
-        return wp_parse_args((array)$args,$defaults);
+        
+        $args = wp_parse_args((array)$args,$defaults);
+        
+        //check by default if no 'default_checked' set and that we have a link ID
+        if ( $args['default_checked']===null ){
+            if ( $args['link_id'] ){
+                $args['default_checked'] = true;
+            } 
+        }
+        
+        return $args;
     }
     
 }

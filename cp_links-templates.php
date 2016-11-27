@@ -48,7 +48,7 @@ function cp_links_get_for_post($post_id = null,$orderby= null){
     
     //sanitize links
     foreach ((array)$links as $key=>$link){
-        $links[$key] = (object)cp_links()->get_blank_link($link);
+        $links[$key] = (object)cp_links()->sanitize_link($link);
     }
 
     return $links;

@@ -3,7 +3,7 @@ jQuery(function($){
     $(document).ready(function(){
 
         // Look for changes in the value
-        $('.cp_links_new .column-url input').live("change paste", function(event){
+        $('#custom-post-links .cp-links-row-edit .column-url input').live("change paste", function(event){
             
             var row = $(this).parents('tr');
             
@@ -78,18 +78,15 @@ jQuery(function($){
         var table = add_new_section.find("table");
 
         //add new link
-        var blankBlock = $('#add-link-section');
-        blankBlock.addClass('has-js');
-        blankBlock.find('a').click(function(event){
+        add_new_section.find('a').click(function(event){
 
             event.preventDefault();
 
             var new_line = table.find("tbody tr");
             var new_table_line = new_line.clone();
-            new_table_line.addClass('cp_links_new');
 
             //count existing new link rows
-            var new_link_rows = $("#custom-post-links #the-list tr.cp_links_new");
+            var new_link_rows = $("#list-links-section #the-list tr.cp-links-row-new");
             var new_link_idx = new_link_rows.length -1;
             if (new_link_idx < 0) new_link_idx = 0;
 
