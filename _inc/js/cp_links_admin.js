@@ -118,12 +118,15 @@ jQuery(function($){
         });
 
         // sort links
-        $('#custom-post-links .wp-list-table #the-list').sortable({
+        $('#list-links-section #the-list').sortable({
           handle: '.cp-links-link-draghandle',
 
           update: function(event, ui) {
-            // update row weights
-            //_custom_post_links_update_links_weight();
+                var all_rows = $('#list-links-section #the-list tr');
+                $.each( all_rows, function( key, value ) {
+                  var order_input = $(this).find('.column-reorder input');
+                    order_input.val(key);
+                });
           }
         });
     })
