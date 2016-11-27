@@ -5,10 +5,6 @@
   opacity: 0.5;
 }
 
-body .postbox#metabox-job-settings #job-settings-client-id {
-  max-height: 200px;
-  overflow: auto;
-}
 body .postbox#custom-post-links td input[type='text'] {
   width: 100%;
 }
@@ -23,6 +19,21 @@ body .postbox#custom-post-links .cp-links-favicon {
   background-position: center center;
   background-repeat: no-repeat;
 }
+body .postbox#custom-post-links #the-list tr .cp-links-data.cp-links-data-display {
+  display: inherit;
+}
+body .postbox#custom-post-links #the-list tr .cp-links-data.cp-links-data-edit {
+  display: none;
+}
+body .postbox#custom-post-links #the-list tr.cp-links-row-edit .cp-links-data.cp-links-data-display {
+  display: none;
+}
+body .postbox#custom-post-links #the-list tr.cp-links-row-edit .cp-links-data.cp-links-data-edit {
+  display: inherit;
+}
+body .postbox#custom-post-links #the-list tr.cp-links-row-edit .row-actions {
+  display: none;
+}
 body .postbox#custom-post-links #the-list .cp-links-link-draghandle {
   text-align: center;
 }
@@ -32,9 +43,6 @@ body .postbox#custom-post-links #the-list .cp-links-link-draghandle:not(.disable
 }
 body .postbox#custom-post-links #the-list .cp-links-link-draghandle.disabled {
   opacity: 0.5;
-}
-body .postbox#custom-post-links #the-list tr.cp_links_new label {
-  display: none;
 }
 body .postbox#custom-post-links .cpl-metabox-section {
   padding: 1em;
@@ -70,6 +78,6 @@ body .postbox#custom-post-links .cpl-metabox-section#search-links-section.has-se
 body .postbox#custom-post-links .cpl-metabox-section#search-links-section .cp-links-link-draghandle {
   display: none;
 }
-body .postbox#custom-post-links #cp_links_new_wrapper p {
-  text-align: right;
+body.js .postbox#custom-post-links #add-link-section table {
+  display: none;
 }
