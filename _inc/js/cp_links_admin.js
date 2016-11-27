@@ -93,18 +93,15 @@ jQuery(function($){
             var new_line = table.find("tbody tr");
             var new_table_line = new_line.clone();
 
-            //count existing new link rows
-            var new_link_rows = $("#list-links-section #the-list tr.cp-links-row-new");
-            var new_link_idx = new_link_rows.length -1;
-            if (new_link_idx < 0) new_link_idx = 0;
+            //count existing link rows
+            var link_rows = $("#list-links-section #the-list tr");
 
             //check last entry is filled
-            var first_line = new_link_rows.first();
-            if (first_line.length > 0) {
-                var first_line_url_input = first_line.find('.column-url input');
-                console.log(first_line_url_input);
-                if( first_line_url_input.val().length === 0 ) {
-                    first_line_url_input.focus();
+            var first_row = link_rows.first();
+            if (first_row.length > 0) {
+                var first_row_url_input = first_row.find('.column-url input');
+                if( first_row_url_input.val().length === 0 ) {
+                    first_row_url_input.focus();
                     return;
                 }
             }
