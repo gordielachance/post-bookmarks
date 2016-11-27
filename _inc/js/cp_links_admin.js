@@ -115,13 +115,13 @@ jQuery(function($){
             new_table_line.prependTo( "#custom-post-links #list-links-section #the-list" );
             
             //replace input names
-            if (link_rows_new_count > 0){
+            //TO FIX NOT WORKING
+            //if (link_rows_new_count > 0){
                 console.log(link_rows_new_count);
-                var html_curent = new_table_line.html();
-                //TO FIX NOT WORKING
-                var html_updated = html_curent.replace('custom_post_links[links][0]', 'custom_post_links[links]['+link_rows_new_count+']');
-                new_table_line.html(html_updated);
-            }
+                new_table_line.html(function(index,html){
+                    return html.replace('custom_post_links[links][0]', 'custom_post_links[links]['+link_rows_new_count+']');
+                });  
+            //}
 
 
             //focus input
