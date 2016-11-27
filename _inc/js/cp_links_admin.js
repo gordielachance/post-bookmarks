@@ -89,13 +89,9 @@ jQuery(function($){
         add_new_section.find('a').click(function(event){
 
             event.preventDefault();
-
-            var new_line = table.find("tbody tr");
-            var new_table_line = new_line.clone();
-
-            //count existing link rows
+            
             var link_rows = $("#list-links-section #the-list tr");
-
+            
             //check last entry is filled
             var first_row = link_rows.first();
             if (first_row.length > 0) {
@@ -106,11 +102,27 @@ jQuery(function($){
                 }
             }
 
+            var new_line = table.find("tbody tr");
+            var new_table_line = new_line.clone();
+
+            //count existing link rows
+            var link_rows_new_count = link_rows.filter('.cp-links-row-new').length;
+
             //clear form
             new_line.find('input[type="text"]').val('');
 
             //add line
             new_table_line.prependTo( "#custom-post-links #list-links-section #the-list" );
+            
+            //replace input names
+            if (link_rows_new_count > 0){
+                console.log(link_rows_new_count);
+                var html_curent = new_table_line.html();
+                //TO FIX NOT WORKING
+                var html_updated = html_curent.replace('custom_post_links[links][0]', 'custom_post_links[links]['+link_rows_new_count+']');
+                new_table_line.html(html_updated);
+            }
+
 
             //focus input
             new_table_line.find('input').first().focus();
