@@ -600,7 +600,7 @@ class CP_Links {
     
     function sanitize_link($args = array()){
         $defaults = array(
-            'link_id'       => null,
+            'link_id'       => 0,
             'link_name'     => null,
             'link_url'      => null,
             'link_target'   => null,
