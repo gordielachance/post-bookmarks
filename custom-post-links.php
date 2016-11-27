@@ -77,15 +77,11 @@ class CP_Links {
             'links_orderby'         => 'name',
             'ignore_target_local'   => 'on',
             'get_favicon'           => 'on',
-            'hide_from_bookmarks'   => 'on'
+            'hide_from_bookmarks'   => 'on',
+            'links_category'        => $this->get_links_category()
         );
         $this->options = wp_parse_args(get_option( self::$meta_name_options), $this->options_default);
-        
-        //parent category
-        if ( $parent_cat = get_term_by( 'slug', self::$links_category_slug, 'link_category') ){
-            $this->options['links_category'] = (int)$parent_cat->term_id;
-        }
-        
+
         //search links
         $this->search_links_text = ( isset($_GET['cp_links_search']) ) ? $_GET['cp_links_search'] : null; //existing links to attach to post
         
@@ -156,12 +152,9 @@ class CP_Links {
     </div>
     <?php
     }
-    
 
-    
     function upgrade(){
         global $wpdb;
-        
 
         //old plugin import
         $old_metas = cp_links_get_metas('_custom_post_links');
@@ -212,21 +205,6 @@ class CP_Links {
         
         if(!$current_version){ //not installed
             
-            //add default category
-
-            if ( !$parent_cat = get_term_by( 'slug', self::$links_category_slug, 'link_category') ){
-                $cat_id = wp_insert_term( 
-                    __('Post Links','cp_links'), 
-                    'link_category',
-                     array(
-                         'description'  =>__('Parent category for all the links added using the <em>Custom Post Links</em> plugin','cp_links'),
-                         'slug'         => self::$links_category_slug
-                     ) 
-                );
-                //TO FIX save cat_id ?
-            }
-            
-            
             /*
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
             dbDelta($sql);
@@ -246,6 +224,31 @@ class CP_Links {
     public function get_default_option($keys = null){
         return cp_links_get_array_value($keys,$this->options_default);
     }
+    
+    /*
+    Get our links category (based on slug) or create it if it does not exists
+    */
+    
+    public function get_links_category(){
+        
+        $cat_id = null;
+        $cat_slug = self::$links_category_slug;
+        
+        if ( $cat = get_term_by( 'slug', $cat_slug, 'link_category') ){
+            $cat_id = $cat->term_id;
+        }else{
+            $cat_id = wp_insert_term( 
+                __('Post Links','cp_links'), 
+                'link_category',
+                 array(
+                     'description'  => __('Parent category for all the links added using the <em>Custom Post Links</em> plugin','cp_links'),
+                     'slug'         => $cat_slug
+                 ) 
+            );
+        }
+        return $cat_id;
+    }
+
     
     /* get post types that supports Custom Post Links */
     
@@ -582,8 +585,7 @@ class CP_Links {
         if ( !$linkdata['link_name'] ){
             $linkdata['link_name'] = cp_links_get_name_from_url($linkdata['link_url']);
         }
-        
-        
+
         //TO FIX check url is valid
         if ( !$link_id = cp_links_get_existing_link_id($linkdata['link_url'],$linkdata['link_name']) ){ //check the link does not exists yet
             if( !function_exists( 'wp_insert_link' ) ) include_once( ABSPATH . '/wp-admin/includes/bookmark.php' );
