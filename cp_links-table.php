@@ -115,7 +115,7 @@ class CP_Links_List_Table extends WP_List_Table {
 
                 //edit
                 $edit_el = sprintf('<input type="text" name="%s" value="%s" />',
-                                   $field_name_prefix . '[name]',
+                                   $field_name_prefix . '[link_name]',
                                    $name
                                   );
                 
@@ -141,7 +141,7 @@ class CP_Links_List_Table extends WP_List_Table {
 
                 //edit
                 $edit_el = sprintf('<input type="text" name="%s" value="%s" />',
-                                   $field_name_prefix . '[url]',
+                                   $field_name_prefix . '[link_url]',
                                    $url
                                   );
 
@@ -161,7 +161,7 @@ class CP_Links_List_Table extends WP_List_Table {
 
                 //edit
                 $edit_el = sprintf('<input id="link_target_blank" type="checkbox" name="%s" value="_blank" %s/><small>%s</small>',
-                                   $field_name_prefix . '[target]',
+                                   $field_name_prefix . '[link_target]',
                                    checked( $option_target, '_blank',false),
                                    __('<code>_blank</code> &mdash; new window or tab.','cp_links')
                                   );
@@ -174,7 +174,7 @@ class CP_Links_List_Table extends WP_List_Table {
                 
             default:
                 $output = null;
-                return apply_filters('cp_links_list_table_column_content',$output,$link,$column_name); //allow plugins to filter the content
+                return apply_filters('cp_links_list_table_column_content',$output,$link,$column_name,$field_name_prefix); //allow plugins to filter the content
             break;
 
         }

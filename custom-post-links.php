@@ -523,51 +523,49 @@ class CP_Links {
         
         /* OK, its safe for us to save the data now. */
         
-        $cp_links_ids = ( isset($form_data['ids']) ) ? $form_data['ids'] : null; //existing links to attach to post
         
-        $new_links_form = ( isset($form_data['new']) ) ? $form_data['new'] : null;
-        $new_links_form_name = ( isset($new_links_form['name']) ) ? $new_links_form['name'] : array();
-        $new_links_form_url = ( isset($new_links_form['url']) ) ? $new_links_form['url'] : array();
-        $new_links_form_target = ( isset($new_links_form['target']) ) ? $new_links_form['target'] : array();
-        $new_links = array();
+        $cp_links_ids = array();
+        $form_data_links = (isset($form_data['links'])) ? $form_data['links'] : array();
 
-        //combine form arrays
-        //TO FIX seems that unchecked target boxes still gets a '_blank' value, why ?
-        foreach ( $new_links_form_url as $key=>$url ) {
-            if ($key == 0) continue; //ignore first item (cloned row)
-            if (!$url) continue;
-            $new_links[] = array( 
-                'name' => $new_links_form_name[ $key ] , 
-                'url' => $url, 
-                'target' => $new_links_form_target[ $key ] 
-            );
-        }
+        foreach($form_data_links as $form_data_link){
+            if ( !isset($form_data_link['enabled']) ) continue; //manage only links that have 'enabled' set
 
-        //new links
-        foreach((array)$new_links as $key=>$new_link){
+            $link_id = null;
+            $link_data = $this->sanitize_link($form_data_link);
+            $link_data = apply_filters('cp_links_before_save_data',$link_data,$form_data_link);
+
+            //existing links
+            if ($link_id = $link_data['link_id']){
+  
+                //get stored bookmark
+                $bookmark = get_bookmark($link_id,ARRAY_A);
+                
+                //compare keys that are shared by both arrays
+                $link_data_reduced = array_intersect_key($link_data, $bookmark); //keep only keys shared in both arrays - values are from the first one
+                $bookmark_reduced = array_intersect_key($bookmark, $link_data);
+                
+                //print_r($link_data_reduced);
+                //print_r('<br/>VS<br/>');
+                //print_r($bookmark_reduced);
+                //die();
+
+                //update link only if data has been changed
+                if ($link_data_reduced != $bookmark_reduced){
+                    wp_update_link( $link_data );
+                }
+                
+            }else{ //create new link
+                $link_id = $this->insert_link($link_data);
+            }
             
-            $url = ( isset($new_link['url']) ) ? urldecode($new_link['url']) : null;
-            $name = ( isset($new_link['name']) ) ? $new_link['name'] : null;
-            
-            $linkdata = array(
-                'link_name'     => $name,
-                'link_url'      => $url,
-                'link_target'   => ( isset($new_link['target']) ) ? $new_link['target'] : null
-            );
-            
-            apply_filters('cp_links_before_save_data',$linkdata,$new_link);
-            
-            //validate for the new link
-            $linkdata = array_filter($linkdata);
-            $link_id = $this->insert_link($linkdata);
-            
+            //add to IDs list
             if ($link_id && !is_wp_error($link_id)){
                 $cp_links_ids[] = $link_id;
             }
         }
-
-        $cp_links_ids = array_unique((array)$cp_links_ids);
         
+        $cp_links_ids = array_unique((array)$cp_links_ids);
+
         update_post_meta( $post_id, '_custom_post_links_ids', $cp_links_ids );
         
         return $cp_links_ids;
@@ -601,10 +599,10 @@ class CP_Links {
     function sanitize_link($args = array()){
         $defaults = array(
             'link_id'       => 0,
-            'link_name'     => null,
             'link_url'      => null,
+            'link_name'     => null,
             'link_target'   => null,
-            'link_category' => $this->get_options('links_category'),
+            'link_category' => (array)$this->get_options('links_category'),
             'default_checked'   => null,
             'row_classes'   => null, //class for the row, in the links table. eg. 'cp-links-row-edit cp-links-row-new cp-links-row-suggest'
         );
