@@ -24,10 +24,8 @@ function cp_links_get_array_value($keys = null, $array){
 }
 
 function cp_links_validate_url($url){
-    
-    if (!$url) return null;
-    
-    if ( !$protocol = parse_url($url, PHP_URL_SCHEME) ){
+
+    if ( $url && (!$protocol = parse_url($url, PHP_URL_SCHEME) ) ){
         $url = 'http://' . $url; //add default protocol
     }
     

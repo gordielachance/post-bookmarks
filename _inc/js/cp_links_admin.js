@@ -93,7 +93,7 @@ jQuery(function($){
 
             event.preventDefault();
             
-            var list_rows = table_list.find("#the-list tr");
+            var list_rows = table_list.find("#the-list tr:not(.no-items)");
             var clone_row = table_new.find("tbody tr");
             
             //check last entry is filled
