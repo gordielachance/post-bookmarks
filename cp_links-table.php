@@ -5,6 +5,8 @@ if(!class_exists('WP_List_Table')){
 }
 
 class CP_Links_List_Table extends WP_List_Table {
+    
+    var $current_link_idx = -1;
 
     function display_tablenav($which){
         
@@ -53,20 +55,11 @@ class CP_Links_List_Table extends WP_List_Table {
 	/**
 	 * Handles the checkbox column output.
 	 *
-	 * @since 4.3.0
-	 * @access public
-	 *
-	 * @param object $link The current link object.
+     * This function SHOULD be overriden but we want to use column_defaut() as it is more handy, so use a trick here.
 	 */
 	public function column_cb( $link ) {
-        $post_links_ids = cp_links_get_links_ids_for_post();
-        $checked = ( in_array($link->link_id,$post_links_ids) || $link->default_checked ) ? true : false;
-
-        $label = sprintf( __( 'Select %s' ), $link->link_name );
-        $label_el = sprintf('<label class="screen-reader-text" for="cb-select-%s">%s</label>',$link->link_id,$label);
-        $input_el = sprintf( '<input type="checkbox" name="custom_post_links[ids][]" id="cb-select-%s" value="%s" %s />',$link->link_id,esc_attr( $link->link_id ),checked($checked, true,false) );
-
-        return $label_el . $input_el;
+        $this->current_link_idx += 1;
+        return $this->column_default( $link, 'cb');
 	}
 
     /**
@@ -77,19 +70,37 @@ class CP_Links_List_Table extends WP_List_Table {
         $classes = array('cp-links-data');
         $display_classes = array_merge( $classes,array('cp-links-data-display') );
         $edit_classes = array_merge( $classes,array('cp-links-data-edit') );
+        $field_name_prefix = sprintf('custom_post_links[links][%s]',(int)$link->link_id);
 
         switch($column_name){
                 
+            case 'cb':
+                $post_links_ids = cp_links_get_links_ids_for_post();
+                $checked = ( in_array($link->link_id,$post_links_ids) || $link->default_checked ) ? true : false;
+
+                $label = sprintf( __( 'Select %s' ), $link->link_name );
+                $label_el = sprintf('<label class="screen-reader-text" for="cb-select-%s">%s</label>',$link->link_id,$label);
+                $input_el = sprintf( '<input type="checkbox" name="%s" id="cb-select-%s" value="%s" %s />',
+                                    $field_name_prefix . '[enabled]',
+                                    $link->link_id,
+                                    esc_attr( $link->link_id ),checked($checked, true,false) 
+                                   );
+
+                return $label_el . $input_el;
+            break;
+                
             case 'reorder':
-                $disabled = ( $link->link_id == 0);
 
                 $classes = array(
                     'cp-links-link-draghandle'
                 );
 
-                if ($disabled) $classes[] = 'disabled';
+                $input_el = sprintf( '<input type="hidden" name="%s" value="%s"/>',
+                                    $field_name_prefix . '[order]',
+                                    $this->current_link_idx
+                                   );
 
-                return sprintf('<div %s><i class="fa fa-arrows-v" aria-hidden="true"></i></div>',cp_links_get_classes($classes));
+                return $input_el . sprintf('<div %s><i class="fa fa-arrows-v" aria-hidden="true"></i></div>',cp_links_get_classes($classes));
                 
             break;
                 
@@ -102,7 +113,10 @@ class CP_Links_List_Table extends WP_List_Table {
                 $name = ($link->link_name) ? $link->link_name : null;
 
                 //edit
-                $edit_el = sprintf('<input type="text" name="custom_post_links[new][name][]" value="%s" />',$name);
+                $edit_el = sprintf('<input type="text" name="%s" value="%s" />',
+                                   $field_name_prefix . '[name]',
+                                   $name
+                                  );
                 
                 //display
 
@@ -125,7 +139,10 @@ class CP_Links_List_Table extends WP_List_Table {
                 $url = ($link->link_url) ? $link->link_url : null;
 
                 //edit
-                $edit_el = sprintf('<input type="text" name="custom_post_links[new][url][]" value="%s" />',$url);
+                $edit_el = sprintf('<input type="text" name="%s" value="%s" />',
+                                   $field_name_prefix . '[url]',
+                                   $url
+                                  );
 
                 //display
                 $short_url = url_shorten( $link->link_url );
@@ -142,7 +159,11 @@ class CP_Links_List_Table extends WP_List_Table {
                 $option_target = cp_links()->get_options('default_target');
 
                 //edit
-                $edit_el = sprintf('<input id="link_target_blank" type="checkbox" name="custom_post_links[new][target][]" value="_blank" %s/><small>%s</small>',checked( $option_target, '_blank',false),__('<code>_blank</code> &mdash; new window or tab.','cp_links'));
+                $edit_el = sprintf('<input id="link_target_blank" type="checkbox" name="%s" value="_blank" %s/><small>%s</small>',
+                                   $field_name_prefix . '[target]',
+                                   checked( $option_target, '_blank',false),
+                                   __('<code>_blank</code> &mdash; new window or tab.','cp_links')
+                                  );
 
                 //display
                 $display_el = sprintf('<code>%s</code>',$target);
