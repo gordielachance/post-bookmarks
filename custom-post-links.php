@@ -183,7 +183,6 @@ class CP_Links {
                             unset($linkdata['link_target']);
                         }
                         */
-
                         if ( ($link_id = $this->insert_link($linkdata)) && !is_wp_error($link_id)){
                             $cp_links_ids[] = $link_id;
                         }
@@ -490,8 +489,6 @@ class CP_Links {
     * @param int $post_id The ID of the post being saved.
     */
     function metabox_save( $post_id ) {
-        
-        $form_data = ( isset($_POST['custom_post_links']) ) ? $_POST['custom_post_links'] : null;
 
         /*
         * We need to verify this came from our screen and with proper authorization,
@@ -525,52 +522,60 @@ class CP_Links {
         }
         
         /* OK, its safe for us to save the data now. */
-        
-        
+        $form_data = ( isset($_POST['custom_post_links']) ) ? $_POST['custom_post_links'] : null;
         $cp_links_ids = array();
+
         $form_data_links = (isset($form_data['links'])) ? $form_data['links'] : array();
+        $form_data_links = stripslashes_deep($form_data_links); //strip slashes for $_POST args if any
+        $default_category = cp_links()->get_options('links_category');
 
         foreach($form_data_links as $form_data_link){
-            if ( !isset($form_data_link['enabled']) ) continue; //manage only links that have 'enabled' set
+            if ( isset($form_data_link['enabled']) ){
+                $link_id = null;
+                $link_data = $this->sanitize_link($form_data_link);
 
-            $link_id = null;
-            $link_data = $this->sanitize_link($form_data_link);
-            $link_data = apply_filters('cp_links_before_save_data',$link_data,$form_data_link);
-
-            //existing links
-            if ($link_id = $link_data['link_id']){
-  
-                //get stored bookmark
-                $bookmark = get_bookmark($link_id,ARRAY_A);
-                
-                //compare keys that are shared by both arrays
-                $link_data_reduced = array_intersect_key($link_data, $bookmark); //keep only keys shared in both arrays - values are from the first one
-                $bookmark_reduced = array_intersect_key($bookmark, $link_data);
-                
-                //print_r($link_data_reduced);
-                //print_r('<br/>VS<br/>');
-                //print_r($bookmark_reduced);
-                //die();
-
-                //update link only if data has been changed
-                if ($link_data_reduced != $bookmark_reduced){
-                    wp_update_link( $link_data );
+                //force default category
+                if ( !in_array($default_category,$link_data['link_category']) ){
+                    $link_data['link_category'][] = $default_category;
                 }
-                
-            }else{ //create new link
-                $link_id = $this->insert_link($link_data);
-            }
-            
-            //add to IDs list
-            if ($link_id && !is_wp_error($link_id)){
-                $cp_links_ids[] = $link_id;
+
+                $link_data = apply_filters('cp_links_before_save_data',$link_data,$form_data_link);
+
+                //existing links
+                if ($link_id = $link_data['link_id']){
+
+                    //get stored bookmark
+                    $bookmark = get_bookmark($link_id,ARRAY_A);
+
+                    //compare keys that are shared by both arrays
+                    $link_data_reduced = array_intersect_key($link_data, $bookmark); //keep only keys shared in both arrays - values are from the first one
+                    $bookmark_reduced = array_intersect_key($bookmark, $link_data);
+
+                    /*
+                    print_r($link_data_reduced);
+                    print_r('<br/>VS<br/>');
+                    print_r($bookmark_reduced);
+                    die();
+                    */
+
+                    //update link only if data has been changed
+                    if ($link_data_reduced != $bookmark_reduced){
+                        wp_update_link( $link_data );
+                    }
+
+                }else{ //create new link
+                    $link_id = $this->insert_link($link_data);
+                }
+
+                //add to IDs list
+                if ($link_id && !is_wp_error($link_id)){
+                    $cp_links_ids[] = $link_id;
+                }
             }
         }
         
         $cp_links_ids = array_unique((array)$cp_links_ids);
-
         update_post_meta( $post_id, '_custom_post_links_ids', $cp_links_ids );
-        
         return $cp_links_ids;
 
     }
@@ -582,6 +587,7 @@ class CP_Links {
 
         if ( !$linkdata['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','custom-post-links') );
 
+        //force name
         if ( !$linkdata['link_name'] ){
             $linkdata['link_name'] = cp_links_get_name_from_url($linkdata['link_url']);
         }
@@ -591,7 +597,7 @@ class CP_Links {
             if( !function_exists( 'wp_insert_link' ) ) include_once( ABSPATH . '/wp-admin/includes/bookmark.php' );
             
             $linkdata = apply_filters('cp_links_insert_link_pre',$linkdata);
-            
+
             $link_id = wp_insert_link( $linkdata, true ); //return id
         }
         
@@ -608,8 +614,10 @@ class CP_Links {
             'default_checked'   => null,
             'row_classes'   => null, //class for the row, in the links table. eg. 'cp-links-row-edit cp-links-row-new cp-links-row-suggest'
         );
-        
+
         $args = wp_parse_args((array)$args,$defaults);
+        
+        //$args['link_name'] = sanitize_text_field($args['link_name']);
         
         //check by default if no 'default_checked' set and that we have a link ID
         if ( $args['default_checked']===null ){

@@ -12,6 +12,11 @@ body .postbox#custom-post-links .column-reorder, body .postbox#custom-post-links
   width: 2em;
   text-align: center;
 }
+body .postbox#custom-post-links .column-category ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 body .postbox#custom-post-links .cp-links-favicon {
   display: inline-block;
   width: 2em;

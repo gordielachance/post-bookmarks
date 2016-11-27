@@ -20,6 +20,14 @@ body{
             width: 2em;
             text-align:center;
         }
+        
+        .column-category{
+            ul{
+                list-style: none;
+                padding:0;
+                margin:0;
+            }
+        }
 
         .cp-links-favicon{
             display: inline-block;

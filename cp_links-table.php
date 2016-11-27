@@ -40,6 +40,7 @@ class CP_Links_List_Table extends WP_List_Table {
             'favicon'       => '',
             'url'           => __('URL'),
             'name'          => __('Name'),
+            'category'          => __('Categories') . sprintf(' <small><a href="%s">+</a></small>',admin_url('edit-tags.php?taxonomy=link_category')),
             'target'        => __('Target')
         );
         
@@ -50,6 +51,10 @@ class CP_Links_List_Table extends WP_List_Table {
         return array();
     }
     */
+    
+    public function get_field_name( $slug ) {
+        return sprintf('custom_post_links[links][%d][%s]',$this->current_link_idx,$slug);
+    }
     
     
 	/**
@@ -70,8 +75,6 @@ class CP_Links_List_Table extends WP_List_Table {
         $classes = array('cp-links-data');
         $display_classes = array_merge( $classes,array('cp-links-data-display') );
         $edit_classes = array_merge( $classes,array('cp-links-data-edit') );
-        $field_name_prefix = sprintf('custom_post_links[links][%s]',$this->current_link_idx);
-
         switch($column_name){
                 
             case 'cb':
@@ -79,11 +82,11 @@ class CP_Links_List_Table extends WP_List_Table {
                 $checked = ( in_array($link->link_id,$post_links_ids) || $link->default_checked ) ? true : false;
 
                 $input_cb = sprintf( '<input type="checkbox" name="%s" value="on" %s />',
-                                    $field_name_prefix . '[enabled]',
+                                    $this->get_field_name('enabled'),
                                     checked($checked, true,false) 
                                    );
                 $input_id = sprintf( '<input type="hidden" name="%s" value="%s"/>',
-                                    $field_name_prefix . '[link_id]',
+                                    $this->get_field_name('link_id'),
                                     $link->link_id
                                    );
 
@@ -97,7 +100,7 @@ class CP_Links_List_Table extends WP_List_Table {
                 );
 
                 $input_el = sprintf( '<input type="hidden" name="%s" value="%s"/>',
-                                    $field_name_prefix . '[order]',
+                                    $this->get_field_name('order'),
                                     $this->current_link_idx
                                    );
 
@@ -115,7 +118,7 @@ class CP_Links_List_Table extends WP_List_Table {
 
                 //edit
                 $edit_el = sprintf('<input type="text" name="%s" value="%s" />',
-                                   $field_name_prefix . '[link_name]',
+                                   $this->get_field_name('link_name'),
                                    $name
                                   );
                 
@@ -137,11 +140,11 @@ class CP_Links_List_Table extends WP_List_Table {
 
             case 'url':
                 
-                $url = ($link->link_url) ? $link->link_url : null;
+                $url = ($link->link_url) ? esc_url($link->link_url) : null;
 
                 //edit
                 $edit_el = sprintf('<input type="text" name="%s" value="%s" />',
-                                   $field_name_prefix . '[link_url]',
+                                   $this->get_field_name('link_url'),
                                    $url
                                   );
 
@@ -153,6 +156,46 @@ class CP_Links_List_Table extends WP_List_Table {
                 
             break;
                 
+            case 'category': //based on core function ion wp_link_category_checklist()
+                $default = cp_links()->get_options('links_category');
+
+                $checked_categories = array();
+
+                if ( $link->link_id ) {
+                    $checked_categories = wp_get_link_cats( $link->link_id );
+                } else {
+                    $checked_categories[] = $default;
+                }
+
+                $categories = get_terms( 'link_category', array( 'orderby' => 'name', 'hide_empty' => 0 ) );
+
+                if ( empty( $categories ) )
+                    return;
+                
+                $cats_str = null;
+
+                foreach ( $categories as $category ) {
+                    $cat_id = $category->term_id;
+
+                    /** This filter is documented in wp-includes/category-template.php */
+                    $name = esc_html( apply_filters( 'the_category', $category->name ) );
+
+                    $cats_str.= sprintf('<li id="link-category-%s"><label for="in-link-category-%s" class="selectit"><input value="%s" type="checkbox" name="%s[]" id="in-link-category-%s" %s %s />%s</label></li>',
+                           $cat_id,
+                           $cat_id,
+                           $cat_id,
+                           $this->get_field_name( 'link_category' ),
+                           $cat_id,
+                           checked( in_array( $cat_id, $checked_categories ), true, false),
+                           disabled( $cat_id, $default, false),
+                           $name
+                    );
+                }
+                
+                return sprintf('<ul>%s</ul>',$cats_str);
+                
+            break;
+                
             case 'target':
                 
                 $target = ($link->link_target) ? $link->link_target : '_none';
@@ -161,7 +204,7 @@ class CP_Links_List_Table extends WP_List_Table {
 
                 //edit
                 $edit_el = sprintf('<input id="link_target_blank" type="checkbox" name="%s" value="_blank" %s/><small>%s</small>',
-                                   $field_name_prefix . '[link_target]',
+                                   $this->get_field_name('link_target'),
                                    checked( $option_target, '_blank',false),
                                    __('<code>_blank</code> &mdash; new window or tab.','cp_links')
                                   );
@@ -174,7 +217,7 @@ class CP_Links_List_Table extends WP_List_Table {
                 
             default:
                 $output = null;
-                return apply_filters('cp_links_list_table_column_content',$output,$link,$column_name,$field_name_prefix); //allow plugins to filter the content
+                return apply_filters('cp_links_list_table_column_content',$output,$link,$column_name); //allow plugins to filter the content
             break;
 
         }
