@@ -70,7 +70,7 @@ class CP_Links_List_Table extends WP_List_Table {
         $classes = array('cp-links-data');
         $display_classes = array_merge( $classes,array('cp-links-data-display') );
         $edit_classes = array_merge( $classes,array('cp-links-data-edit') );
-        $field_name_prefix = sprintf('custom_post_links[links][%s]',(int)$link->link_id);
+        $field_name_prefix = sprintf('custom_post_links[links][%s]',$this->current_link_idx);
 
         switch($column_name){
                 
@@ -78,15 +78,16 @@ class CP_Links_List_Table extends WP_List_Table {
                 $post_links_ids = cp_links_get_links_ids_for_post();
                 $checked = ( in_array($link->link_id,$post_links_ids) || $link->default_checked ) ? true : false;
 
-                $label = sprintf( __( 'Select %s' ), $link->link_name );
-                $label_el = sprintf('<label class="screen-reader-text" for="cb-select-%s">%s</label>',$link->link_id,$label);
-                $input_el = sprintf( '<input type="checkbox" name="%s" id="cb-select-%s" value="%s" %s />',
+                $input_cb = sprintf( '<input type="checkbox" name="%s" value="on" %s />',
                                     $field_name_prefix . '[enabled]',
-                                    $link->link_id,
-                                    esc_attr( $link->link_id ),checked($checked, true,false) 
+                                    checked($checked, true,false) 
+                                   );
+                $input_id = sprintf( '<input type="hidden" name="%s" value="%s"/>',
+                                    $field_name_prefix . '[link_id]',
+                                    $link->link_id
                                    );
 
-                return $label_el . $input_el;
+                return $input_cb . $input_id;
             break;
                 
             case 'reorder':
