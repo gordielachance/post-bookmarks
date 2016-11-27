@@ -1,6 +1,14 @@
 jQuery(function($){
 
     $(document).ready(function(){
+        
+        //'Edit' row action
+        
+        $('#custom-post-links .row-actions .edit a').live("click", function(event){
+            event.preventDefault();
+            var row = $(this).parents('tr');
+            row.addClass('cp-links-row-edit');
+        });
 
         // Look for changes in the value
         $('#custom-post-links .cp-links-row-edit .column-url input').live("change paste", function(event){
