@@ -82,50 +82,45 @@ jQuery(function($){
 
         });
 
-        var add_new_section =  $('#add-link-section');
-        var table = add_new_section.find("table");
+        var section_new =   $("#custom-post-links #add-link-section");
+        var section_list =  $("#custom-post-links #list-links-section")
+        
+        var table_new =     section_new.find("table");
+        var table_list =    section_list.find("table");
 
         //add new link
-        add_new_section.find('a').click(function(event){
+        section_new.find('a.page-title-action').click(function(event){
 
             event.preventDefault();
             
-            var link_rows = $("#list-links-section #the-list tr");
+            var list_rows = table_list.find("#the-list tr");
+            var clone_row = table_new.find("tbody tr");
             
             //check last entry is filled
-            var first_row = link_rows.first();
-            if (first_row.length > 0) {
-                var first_row_url_input = first_row.find('.column-url input');
+            var list_first_row = list_rows.first();
+            if (list_first_row.length > 0) {
+                var first_row_url_input = list_first_row.find('.column-url input');
                 if( first_row_url_input.val().length === 0 ) {
                     first_row_url_input.focus();
                     return;
                 }
             }
 
-            var new_line = table.find("tbody tr");
-            var new_table_line = new_line.clone();
+            clone_row.find('input[type="text"]').val(''); //clear form
+            var new_row = clone_row.clone();
 
-            //count existing link rows
-            var link_rows_new_count = link_rows.filter('.cp-links-row-new').length;
-
-            //clear form
-            new_line.find('input[type="text"]').val('');
-
+            //increment input name prefixes
+            new_row.html(function(index,html){
+                var pattern = 'custom_post_links[links][0]';
+                var replaceby = 'custom_post_links[links]['+list_rows.length+']';
+                return html.split(pattern).join(replaceby);
+            }); 
+ 
             //add line
-            new_table_line.prependTo( "#custom-post-links #list-links-section #the-list" );
-            
-            //replace input names
-            //TO FIX NOT WORKING
-            //if (link_rows_new_count > 0){
-                console.log(link_rows_new_count);
-                new_table_line.html(function(index,html){
-                    return html.replace('custom_post_links[links][0]', 'custom_post_links[links]['+link_rows_new_count+']');
-                });  
-            //}
-
+            new_row.prependTo( "#custom-post-links #list-links-section #the-list" );
 
             //focus input
-            new_table_line.find('input').first().focus();
+            new_row.find('input').first().focus();
 
         });
 
@@ -143,4 +138,6 @@ jQuery(function($){
         });
     })
 })
+
+
 
