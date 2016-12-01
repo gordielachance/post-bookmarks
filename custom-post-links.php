@@ -36,9 +36,7 @@ class CP_Links {
     private static $instance;
 
     static $meta_name_options = 'cp_links_options';
-    
-    static $links_category_slug = 'cp-links';
-    
+
     var $search_links_text = null;
     
     public static function instance() {
@@ -231,16 +229,16 @@ class CP_Links {
     public function get_links_category(){
         
         $cat_id = null;
-        $cat_slug = self::$links_category_slug;
+        $cat_slug = 'cp-links';
         
         if ( $cat = get_term_by( 'slug', $cat_slug, 'link_category') ){
             $cat_id = $cat->term_id;
         }else{
             $cat_id = wp_insert_term( 
-                __('Post Links','cp_links'), 
+                __('Post Links','cp-links'), 
                 'link_category',
                  array(
-                     'description'  => __('Parent category for all the links added using the <em>Custom Post Links</em> plugin','cp_links'),
+                     'description'  => sprintf(__('Parent category for all links created by the %s plugin.','cp_links'),'<a href="'.admin_url('options-general.php?page=cpl_settings').'" target="blank">'.__('Custom Post Links','cp-links').'</a>'),
                      'slug'         => $cat_slug
                  ) 
             );
