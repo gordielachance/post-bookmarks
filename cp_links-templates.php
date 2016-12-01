@@ -82,7 +82,7 @@ function cp_links_output_links( $content ){
  */
 
 function cp_links_get_favicon($url){
-    
+
     $favicon = null;
     
     //get domain url
@@ -106,7 +106,7 @@ function cp_links_output_single_link($link){
     $link_classes = cp_links_get_classes($link_classes_arr);
     $link_target_str=null;
     
-    $favicon = cp_links_get_favicon($link);
+    $favicon = cp_links_get_favicon($link->link_url);
 
     
     if($link->link_target) {
