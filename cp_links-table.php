@@ -125,16 +125,16 @@ class CP_Links_List_Table extends WP_List_Table {
                 //display
 
                 $edit_link = get_edit_bookmark_link( $link );
-
-                $display_el = sprintf( '<p%s><strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong></p>',
-                    cp_links_get_classes($display_classes),
+                $display_classes[] = 'ellipsis';
+                
+                $display_el = sprintf( '<strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong>',
                     $edit_link,
                     /* translators: %s: link name */
                     esc_attr( sprintf( __( 'Edit &#8220;%s&#8221;' ), $name ) ),
                     $name
                 );
                 
-                return sprintf( '<span%s>%s</span>',cp_links_get_classes($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes($edit_classes),$edit_el );
+                return sprintf( '<p%s>%s</p>',cp_links_get_classes($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes($edit_classes),$edit_el );
 
             break;
 

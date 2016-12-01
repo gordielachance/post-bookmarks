@@ -8,6 +8,14 @@
 body .postbox#custom-post-links td input[type='text'] {
   width: 100%;
 }
+body .postbox#custom-post-links .column-name .ellipsis {
+  display: block !important;
+  white-space: nowrap;
+  overflow: hidden;
+  -ms-text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+}
 body .postbox#custom-post-links .column-reorder, body .postbox#custom-post-links .column-favicon {
   width: 2em;
   text-align: center;
