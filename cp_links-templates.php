@@ -15,43 +15,50 @@ function cp_links_get_links_ids_for_post($post_id = null){
     return get_post_meta( $post_id, '_custom_post_links_ids', true );
 }
 
-function cp_links_get_for_post($post_id = null,$orderby= null){
+function cp_links_get_for_post($post_id = null,$args= array()){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     if (!$post_id) return;
     
     $links = array();
-
+    $defaults = array(
+        'orderby'   => cp_links()->get_options('links_orderby'),
+        'order'     => 'ASC'
+    );
+    $orderby_allowed = array('name','custom');
+    
+    $args = wp_parse_args($args,$defaults);
+    
     if ($cp_links_ids = cp_links_get_links_ids_for_post($post_id)){
-        $orderby_allowed = array('name','custom');
-        if ( $orderby && !in_array($orderby,$orderby_allowed) ) $orderby = null;
-        if (!$orderby) $orderby = cp_links()->get_options('links_orderby');
+        
+        $orderby = ( in_array($args['orderby'],$orderby_allowed) ) ? $args['orderby'] : null;
 
-        $args = array( 
-            'include' => implode(',',$cp_links_ids)
-        );
-
-        if ( $orderby && ($orderby!='custom') ){
-            $args['orderby'] = $orderby;
-            $args['order'] = 'ASC';
+        $post_links = array();
+        $args['include'] = implode(',',$cp_links_ids);
+        $links = get_bookmarks( $args );
+        
+        
+        //We could use the 'include' arg with get_bookmarks(); but it override some other ones (eg.category).  So let's rather filter links now.
+        foreach($links as $link){
+            if ( !in_array($link->link_id,$cp_links_ids) ) continue;
+            $post_links[] = $link;
+            
         }
 
-        $links = get_bookmarks( $args );
-
         if ($orderby == 'custom'){
-            $links = cp_links_sort_using_ids_array($links,$cp_links_ids);
+            $links = cp_links_sort_using_ids_array($post_links,$cp_links_ids); //TO FIX should be a filter ?
         }
     }
     
     //allow plugins to filter this
-    $links = apply_filters('cp_links_get_for_post_pre',$links,$post_id,$orderby);
+    $post_links = apply_filters('cp_links_get_for_post_pre',$post_links,$post_id,$orderby);
     
     //sanitize links
-    foreach ((array)$links as $key=>$link){
-        $links[$key] = (object)cp_links()->sanitize_link($link);
+    foreach ((array)$post_links as $key=>$link){
+        $post_links[$key] = (object)cp_links()->sanitize_link($link);
     }
 
-    return $links;
+    return $post_links;
     
 }
 
