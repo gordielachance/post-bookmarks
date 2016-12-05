@@ -20,24 +20,22 @@ function cp_links_get_for_post($post_id = null,$args= array()){
     if (!$post_id) $post_id = $post->ID;
     if (!$post_id) return;
     
-    $links = array();
+    $post_links = array();
     $defaults = array(
         'orderby'   => cp_links()->get_options('links_orderby'),
         'order'     => 'ASC'
     );
+    
     $orderby_allowed = array('name','custom');
+    $orderby = ( isset($args['orderby']) && in_array($args['orderby'],$orderby_allowed) ) ? $args['orderby'] : null;
     
     $args = wp_parse_args($args,$defaults);
     
     if ($cp_links_ids = cp_links_get_links_ids_for_post($post_id)){
-        
-        $orderby = ( in_array($args['orderby'],$orderby_allowed) ) ? $args['orderby'] : null;
 
-        $post_links = array();
         $args['include'] = implode(',',$cp_links_ids);
         $links = get_bookmarks( $args );
-        
-        
+
         //We could use the 'include' arg with get_bookmarks(); but it override some other ones (eg.category).  So let's rather filter links now.
         foreach($links as $link){
             if ( !in_array($link->link_id,$cp_links_ids) ) continue;

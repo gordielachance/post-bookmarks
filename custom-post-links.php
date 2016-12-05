@@ -421,29 +421,25 @@ class CP_Links {
                 'search'    => $this->search_links_text,
                 //'cp_links'  => true
             );
+            if ( $search_links = get_bookmarks( $search_links_args ) ){
+                //sanitize links
+                foreach ((array)$search_links as $key=>$link){
+                    $link->default_checked = false;
+                    $links_search_table->items[] = (object)cp_links()->sanitize_link($link);
+                }
+            }
 
-            $links_search_table->items = get_bookmarks( $search_links_args );
         }
 
-
-        
         //add link
-        if ( current_user_can( 'manage_links' ) ){            
+        if ( current_user_can( 'manage_links' ) ){   
+            
+            $blank_link = (object)cp_links()->sanitize_link(array('default_checked' => true,'row_classes' => 'cp-links-row-new cp-links-row-edit'));
+            array_unshift($links_table->items, $blank_link); //prepend empty row
+            
             ?>
             <div class="cpl-metabox-section" id="add-link-section">
                 <a href="link-add.php" class="page-title-action"><?php echo esc_html_x('Add New', 'link'); ?></a>
-                <?php
-                //blank link
-                $blank_link_table = new CP_Links_List_Table();
-                $blank_link = (object)$this->sanitize_link(array('default_checked' => true,'row_classes' => 'cp-links-row-new cp-links-row-edit'));
-                $blank_link_table->items = array($blank_link);
-                $blank_link_table->prepare_items();
-                $blank_link_table->display();
-                ?>
-                <table>
-                    <?php //$this->add_link_row();?>
-                </table>
-                
             </div>
             <?php
         }

@@ -94,3 +94,9 @@ body .postbox#custom-post-links .cpl-metabox-section#search-links-section .cp-li
 body.js .postbox#custom-post-links #add-link-section table {
   display: none;
 }
+body.js .postbox#custom-post-links #the-list tr:first-child {
+  display: none;
+}
+body.no-js .postbox#custom-post-links #add-link-section .page-title-action {
+  display: none;
+}

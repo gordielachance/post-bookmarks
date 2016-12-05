@@ -2,8 +2,7 @@ jQuery(function($){
 
     $(document).ready(function(){
         
-        //'Edit' row action
-        
+        //Quick Edit
         $('#custom-post-links .row-actions .edit a').live("click", function(event){
             event.preventDefault();
             var row = $(this).parents('tr');
@@ -85,7 +84,6 @@ jQuery(function($){
         var section_new =   $("#custom-post-links #add-link-section");
         var section_list =  $("#custom-post-links #list-links-section")
         
-        var table_new =     section_new.find("table");
         var table_list =    section_list.find("table");
 
         //add new link
@@ -93,31 +91,32 @@ jQuery(function($){
 
             event.preventDefault();
             
-            var list_rows = table_list.find("#the-list tr:not(.no-items)");
-            var clone_row = table_new.find("tbody tr");
+            var rows_list = table_list.find("#the-list tr:not(.no-items)"); //all list items
+            var row_blank = table_list.find("#the-list tr:first-child"); //item to clone
+            var rows_filled = rows_list.not(row_blank); //other items
             
             //check last entry is filled
-            var list_first_row = list_rows.first();
-            if (list_first_row.length > 0) {
-                var first_row_url_input = list_first_row.find('.column-url input');
+            var row_filled_last = rows_filled.first(); //skip first item (blank row)
+            if (row_filled_last.length > 0) {
+                var first_row_url_input = row_filled_last.find('.column-url input');
                 if( first_row_url_input.val().length === 0 ) {
                     first_row_url_input.focus();
                     return;
                 }
             }
 
-            clone_row.find('input[type="text"]').val(''); //clear form
-            var new_row = clone_row.clone();
+            var new_row = row_blank.clone();
+            new_row.find('input[type="text"]').val(''); //clear form
 
             //increment input name prefixes
             new_row.html(function(index,html){
                 var pattern = 'custom_post_links[links][0]';
-                var replaceby = 'custom_post_links[links]['+list_rows.length+']';
+                var replaceby = 'custom_post_links[links]['+rows_list.length+']';
                 return html.split(pattern).join(replaceby);
             }); 
  
             //add line
-            new_row.prependTo( "#custom-post-links #list-links-section #the-list" );
+            new_row.insertAfter( row_blank );
 
             //focus input
             new_row.find('input').first().focus();
@@ -125,11 +124,11 @@ jQuery(function($){
         });
 
         // sort links
-        $('#list-links-section #the-list').sortable({
+        ( table_list ).find( '#the-list' ).sortable({
           handle: '.cp-links-link-draghandle',
 
           update: function(event, ui) {
-                var all_rows = $('#list-links-section #the-list tr');
+                var all_rows = ( table_list ).find( '#the-list tr' );
                 $.each( all_rows, function( key, value ) {
                   var order_input = $(this).find('.column-reorder input');
                     order_input.val(key);

@@ -140,8 +140,15 @@ body{
     
     &.js{
         .postbox#custom-post-links{
+            #the-list tr:first-child{ //blank row
+                display:none;
+            }
+        }
+    }
+    &.no-js{
+        .postbox#custom-post-links{
             #add-link-section{
-                table{
+                .page-title-action{
                     display:none;
                 }
             }
