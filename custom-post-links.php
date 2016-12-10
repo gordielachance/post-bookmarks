@@ -433,10 +433,6 @@ class CP_Links {
 
         //add link
         if ( current_user_can( 'manage_links' ) ){   
-            
-            $blank_link = (object)cp_links()->sanitize_link(array('default_checked' => true,'row_classes' => 'cp-links-row-new cp-links-row-edit'));
-            array_unshift($links_table->items, $blank_link); //prepend empty row
-            
             ?>
             <div class="cpl-metabox-section" id="add-link-section">
                 <a href="link-add.php" class="page-title-action"><?php echo esc_html_x('Add New', 'link'); ?></a>

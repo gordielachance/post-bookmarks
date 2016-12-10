@@ -7,16 +7,31 @@ if(!class_exists('WP_List_Table')){
 class CP_Links_List_Table extends WP_List_Table {
     
     var $current_link_idx = -1;
+    var $links_per_page = 1000;
 
-    function display_tablenav($which){
-        
-    }
-    
     function prepare_items() {
         $columns = $this->get_columns();
         $hidden = array();
         $sortable = $this->get_sortable_columns();
         $this->_column_headers = array($columns, $hidden, $sortable);
+
+        $current_page = $this->get_pagenum();
+        $total_items = count($this->items);
+
+        // only ncessary because we have sample data
+        $this->items = array_slice((array)$this->items,(($current_page-1)*$this->links_per_page),$this->links_per_page);
+
+        $this->set_pagination_args( array(
+        'total_items' => $total_items,
+        'per_page'    => $this->links_per_page
+        ) );
+        $this->items = $this->items;
+        
+        //add blank link
+        if ( current_user_can( 'manage_links' ) ){
+            $blank_link = (object)cp_links()->sanitize_link(array('default_checked' => true,'row_classes' => 'cp-links-row-new cp-links-row-edit'));
+            array_unshift($this->items, $blank_link); //prepend empty row
+        }
         
     }
     
@@ -26,13 +41,11 @@ class CP_Links_List_Table extends WP_List_Table {
 		$this->single_row_columns( $item );
 		echo '</tr>';
 	}
-    
-    /*
+
     function display_tablenav($which){
         
     }
-    */
-    
+
     function get_columns(){
         $columns = array(
             'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
