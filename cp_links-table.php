@@ -7,7 +7,7 @@ if(!class_exists('WP_List_Table')){
 class CP_Links_List_Table extends WP_List_Table {
     
     var $current_link_idx = -1;
-    var $links_per_page = 1000;
+    var $links_per_page = 20;
 
     function prepare_items() {
         $columns = $this->get_columns();
@@ -18,7 +18,7 @@ class CP_Links_List_Table extends WP_List_Table {
         $current_page = $this->get_pagenum();
         $total_items = count($this->items);
 
-        // only ncessary because we have sample data
+        // only necessary because we have sample data
         $this->items = array_slice((array)$this->items,(($current_page-1)*$this->links_per_page),$this->links_per_page);
 
         $this->set_pagination_args( array(
@@ -26,14 +26,25 @@ class CP_Links_List_Table extends WP_List_Table {
         'per_page'    => $this->links_per_page
         ) );
         $this->items = $this->items;
+
+    }
+    
+	/**
+	 * Generate the tbody element for the list table.
+	 *
+	 * @since 3.1.0
+	 * @access public
+	 */
+	public function display_rows_or_placeholder() {
         
-        //add blank link
+        //append blank row
         if ( current_user_can( 'manage_links' ) ){
             $blank_link = (object)cp_links()->sanitize_link(array('default_checked' => true,'row_classes' => 'cp-links-row-new cp-links-row-edit'));
-            array_unshift($this->items, $blank_link); //prepend empty row
+            $this->single_row($blank_link);
         }
         
-    }
+		parent::display_rows_or_placeholder();
+	}
     
     //override parent function so we can add class to our rows
 	public function single_row( $item ) {
@@ -41,10 +52,231 @@ class CP_Links_List_Table extends WP_List_Table {
 		$this->single_row_columns( $item );
 		echo '</tr>';
 	}
+    
+    /**
+     * Generate the table navigation above or below the table
+     *
+     * @since 3.1.0
+     * @access protected
+     *
+     * @param string $which
+     */
+    protected function display_tablenav( $which ) {
 
+        // REMOVED NONCE -- INTERFERING WITH SAVING POSTS ON METABOXES
+        // Add better detection if this class is used on meta box or not.
+        /*
+        if ( 'top' == $which ) {
+            wp_nonce_field( 'bulk-' . $this->_args['plural'] );
+        }
+        */
+
+        ?>
+        <div class="tablenav <?php echo esc_attr( $which ); ?>">
+
+            <div class="alignleft actions bulkactions">
+                <?php //$this->bulk_actions( $which ); ?>
+            </div>
+            <?php
+            $this->extra_tablenav( $which );
+            $this->pagination( $which );
+            ?>
+
+            <br class="clear"/>
+        </div>
+    <?php
+    }
+    
+    function extra_tablenav($which){
+    ?>
+            <div class="alignleft actions">
+                <?php
+                if ( 'top' === $which && !is_singular() ) {
+                    //add link
+                    if ( current_user_can( 'manage_links' ) ){   
+                        ?>
+                        <a id="cp-links-add-link" href="link-add.php" class="button"><?php echo esc_html_x('Add New', 'link'); ?></a>
+                        <?php
+                    }
+                }
+                ?>
+            </div>
+    <?php
+    }
+    
+	/**
+	 * Display the list of views available on this table.
+	 *
+	 * @since 3.1.0
+	 * @access public
+	 */
+	public function views() {
+		$views = $this->get_views();
+
+		if ( empty( $views ) )
+			return;
+
+		echo "<ul class='subsubsub'>\n";
+		foreach ( $views as $class => $view ) {
+			$views[ $class ] = "\t<li class='$class'>$view";
+		}
+		echo implode( " |</li>\n", $views ) . "</li>\n";
+		echo "</ul>";
+	}
+    
+    function get_views() {
+        global $post;
+        
+        $link_attached_count = $link_library_count = 0;
+        $link_attached_classes = $link_library_classes = array();
+        
+        if ( !cp_links()->links_tab ) $link_attached_classes[] = 'current';
+        $link_attached_count = count( cp_links_get_for_post($post->ID) );
+        
+        $link_attached = sprintf(
+            __('<a href="%1$s"%2$s>%3$s <span class="count">(<span class="imported-count">%4$s</span>)</span></a>'),
+            get_edit_post_link(),
+            cp_links_get_classes($link_attached_classes),
+            __('Attached','cp-links'),
+            $link_attached_count
+        );
+        
+        if ( cp_links()->links_tab == 'library' ) $link_library_classes[] = 'current';
+        $link_library_count = count( get_bookmarks( array('limit'=>-1) ) );
+        
+        $link_library = sprintf(
+            __('<a href="%1$s"%2$s>%3$s <span class="count">(<span class="imported-count">%4$s</span>)</span></a>'),
+            add_query_arg(array('cpl_tab'=>'library'),get_edit_post_link()),
+            cp_links_get_classes($link_library_classes),
+            __('Links library','cp-links'),
+            $link_library_count
+        );
+
+		$links = array(
+            'attached'      => $link_attached,
+            'library'       => $link_library
+        );
+        
+        //allow plugins to filter this
+        $links = apply_filters('cp_links_get_table_tabs',$links);
+        
+        return $links;
+    }
+    
+    function get_tab_links(){
+        global $post;
+        $links = array();
+        switch (cp_links()->links_tab){
+            case 'library':
+                $links = get_bookmarks( array('limit'=>-1) );
+            break;
+            default: //attached links
+                $links = cp_links_get_for_post($post->ID);
+            break;
+        }
+        $links = apply_filters('cp_links_get_table_tab_links',$links);
+        
+        foreach ((array)$links as $key=>$link){
+            $links[$key] = (object)cp_links()->sanitize_link($link);
+        }
+        
+        //filter results
+        if ( $search = strtolower(cp_links()->filter_links_text) ){
+            
+            foreach ($links as $key=>$link){
+                
+                $in_name    = strpos(strtolower($link->link_name), $search);
+                $in_url     = strpos(strtolower($link->link_url), $search);
+                
+                if ( ($in_name === false) && ($in_url === false) ){
+                    unset($links[$key]);
+                }
+                
+            }
+
+        }
+        
+        return $links;
+    }
+    
+    /**
+	 * Displays the search box.
+	 *
+	 * @since 4.6.0
+	 * @access public
+	 *
+	 * @param string $text     The 'submit' button label.
+	 * @param string $input_id ID attribute value for the search input field.
+	 */
+	public function search_box( $text, $input_id ) {
+        /*
+		if ( !cp_links()->filter_links_text && ! $this->has_items() ) {
+			return;
+		}
+        */
+
+		$input_id = $input_id . '-search-input';
+
+		if ( ! empty( $_REQUEST['orderby'] ) ) {
+			echo '<input type="hidden" name="orderby" value="' . esc_attr( $_REQUEST['orderby'] ) . '" />';
+		}
+		if ( ! empty( $_REQUEST['order'] ) ) {
+			echo '<input type="hidden" name="order" value="' . esc_attr( $_REQUEST['order'] ) . '" />';
+		}
+		if ( cp_links()->links_tab ) {
+			echo '<input type="hidden" name="cpl_tab" value="' . esc_attr( cp_links()->links_tab ) . '" />';
+		}
+		?>
+		<p class="search-box">
+			<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo $text; ?>:</label>
+			<input type="search" id="<?php echo esc_attr( $input_id ); ?>" class="wp-filter-search" name="cpl_filter" value="<?php echo cp_links()->filter_links_text; ?>" />
+			<?php submit_button( $text, '', '', false, array( 'id' => 'search-submit' ) ); ?>
+		</p>
+		<?php
+	}
+
+    /** ************************************************************************
+     * Optional. If you need to include bulk actions in your list table, this is
+     * the place to define them. Bulk actions are an associative array in the format
+     * 'slug'=>'Visible Title'
+     * 
+     * If this method returns an empty value, no bulk action will be rendered. If
+     * you specify any bulk actions, the bulk actions box will be rendered with
+     * the table automatically on display().
+     * 
+     * Also note that list tables are not automatically wrapped in <form> elements,
+     * so you will need to create those manually in order for bulk actions to function.
+     * 
+     * @return array An associative array containing all the bulk actions: 'slugs'=>'Visible Titles'
+     **************************************************************************/
+    function get_bulk_actions() {
+        $actions = array();
+
+        $actions['delete'] = __('Move to Trash');
+        
+        return $actions;
+    }
+
+    /** ************************************************************************
+     * Optional. You can handle your bulk actions anywhere or anyhow you prefer.
+     * For this example package, we will handle it in the class to keep things
+     * clean and organized.
+     * 
+     * @see $this->prepare_items()
+     **************************************************************************/
+    function process_bulk_action() {
+        
+        //Detect when a bulk action is being triggered...
+        if( 'delete'===$this->current_action() ) {
+            wp_die('Items deleted (or they would be if we had items to delete)!');
+        }
+        
+    }
+    /*
     function display_tablenav($which){
         
     }
+    */
 
     function get_columns(){
         $columns = array(

@@ -67,6 +67,14 @@ add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
 
 == Changelog ==
 
+= *** =
+* 'Quick Edit' mode
+* Link categories column
+* Better way of saving existing / new links
+* improved javascript (& includes URI.js)
+* 'hide_from_bookmarks' option
+* Filters on the 'get_bookmarks' hook to include / exclude our links
+
 = 2.0.7 =
 * cleaner code for blank row link + links tabe actions
 

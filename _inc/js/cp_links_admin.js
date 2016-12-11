@@ -81,13 +81,12 @@ jQuery(function($){
 
         });
 
-        var section_new =   $("#custom-post-links #add-link-section");
         var section_list =  $("#custom-post-links #list-links-section")
         
         var table_list =    section_list.find("table");
 
         //add new link
-        section_new.find('a.page-title-action').click(function(event){
+        $("#cp-links-add-link").click(function(event){
 
             event.preventDefault();
             

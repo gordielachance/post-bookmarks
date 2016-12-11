@@ -12,6 +12,7 @@ body{
     .postbox#custom-post-links{
 
         td{
+            overflow:hidden;
             input[type='text']{
                 width:100%;
             }
@@ -140,7 +141,7 @@ body{
     
     &.js{
         .postbox#custom-post-links{
-            #the-list tr:first-child{ //blank row
+            #the-list tr.cp-links-row-new:first-child{ //blank row
                 display:none;
             }
         }

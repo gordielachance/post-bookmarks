@@ -37,7 +37,7 @@ class CP_Links {
 
     static $meta_name_options = 'cp_links_options';
 
-    var $search_links_text = null;
+    var $filter_links_text = null;
     
     public static function instance() {
         
@@ -65,8 +65,8 @@ class CP_Links {
         $this->plugin_dir = plugin_dir_path( $this->file );
         $this->plugin_url = plugin_dir_url ( $this->file );
         $this->links_category_name = __('Post Links','cp_links');
-        
-        
+        $this->links_tab = ( isset($_REQUEST['cpl_tab'] ) ) ? $_REQUEST['cpl_tab'] : null; //links tab selected backend
+
         $this->options_default = array(
             'ignored_post_type'     => array('attachment','revision','nav_menu_item'),
             'links_category'        => null,
@@ -81,11 +81,11 @@ class CP_Links {
         $this->options = wp_parse_args(get_option( self::$meta_name_options), $this->options_default);
 
         //search links
-        $this->search_links_text = ( isset($_GET['cp_links_search']) ) ? $_GET['cp_links_search'] : null; //existing links to attach to post
+        $this->filter_links_text = ( isset($_REQUEST['cpl_filter']) ) ? $_REQUEST['cpl_filter'] : null; //existing links to attach to post
         
         //is a post update, do loose our search term
         if ( isset($_GET['message']) && ($_GET['message'] == '1') ){
-            $this->search_links_text = null;
+            $this->filter_links_text = null;
         }
         
 
@@ -376,16 +376,20 @@ class CP_Links {
     }
     
     function metabox_variables_redirect($location) {
-        
-        $form_data = ( isset($_POST['custom_post_links']) ) ? $_POST['custom_post_links'] : null;
-        
-        //search links
-        $this->search_links_text = ( isset($form_data['search']) ) ? $form_data['search'] : null; //existing links to attach to post
-        
-        if ($this->search_links_text){
+
+        if ($this->filter_links_text){
             $location = add_query_arg( 
                 array(
-                    'cp_links_search'   => $this->search_links_text
+                    'cpl_filter'   => $this->filter_links_text
+                ),
+                $location 
+            );
+        }
+        
+        if ($this->links_tab){
+            $location = add_query_arg( 
+                array(
+                    'cpl_tab'   => $this->links_tab
                 ),
                 $location 
             );
@@ -409,65 +413,23 @@ class CP_Links {
     function metabox_content( $post ){
 
         //attached links
-        $display_links = cp_links_get_for_post($post->ID);
+        
         $links_table = new CP_Links_List_Table();
-        $links_table->items = $display_links;
-        
-        //links results
-        $links_search_table = new CP_Links_List_Table();
-        
-        if ($this->search_links_text){
-            $search_links_args = array(
-                'search'    => $this->search_links_text,
-                //'cp_links'  => true
-            );
-            if ( $search_links = get_bookmarks( $search_links_args ) ){
-                //sanitize links
-                foreach ((array)$search_links as $key=>$link){
-                    $link->default_checked = false;
-                    $links_search_table->items[] = (object)cp_links()->sanitize_link($link);
-                }
-            }
-
-        }
-
-        //add link
-        if ( current_user_can( 'manage_links' ) ){   
-            ?>
-            <div class="cpl-metabox-section" id="add-link-section">
-                <a href="link-add.php" class="page-title-action"><?php echo esc_html_x('Add New', 'link'); ?></a>
-            </div>
-            <?php
-        }
-
+        $links_table->items = $links_table->get_tab_links();
         ?>
         <!--current links list-->
         <div class="cpl-metabox-section" id="list-links-section">
             <?php
                 $links_table->prepare_items();
+                $links_table->search_box( __( 'Filter links', 'cp-links' ), 'cpl_filter' );
+                $links_table->append_blank_row();
+                $links_table->views();
                 $links_table->display();
             ?>
         </div>
         <!--search links-->
         <?php
-            $search_section_classes=array('cpl-metabox-section');
-            if($this->search_links_text){
-                $search_section_classes[]='has-search-term';
-            }
-        ?>
-        <div<?php cp_links_classes($search_section_classes);?> id="search-links-section">
-            <h4><?php _e('Search for existing links','cp_links');?></h4>
-            <div id="search-links-form">
-                <label class="screen-reader-text" for="link-search-input"></label>
-                <input type="search" id="link-search-input" name="custom_post_links[search]" value="<?php echo $this->search_links_text;?>">
-                <input type="submit" id="search-submit" class="button" value="<?php _e('Search Links');?>">
-            </div>
-            <?php
-                $links_search_table->prepare_items();
-                $links_search_table->display();
-            ?>
-        </div>
-        <?php 
+
       // Add an nonce field so we can check for it later.
       wp_nonce_field( 'custom_post_links_meta_box', 'custom_post_links_meta_box_nonce' );
 
@@ -601,21 +563,14 @@ class CP_Links {
             'link_name'     => null,
             'link_target'   => null,
             'link_category' => (array)$this->get_options('links_category'),
-            'default_checked'   => null,
+            'default_checked'   => false,
             'row_classes'   => null, //class for the row, in the links table. eg. 'cp-links-row-edit cp-links-row-new cp-links-row-suggest'
         );
 
         $args = wp_parse_args((array)$args,$defaults);
         
         //$args['link_name'] = sanitize_text_field($args['link_name']);
-        
-        //check by default if no 'default_checked' set and that we have a link ID
-        if ( $args['default_checked']===null ){
-            if ( $args['link_id'] ){
-                $args['default_checked'] = true;
-            } 
-        }
-        
+
         return $args;
     }
     

@@ -5,6 +5,9 @@
   opacity: 0.5;
 }
 
+body .postbox#custom-post-links td {
+  overflow: hidden;
+}
 body .postbox#custom-post-links td input[type='text'] {
   width: 100%;
 }
@@ -89,9 +92,6 @@ body .postbox#custom-post-links .cpl-metabox-section#search-links-section.has-se
   display: table;
 }
 body .postbox#custom-post-links .cpl-metabox-section#search-links-section .cp-links-link-draghandle {
-  display: none;
-}
-body.js .postbox#custom-post-links #add-link-section table {
   display: none;
 }
 body.js .postbox#custom-post-links #the-list tr:first-child {
