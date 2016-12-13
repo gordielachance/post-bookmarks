@@ -1,15 +1,15 @@
 <?php
 /*
-Plugin Name: Custom Post Links
+Plugin Name: Post Bookmarks
 Description: Adds a new metabox to the editor, allowing you to attach a set of related links to any post
-Plugin URI: https://github.com/gordielachance/custom-post-links
+Plugin URI: https://github.com/gordielachance/post-bookmarks
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
 Version: 2.0.7
 License: GPL2
 */
 
-class CP_Links {
+class Post_Bookmarks {
     /** Version ***************************************************************/
     /**
     * @public string plugin version
@@ -35,14 +35,14 @@ class CP_Links {
     */
     private static $instance;
 
-    static $meta_name_options = 'cp_links_options';
+    static $meta_name_options = 'post_bkmarks-options';
 
     var $filter_links_text = null;
     
     public static function instance() {
         
             if ( ! isset( self::$instance ) ) {
-                    self::$instance = new CP_Links;
+                    self::$instance = new Post_Bookmarks;
                     self::$instance->setup_globals();
                     self::$instance->includes();
                     self::$instance->setup_actions();
@@ -64,8 +64,7 @@ class CP_Links {
         $this->basename   = plugin_basename( $this->file );
         $this->plugin_dir = plugin_dir_path( $this->file );
         $this->plugin_url = plugin_dir_url ( $this->file );
-        $this->links_category_name = __('Post Links','cp_links');
-        $this->links_tab = ( isset($_REQUEST['cpl_tab'] ) ) ? $_REQUEST['cpl_tab'] : null; //links tab selected backend
+        $this->links_tab = ( isset($_REQUEST['pbkm_tab'] ) ) ? $_REQUEST['pbkm_tab'] : null; //links tab selected backend
 
         $this->options_default = array(
             'ignored_post_type'     => array('attachment','revision','nav_menu_item'),
@@ -81,7 +80,7 @@ class CP_Links {
         $this->options = wp_parse_args(get_option( self::$meta_name_options), $this->options_default);
 
         //search links
-        $this->filter_links_text = ( isset($_REQUEST['cpl_filter']) ) ? $_REQUEST['cpl_filter'] : null; //existing links to attach to post
+        $this->filter_links_text = ( isset($_REQUEST['pbkm_filter']) ) ? $_REQUEST['pbkm_filter'] : null; //existing links to attach to post
         
         //is a post update, do loose our search term
         if ( isset($_GET['message']) && ($_GET['message'] == '1') ){
@@ -93,11 +92,11 @@ class CP_Links {
     }
     function includes(){
         
-        require $this->plugin_dir . 'cp_links-table.php';
-        require $this->plugin_dir . 'cp_links-templates.php';
-        require $this->plugin_dir . 'cp_links-functions.php';
-        require $this->plugin_dir . 'cp_links-settings.php';
-        require $this->plugin_dir . 'cp_links-ajax.php';
+        require $this->plugin_dir . 'post_bkmarks-table.php';
+        require $this->plugin_dir . 'post_bkmarks-templates.php';
+        require $this->plugin_dir . 'post_bkmarks-functions.php';
+        require $this->plugin_dir . 'post_bkmarks-settings.php';
+        require $this->plugin_dir . 'post_bkmarks-ajax.php';
         
     }
     function setup_actions(){  
@@ -116,7 +115,7 @@ class CP_Links {
         add_action( 'add_meta_boxes', array($this, 'metabox_add'));
         add_action( 'save_post', array(&$this,'metabox_save'));
         
-        add_filter('the_content', 'cp_links_output_links', 100, 2);
+        add_filter('the_content', 'post_bkmarks_output_links', 100, 2);
         
         add_filter( 'get_bookmarks', array(&$this,'filter_bookmarks'),10,2);
         add_filter( 'get_bookmarks', array(&$this,'exclude_from_bookmarks'),10,2);
@@ -130,21 +129,21 @@ class CP_Links {
     }
     
     function load_textdomain() {
-        load_plugin_textdomain( 'cp_links', false, $this->plugin_dir . '/languages' );
+        load_plugin_textdomain( 'post-bkmarks', false, $this->plugin_dir . '/languages' );
     }
     
     function upgrade_notice(){
 
-        $link = add_query_arg(array('cpl_do_import_old_links'=>true),admin_url('options-general.php?page=cpl_settings'));
+        $link = add_query_arg(array('pbkm_do_import_old_links'=>true),admin_url('options-general.php?page=pbkm_settings'));
         
     ?>
     <div class="notice notice-success is-dismissible">
         <p>
             <?php printf( 
-        __('Click %s to import the links from the %s plugin. %s', 'custom-post-links' ),
-        sprintf(__('<a href="%s">here</a>','custom-post-links'),$link),
-        sprintf('<a href="https://github.com/daggerhart/custom-post-links" target="_blank">Custom Post Links 1.0 (daggerhart)</a>',$link),
-        '<small>'.__("They will be moved to the new plugin's architecture.",'custom-post-links').'</small>'
+        __('Click %s to import the links from the %s plugin. %s', 'post-bookmarks' ),
+        sprintf(__('<a href="%s">here</a>','post-bookmarks'),$link),
+        sprintf('<a href="https://github.com/daggerhart/post-bookmarks" target="_blank">Custom Post Links 1.0 (daggerhart)</a>',$link),
+        '<small>'.__("They will be moved to the new plugin's architecture.",'post-bookmarks').'</small>'
         ); ?>
         </p>
     </div>
@@ -155,17 +154,17 @@ class CP_Links {
         global $wpdb;
 
         //old plugin import
-        $old_metas = cp_links_get_metas('_custom_post_links');
+        $old_metas = post_bkmarks_get_metas('_custom_post_links');
         if ($old_metas){
             add_action( 'admin_notices', array(&$this,'upgrade_notice'));
 
-            if (isset($_GET['cpl_do_import_old_links'])){
+            if (isset($_GET['pbkm_do_import_old_links'])){
                 
                 foreach((array)$old_metas as $meta){
                     
                     $old_links = maybe_unserialize($meta->meta_value);
 
-                    $cp_links_ids = array();
+                    $link_ids = array();
                     
                     foreach((array)$old_links as $old_link){
                         
@@ -177,18 +176,18 @@ class CP_Links {
                         
                         //ignore target
                         /*
-                        if( isset($linkdata['link_target']) && (cp_links()->get_options('ignore_target_local') == 'on') && cp_links_is_local_url($linkdata['link_url']) ){
+                        if( isset($linkdata['link_target']) && (post_bkmarks()->get_options('ignore_target_local') == 'on') && post_bkmarks_is_local_url($linkdata['link_url']) ){
                             unset($linkdata['link_target']);
                         }
                         */
                         if ( ($link_id = $this->insert_link($linkdata)) && !is_wp_error($link_id)){
-                            $cp_links_ids[] = $link_id;
+                            $link_ids[] = $link_id;
                         }
                         
                     }
                 }
                 
-                if ( update_post_meta( $meta->post_id, '_custom_post_links_ids', array_unique($cp_links_ids) ) ){
+                if ( update_post_meta( $meta->post_id, '_custom_post_links_ids', array_unique($link_ids) ) ){
                     delete_post_meta( $meta->post_id, '_custom_post_links'); //old plugin
                 }
                 
@@ -197,7 +196,7 @@ class CP_Links {
         }
         
 
-        $current_version = get_option("_cp_links-db_version");
+        $current_version = get_option("_post_bkmarks-db_version");
         if ($current_version==$this->db_version) return false;
         
         if(!$current_version){ //not installed
@@ -211,15 +210,15 @@ class CP_Links {
         }
         
         //update DB version
-        update_option("_cp_links-db_version", $this->db_version );
+        update_option("_post_bkmarks-db_version", $this->db_version );
     }
     
     function get_options($keys = null){
-        return cp_links_get_array_value($keys,$this->options);
+        return post_bkmarks_get_array_value($keys,$this->options);
     }
     
     public function get_default_option($keys = null){
-        return cp_links_get_array_value($keys,$this->options_default);
+        return post_bkmarks_get_array_value($keys,$this->options_default);
     }
     
     /*
@@ -235,10 +234,10 @@ class CP_Links {
             $cat_id = $cat->term_id;
         }else{
             $cat_id = wp_insert_term( 
-                __('Post Links','cp-links'), 
+                __('Post Bookmarks','post-bkmarks'), 
                 'link_category',
                  array(
-                     'description'  => sprintf(__('Parent category for all links created by the %s plugin.','cp_links'),'<a href="'.admin_url('options-general.php?page=cpl_settings').'" target="blank">'.__('Custom Post Links','cp-links').'</a>'),
+                     'description'  => sprintf(__('Parent category for all links created by the %s plugin.','post-bkmarks'),'<a href="'.admin_url('options-general.php?page=pbkm_settings').'" target="blank">'.__('Post Bookmarks','post-bkmarks').'</a>'),
                      'slug'         => $cat_slug
                  ) 
             );
@@ -247,7 +246,7 @@ class CP_Links {
     }
 
     
-    /* get post types that supports Custom Post Links */
+    /* get post types that supports Post Bookmarks */
     
     public function allowed_post_types(){
         
@@ -273,7 +272,7 @@ class CP_Links {
         
         // CSS
         
-        wp_register_style( 'cp_links_admin',  $this->plugin_url . '_inc/css/cp_links-admin.css',$this->version );
+        wp_register_style( 'post-bkmarks-admin',  $this->plugin_url . '_inc/css/post_bkmarks-admin.css',$this->version );
         
         // JS
         
@@ -281,7 +280,7 @@ class CP_Links {
         wp_register_script( 'uri', $this->plugin_url . '_inc/js/URI.min.js', null, '1.18.3');
         wp_register_script( 'jquery-uri', $this->plugin_url . '_inc/js/jquery.URI.min.js', array('uri'), '1.18.3');
         
-        wp_register_script( 'cp_links_admin', $this->plugin_url . '_inc/js/cp_links_admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','jquery-uri'),$this->version);
+        wp_register_script( 'post-bkmarks-admin', $this->plugin_url . '_inc/js/post_bkmarks_admin.js', array('jquery-core', 'jquery-ui-core', 'jquery-ui-sortable','jquery-uri'),$this->version);
     }
     
 
@@ -295,9 +294,9 @@ class CP_Links {
         $screen = get_current_screen();
         
         if( is_object( $screen ) ) {
-            if( ( in_array($hook, array('post.php', 'post-new.php','edit.php') ) &&  in_array($screen->id, $this->allowed_post_types() ) ) || ( $screen->base == 'settings_page_cpl_settings') ) {
-                wp_enqueue_script( 'cp_links_admin' );
-                wp_enqueue_style( 'cp_links_admin' );
+            if( ( in_array($hook, array('post.php', 'post-new.php','edit.php') ) &&  in_array($screen->id, $this->allowed_post_types() ) ) || ( $screen->base == 'settings_page_pbkm_settings') ) {
+                wp_enqueue_script( 'post-bkmarks-admin' );
+                wp_enqueue_style( 'post-bkmarks-admin' );
                 
             }
         }
@@ -305,20 +304,20 @@ class CP_Links {
     
     function enqueue_scripts_styles(){
         wp_register_style('font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css',false,'4.3.0');
-        wp_register_style( 'cp_links',  $this->plugin_url . '_inc/css/cp_links.css',false,$this->version );
+        wp_register_style( 'post-bkmarks',  $this->plugin_url . '_inc/css/post_bkmarks.css',false,$this->version );
         
         
-        wp_enqueue_style( 'cp_links' );
+        wp_enqueue_style( 'post-bkmarks' );
         
     }
 
     function exclude_from_bookmarks($bookmarks,$r){
-        $hide_from_bookmarks = ( cp_links()->get_options('hide_from_bookmarks') == "on" ) ? true : false;
+        $hide_from_bookmarks = ( post_bkmarks()->get_options('hide_from_bookmarks') == "on" ) ? true : false;
         if (!$hide_from_bookmarks) return $bookmarks;
         
         remove_filter( 'get_bookmarks', array(&$this,'exclude_from_bookmarks'),10,2); //unhook to avoid infinite loop
 
-        $r['cp_links'] = false;
+        $r['post_bkmarks'] = false;
         $bookmarks = get_bookmarks($r);
         
         add_filter( 'get_bookmarks', array(&$this,'exclude_from_bookmarks'),10,2); //rehook
@@ -329,16 +328,16 @@ class CP_Links {
     
     function filter_bookmarks($bookmarks,$r){
 
-        if ( isset($r['cp_links']) ){
+        if ( isset($r['post_bkmarks']) ){
             
-            $do_include = (bool)$r['cp_links'];
-            $cpl_category = cp_links()->get_options('links_category');
+            $do_include = (bool)$r['post_bkmarks'];
+            $pbkm_category = post_bkmarks()->get_options('links_category');
             $args_categories = array();
 
             // category already set, abord
             if ( isset($r['category']) ){
                 if ( $args_categories = explode(',',$r['category']) ){
-                    if (in_array($cpl_category,$args_categories)) return $bookmarks; //already there, abord
+                    if (in_array($pbkm_category,$args_categories)) return $bookmarks; //already there, abord
                 }
             }
             
@@ -346,7 +345,7 @@ class CP_Links {
 
                 case true: //include only our links
 
-                    $args_categories[] = $cpl_category;
+                    $args_categories[] = $pbkm_category;
                     $r['category'] = implode(',',$args_categories);
 
                 break;
@@ -355,19 +354,19 @@ class CP_Links {
 
                     //re-run query.
                     //there is no 'exclude_category' parameter, so exclude all links IDs
-                    if ( $cpl_links = get_bookmarks( array('cp_links' => true) ) ){
-                        $cpl_links_ids = array();
-                        foreach((array)$cpl_links as $link){
-                            $cpl_links_ids[] = $link->link_id;
+                    if ( $pbkm_links = get_bookmarks( array('post_bkmarks' => true) ) ){
+                        $pbkm_links_ids = array();
+                        foreach((array)$pbkm_links as $link){
+                            $pbkm_links_ids[] = $link->link_id;
                         }
 
-                        $r['exclude'] = implode(',',$cpl_links_ids);
+                        $r['exclude'] = implode(',',$pbkm_links_ids);
                     }
 
                 break;
             }
 
-            unset($r['cp_links']);
+            unset($r['post_bkmarks']);
             $bookmarks = get_bookmarks($r);
 
         }
@@ -380,7 +379,7 @@ class CP_Links {
         if ($this->filter_links_text){
             $location = add_query_arg( 
                 array(
-                    'cpl_filter'   => $this->filter_links_text
+                    'pbkm_filter'   => $this->filter_links_text
                 ),
                 $location 
             );
@@ -389,7 +388,7 @@ class CP_Links {
         if ($this->links_tab){
             $location = add_query_arg( 
                 array(
-                    'cpl_tab'   => $this->links_tab
+                    'pbkm_tab'   => $this->links_tab
                 ),
                 $location 
             );
@@ -402,10 +401,10 @@ class CP_Links {
     function metabox_add(){
         $post_types = $this->allowed_post_types();
         
-        $title = __('Custom Post Links','cp_links');
+        $title = __('Post Bookmarks','post-bkmarks');
 
         foreach ( $post_types as $post_type ) {
-            add_meta_box( 'custom-post-links', $title,array($this,'metabox_content'),$post_type, 'normal', 'high' );
+            add_meta_box( 'post-bookmarks', $title,array($this,'metabox_content'),$post_type, 'normal', 'high' );
         }
         
     }
@@ -414,14 +413,14 @@ class CP_Links {
 
         //attached links
         
-        $links_table = new CP_Links_List_Table();
+        $links_table = new Post_Bookmarks_List_Table();
         $links_table->items = $links_table->get_tab_links();
         ?>
         <!--current links list-->
-        <div class="cpl-metabox-section" id="list-links-section">
+        <div class="pbkm-metabox-section" id="list-links-section">
             <?php
                 $links_table->prepare_items();
-                $links_table->search_box( __( 'Filter links', 'cp-links' ), 'cpl_filter' );
+                $links_table->search_box( __( 'Filter links', 'post-bkmarks' ), 'pbkm_filter' );
                 $links_table->append_blank_row();
                 $links_table->views();
                 $links_table->display();
@@ -475,23 +474,17 @@ class CP_Links {
         
         /* OK, its safe for us to save the data now. */
         $form_data = ( isset($_POST['custom_post_links']) ) ? $_POST['custom_post_links'] : null;
-        $cp_links_ids = array();
+        $link_ids = array();
 
         $form_data_links = (isset($form_data['links'])) ? $form_data['links'] : array();
         $form_data_links = stripslashes_deep($form_data_links); //strip slashes for $_POST args if any
-        $default_category = cp_links()->get_options('links_category');
 
         foreach($form_data_links as $form_data_link){
             if ( isset($form_data_link['enabled']) ){
                 $link_id = null;
                 $link_data = $this->sanitize_link($form_data_link);
 
-                //force default category
-                if ( !in_array($default_category,$link_data['link_category']) ){
-                    $link_data['link_category'][] = $default_category;
-                }
-
-                $link_data = apply_filters('cp_links_before_save_data',$link_data,$form_data_link);
+                $link_data = apply_filters('post_bkmarks_before_save_data',$link_data,$form_data_link);
 
                 //existing links
                 if ($link_id = $link_data['link_id']){
@@ -521,14 +514,14 @@ class CP_Links {
 
                 //add to IDs list
                 if ($link_id && !is_wp_error($link_id)){
-                    $cp_links_ids[] = $link_id;
+                    $link_ids[] = $link_id;
                 }
             }
         }
         
-        $cp_links_ids = array_unique((array)$cp_links_ids);
-        update_post_meta( $post_id, '_custom_post_links_ids', $cp_links_ids );
-        return $cp_links_ids;
+        $link_ids = array_unique((array)$link_ids);
+        update_post_meta( $post_id, '_custom_post_links_ids', $link_ids );
+        return $link_ids;
 
     }
     
@@ -537,18 +530,18 @@ class CP_Links {
         //sanitize
         $linkdata = $this->sanitize_link($new_link);
 
-        if ( !$linkdata['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','custom-post-links') );
+        if ( !$linkdata['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','post-bookmarks') );
 
         //force name
         if ( !$linkdata['link_name'] ){
-            $linkdata['link_name'] = cp_links_get_name_from_url($linkdata['link_url']);
+            $linkdata['link_name'] = post_bkmarks_get_name_from_url($linkdata['link_url']);
         }
 
         //TO FIX check url is valid
-        if ( !$link_id = cp_links_get_existing_link_id($linkdata['link_url'],$linkdata['link_name']) ){ //check the link does not exists yet
+        if ( !$link_id = post_bkmarks_get_existing_link_id($linkdata['link_url'],$linkdata['link_name']) ){ //check the link does not exists yet
             if( !function_exists( 'wp_insert_link' ) ) include_once( ABSPATH . '/wp-admin/includes/bookmark.php' );
             
-            $linkdata = apply_filters('cp_links_insert_link_pre',$linkdata);
+            $linkdata = apply_filters('post_bkmarks_insert_link_pre',$linkdata);
 
             $link_id = wp_insert_link( $linkdata, true ); //return id
         }
@@ -564,23 +557,37 @@ class CP_Links {
             'link_target'   => null,
             'link_category' => (array)$this->get_options('links_category'),
             'default_checked'   => false,
-            'row_classes'   => null, //class for the row, in the links table. eg. 'cp-links-row-edit cp-links-row-new cp-links-row-suggest'
+            'row_classes'   => null, //class for the row, in the links table. eg. 'post-bkmarks-row-edit post-bkmarks-row-new post-bkmarks-row-suggest'
         );
 
         $args = wp_parse_args((array)$args,$defaults);
         
-        //$args['link_name'] = sanitize_text_field($args['link_name']);
+        //validating, sanitizing
+        $args['link_id'] = intval( $args['link_id'] );
+        $args['link_url'] = sanitize_text_field($args['link_url']);
+        $args['link_name'] = sanitize_text_field($args['link_name']);
+        $args['link_target'] = sanitize_text_field($args['link_target']);
+        
+        foreach((array)$args['link_category'] as $key=>$cat){
+            $args['link_category'][$key] = intval($cat);
+        }
+        //force default category
+        $default_category = post_bkmarks()->get_options('links_category');
+        if ( !in_array($default_category,$args['link_category']) ){
+            $args['link_category'][] = $default_category;
+        }
+        $args['link_category'] = array_filter($args['link_category']);
 
         return $args;
     }
     
 }
 
-function cp_links() {
-	return CP_Links::instance();
+function post_bkmarks() {
+	return Post_Bookmarks::instance();
 }
 
-cp_links();
+post_bkmarks();
 
 
 

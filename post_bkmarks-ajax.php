@@ -1,6 +1,6 @@
 <?php
 
-function ajax_cp_links_refresh_url(){
+function ajax_post_bkmarks_refresh_url(){
     $result = array(
         'message'   => null,
         'success'   => false,
@@ -8,19 +8,20 @@ function ajax_cp_links_refresh_url(){
     );
 
     $url = ( isset($_POST['url']) ) ? $_POST['url'] : null;
-    $url = cp_links_validate_url( $url );
+    $url = post_bkmarks_maybe_add_url_protocol($url);
     
-    if ($url){
-        
+    if (filter_var($url, FILTER_VALIDATE_URL) === FALSE) {
+        $result['message'] = $url . 'is not a valid url';
+    }else{
         $result['success'] = true;
         
         //guess the link name if none provided
-        if ( $new_name = cp_links_get_name_from_url($url) ){
+        if ( $new_name = post_bkmarks_get_name_from_url($url) ){
             $result['name'] = $new_name;
         }
         
         //favicon
-        $result['favicon'] = cp_links_get_favicon($url);
+        $result['favicon'] = post_bkmarks_get_favicon($url);
         
     }
 
@@ -29,4 +30,4 @@ function ajax_cp_links_refresh_url(){
     die();
 }
 
-add_action('wp_ajax_cp_links_refresh_url','ajax_cp_links_refresh_url');
+add_action('wp_ajax_post_bkmarks_refresh_url','ajax_post_bkmarks_refresh_url');

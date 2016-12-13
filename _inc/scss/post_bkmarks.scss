@@ -1,10 +1,10 @@
 @import "compass/css3";
 @import '//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css';
 
-.custom-post-links{
+.post-bookmarks{
     ul{
         list-style: none!important;
-        li.cp-links {
+        li.post-bkmarks {
 
             position:relative;
             
@@ -15,7 +15,7 @@
                 margin-right:0.2em;
             }
 
-            .cp-links-favicon{
+            .post-bkmarks-favicon{
 
                 display: inline-block;
                 height: 1em;
@@ -32,7 +32,7 @@
 
 
 
-            &[data-cp-link-domain='wikipedia.org'] .cp-links-favicon{ /* example of custom icon regarding the link domain */
+            &[data-cp-link-domain='wikipedia.org'] .post-bkmarks-favicon{ /* example of custom icon regarding the link domain */
                 background-image: url('https://wikipedia.org/static/favicon/wikipedia.ico');
             }
 

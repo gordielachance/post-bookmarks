@@ -7,7 +7,7 @@
  * @param type $array
  * @return type
  */
-function cp_links_get_array_value($keys = null, $array){
+function post_bkmarks_get_array_value($keys = null, $array){
     if (!$keys) return $array;
     
     $keys = (array)$keys;
@@ -23,7 +23,7 @@ function cp_links_get_array_value($keys = null, $array){
     return false;
 }
 
-function cp_links_validate_url($url){
+function post_bkmarks_maybe_add_url_protocol($url){
 
     if ( $url && (!$protocol = parse_url($url, PHP_URL_SCHEME) ) ){
         $url = 'http://' . $url; //add default protocol
@@ -33,25 +33,25 @@ function cp_links_validate_url($url){
 
 }
 
-function cp_links_get_name_from_url($url){
+function post_bkmarks_get_name_from_url($url){
     
-    $url = cp_links_validate_url($url);
+    $url = post_bkmarks_maybe_add_url_protocol($url);
     if (filter_var($url, FILTER_VALIDATE_URL) === false) return;
     
     $name = null;
 
     //try to get page title
-    if ( !$name = cp_links_get_url_title($url) ){
-        $name = cp_links_get_url_domain($url);
+    if ( !$name = post_bkmarks_get_url_title($url) ){
+        $name = post_bkmarks_get_url_domain($url);
     }
 
     return $name;
     
 }
 
-function cp_links_get_url_domain($url){
+function post_bkmarks_get_url_domain($url){
     
-    $url = cp_links_validate_url($url);
+    $url = post_bkmarks_maybe_add_url_protocol($url);
     if (filter_var($url, FILTER_VALIDATE_URL) === false) return;
     
       $pieces = parse_url($url);
@@ -62,9 +62,9 @@ function cp_links_get_url_domain($url){
       return false;
 }
 
-function cp_links_get_url_title($url){
+function post_bkmarks_get_url_title($url){
     
-    $url = cp_links_validate_url($url);
+    $url = post_bkmarks_maybe_add_url_protocol($url);
     if (filter_var($url, FILTER_VALIDATE_URL) === false) return;
 
     $response = wp_remote_get( $url );
@@ -80,7 +80,7 @@ function cp_links_get_url_title($url){
 }
 
 
-function cp_links_get_existing_link_id($link_url,$link_name){
+function post_bkmarks_get_existing_link_id($link_url,$link_name){
 
     global $wpdb;
     
@@ -94,7 +94,7 @@ function cp_links_get_existing_link_id($link_url,$link_name){
 
 }
 
-function cp_links_sort_using_ids_array($links,$sort_ids){
+function post_bkmarks_sort_using_ids_array($links,$sort_ids){
     
     if (!$links) return $links;
 
@@ -111,7 +111,7 @@ function cp_links_sort_using_ids_array($links,$sort_ids){
     
 }
 
-function cp_links_get_metas( $key, $fields = null, $type = null, $status = null ) {
+function post_bkmarks_get_metas( $key, $fields = null, $type = null, $status = null ) {
 
     global $wpdb;
     
@@ -148,7 +148,7 @@ function cp_links_get_metas( $key, $fields = null, $type = null, $status = null 
     return $r;
 }
 
-function cp_links_is_local_url($url){
+function post_bkmarks_is_local_url($url){
 
     $is_local = strpos($url, home_url());
 
