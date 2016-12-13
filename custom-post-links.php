@@ -64,7 +64,6 @@ class CP_Links {
         $this->basename   = plugin_basename( $this->file );
         $this->plugin_dir = plugin_dir_path( $this->file );
         $this->plugin_url = plugin_dir_url ( $this->file );
-        $this->links_category_name = __('Post Links','cp_links');
         $this->links_tab = ( isset($_REQUEST['cpl_tab'] ) ) ? $_REQUEST['cpl_tab'] : null; //links tab selected backend
 
         $this->options_default = array(
@@ -479,17 +478,11 @@ class CP_Links {
 
         $form_data_links = (isset($form_data['links'])) ? $form_data['links'] : array();
         $form_data_links = stripslashes_deep($form_data_links); //strip slashes for $_POST args if any
-        $default_category = cp_links()->get_options('links_category');
 
         foreach($form_data_links as $form_data_link){
             if ( isset($form_data_link['enabled']) ){
                 $link_id = null;
                 $link_data = $this->sanitize_link($form_data_link);
-
-                //force default category
-                if ( !in_array($default_category,$link_data['link_category']) ){
-                    $link_data['link_category'][] = $default_category;
-                }
 
                 $link_data = apply_filters('cp_links_before_save_data',$link_data,$form_data_link);
 
@@ -569,7 +562,21 @@ class CP_Links {
 
         $args = wp_parse_args((array)$args,$defaults);
         
-        //$args['link_name'] = sanitize_text_field($args['link_name']);
+        //validating, sanitizing
+        $args['link_id'] = intval( $args['link_id'] );
+        $args['link_url'] = sanitize_text_field($args['link_url']);
+        $args['link_name'] = sanitize_text_field($args['link_name']);
+        $args['link_target'] = sanitize_text_field($args['link_target']);
+        
+        foreach((array)$args['link_category'] as $key=>$cat){
+            $args['link_category'][$key] = intval($cat);
+        }
+        //force default category
+        $default_category = cp_links()->get_options('links_category');
+        if ( !in_array($default_category,$args['link_category']) ){
+            $args['link_category'][] = $default_category;
+        }
+        $args['link_category'] = array_filter($args['link_category']);
 
         return $args;
     }

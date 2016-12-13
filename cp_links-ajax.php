@@ -8,10 +8,11 @@ function ajax_cp_links_refresh_url(){
     );
 
     $url = ( isset($_POST['url']) ) ? $_POST['url'] : null;
-    $url = cp_links_validate_url( $url );
+    $url = cp_links_maybe_add_url_protocol($url);
     
-    if ($url){
-        
+    if (filter_var($url, FILTER_VALIDATE_URL) === FALSE) {
+        $result['message'] = $url . 'is not a valid url';
+    }else{
         $result['success'] = true;
         
         //guess the link name if none provided

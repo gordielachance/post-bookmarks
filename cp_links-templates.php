@@ -1,12 +1,12 @@
 <?php
 
 function cp_links_classes($classes){
-    echo cp_links_get_classes($classes);
+    echo cp_links_get_classes_attr($classes);
 }
 
-function cp_links_get_classes($classes){
+function cp_links_get_classes_attr($classes){
     if (empty($classes)) return;
-    return' class="'.implode(' ',$classes).'"';
+    return' class="'.esc_attr( implode(' ',$classes) ).'"';
 }
 
 function cp_links_get_links_ids_for_post($post_id = null){
@@ -108,17 +108,16 @@ function cp_links_output_single_link($link){
 
     $link_classes_arr = array('cp-links');
     $link_classes_arr = apply_filters('cp_links_single_link_classes',$link_classes_arr,$link);
-    $link_classes = cp_links_get_classes($link_classes_arr);
+    $link_classes = cp_links_get_classes_attr($link_classes_arr);
     $link_target_str=null;
     
     $favicon = cp_links_get_favicon($link->link_url);
 
-    
     if($link->link_target) {
         if ( (cp_links()->get_options('ignore_target_local')=='on') && cp_links_is_local_url($link->link_url) ){
             //nix
         }else{
-            $link_target_str = sprintf(' target="%s"',$link->link_target);
+            $link_target_str = sprintf(' target="%s"',esc_attr($link->link_target) );
         }
         
     }
@@ -126,11 +125,11 @@ function cp_links_output_single_link($link){
     $output = sprintf('<li id="%1s" %2s data-cp-link-domain="%3s"><i class="fa fa-link" aria-hidden="true"></i><a href="%4$s"%5$s>%6$s%7$s</a></li>',
                       'cp-link-'.$link->link_id,
                       $link_classes,
-                      $domain,
-                      $link->link_url,
+                      esc_attr($domain),
+                      esc_url($link->link_url),
                       $link_target_str,
                       $favicon,
-                      $link->link_name
+                      esc_html($link->link_name)
      );
     return apply_filters('cp_links_output_single_link',$output,$link);
     
@@ -151,9 +150,7 @@ function cp_links_output_for_post($post_id = null){
     $blogroll = array();
     
     if ( $cp_links = cp_links_get_for_post($post_id) ){
-        
-        //$blogroll_str = _walk_bookmarks( $cp_links );
-        
+
         foreach ((array)$cp_links as $link){
             $blogroll[] = cp_links_output_single_link($link);
             

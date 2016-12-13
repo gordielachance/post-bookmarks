@@ -127,6 +127,7 @@ class CP_Links_List_Table extends WP_List_Table {
     function get_views() {
         global $post;
         
+        $link_attached = $link_library = null;
         $link_attached_count = $link_library_count = 0;
         $link_attached_classes = $link_library_classes = array();
         
@@ -136,7 +137,7 @@ class CP_Links_List_Table extends WP_List_Table {
         $link_attached = sprintf(
             __('<a href="%1$s"%2$s>%3$s <span class="count">(<span class="imported-count">%4$s</span>)</span></a>'),
             get_edit_post_link(),
-            cp_links_get_classes($link_attached_classes),
+            cp_links_get_classes_attr($link_attached_classes),
             __('Attached','cp-links'),
             $link_attached_count
         );
@@ -144,13 +145,15 @@ class CP_Links_List_Table extends WP_List_Table {
         if ( cp_links()->links_tab == 'library' ) $link_library_classes[] = 'current';
         $link_library_count = count( get_bookmarks( array('limit'=>-1) ) );
         
-        $link_library = sprintf(
-            __('<a href="%1$s"%2$s>%3$s <span class="count">(<span class="imported-count">%4$s</span>)</span></a>'),
-            add_query_arg(array('cpl_tab'=>'library'),get_edit_post_link()),
-            cp_links_get_classes($link_library_classes),
-            __('Links library','cp-links'),
-            $link_library_count
-        );
+        if ($link_library_count){
+            $link_library = sprintf(
+                __('<a href="%1$s"%2$s>%3$s <span class="count">(<span class="imported-count">%4$s</span>)</span></a>'),
+                add_query_arg(array('cpl_tab'=>'library'),get_edit_post_link()),
+                cp_links_get_classes_attr($link_library_classes),
+                __('Links library','cp-links'),
+                $link_library_count
+            );
+        }
 
 		$links = array(
             'attached'      => $link_attached,
@@ -159,6 +162,8 @@ class CP_Links_List_Table extends WP_List_Table {
         
         //allow plugins to filter this
         $links = apply_filters('cp_links_get_table_tabs',$links);
+        
+        $links = array_filter($links);
         
         return $links;
     }
@@ -349,7 +354,7 @@ class CP_Links_List_Table extends WP_List_Table {
                                     $this->current_link_idx
                                    );
 
-                return $input_el . sprintf('<div %s><i class="fa fa-arrows-v" aria-hidden="true"></i></div>',cp_links_get_classes($classes));
+                return $input_el . sprintf('<div %s><i class="fa fa-arrows-v" aria-hidden="true"></i></div>',cp_links_get_classes_attr($classes));
                 
             break;
                 
@@ -379,7 +384,7 @@ class CP_Links_List_Table extends WP_List_Table {
                     $name
                 );
                 
-                return sprintf( '<p%s>%s</p>',cp_links_get_classes($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes($edit_classes),$edit_el );
+                return sprintf( '<p%s>%s</p>',cp_links_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes_attr($edit_classes),$edit_el );
 
             break;
 
@@ -397,7 +402,7 @@ class CP_Links_List_Table extends WP_List_Table {
                 $short_url = url_shorten( $link->link_url );
                 $display_el = sprintf('<a target="_blank" href="%s">%s</a>',$link->link_url,$short_url);
                 
-                return sprintf( '<span%s>%s</span>',cp_links_get_classes($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes($edit_classes),$edit_el );
+                return sprintf( '<span%s>%s</span>',cp_links_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes_attr($edit_classes),$edit_el );
                 
             break;
                 
@@ -456,7 +461,7 @@ class CP_Links_List_Table extends WP_List_Table {
 
                 //display
                 $display_el = sprintf('<code>%s</code>',$target);
-                return sprintf( '<span%s>%s</span>',cp_links_get_classes($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes($edit_classes),$edit_el );
+                return sprintf( '<span%s>%s</span>',cp_links_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes_attr($edit_classes),$edit_el );
                 
             break;
                 
@@ -488,9 +493,9 @@ class CP_Links_List_Table extends WP_List_Table {
         
         $actions = array();
 
+        $edit_link = get_edit_bookmark_link( $link );
+        $actions['edit'] = '<a href="' . $edit_link . '">' . __('Edit') . '</a>';
         if ( $link->link_id ){
-            $edit_link = get_edit_bookmark_link( $link );
-            $actions['edit'] = '<a href="' . $edit_link . '">' . __('Edit') . '</a>';
             $actions['delete'] = "<a class='submitdelete' href='" . wp_nonce_url("link.php?action=delete&amp;link_id=$link->link_id", 'delete-bookmark_' . $link->link_id) . "' onclick=\"if ( confirm( '" . esc_js(sprintf(__("You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete."), $link->link_name)) . "' ) ) { return true;}return false;\">" . __('Delete') . "</a>";
         }
 

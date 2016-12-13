@@ -23,7 +23,7 @@ function cp_links_get_array_value($keys = null, $array){
     return false;
 }
 
-function cp_links_validate_url($url){
+function cp_links_maybe_add_url_protocol($url){
 
     if ( $url && (!$protocol = parse_url($url, PHP_URL_SCHEME) ) ){
         $url = 'http://' . $url; //add default protocol
@@ -35,7 +35,7 @@ function cp_links_validate_url($url){
 
 function cp_links_get_name_from_url($url){
     
-    $url = cp_links_validate_url($url);
+    $url = cp_links_maybe_add_url_protocol($url);
     if (filter_var($url, FILTER_VALIDATE_URL) === false) return;
     
     $name = null;
@@ -51,7 +51,7 @@ function cp_links_get_name_from_url($url){
 
 function cp_links_get_url_domain($url){
     
-    $url = cp_links_validate_url($url);
+    $url = cp_links_maybe_add_url_protocol($url);
     if (filter_var($url, FILTER_VALIDATE_URL) === false) return;
     
       $pieces = parse_url($url);
@@ -64,7 +64,7 @@ function cp_links_get_url_domain($url){
 
 function cp_links_get_url_title($url){
     
-    $url = cp_links_validate_url($url);
+    $url = cp_links_maybe_add_url_protocol($url);
     if (filter_var($url, FILTER_VALIDATE_URL) === false) return;
 
     $response = wp_remote_get( $url );
