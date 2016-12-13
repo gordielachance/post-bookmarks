@@ -1,28 +1,28 @@
 <?php
 
-function cp_links_classes($classes){
-    echo cp_links_get_classes_attr($classes);
+function post_bkmarks_classes($classes){
+    echo post_bkmarks_get_classes_attr($classes);
 }
 
-function cp_links_get_classes_attr($classes){
+function post_bkmarks_get_classes_attr($classes){
     if (empty($classes)) return;
     return' class="'.esc_attr( implode(' ',$classes) ).'"';
 }
 
-function cp_links_get_links_ids_for_post($post_id = null){
+function post_bkmarks_get_links_ids_for_post($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     return get_post_meta( $post_id, '_custom_post_links_ids', true );
 }
 
-function cp_links_get_for_post($post_id = null,$args= array()){
+function post_bkmarks_get_for_post($post_id = null,$args= array()){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     if (!$post_id) return;
     
     $post_links = array();
     $defaults = array(
-        'orderby'   => cp_links()->get_options('links_orderby'),
+        'orderby'   => post_bkmarks()->get_options('links_orderby'),
         'order'     => 'ASC'
     );
     
@@ -31,29 +31,29 @@ function cp_links_get_for_post($post_id = null,$args= array()){
     
     $args = wp_parse_args($args,$defaults);
     
-    if ($cp_links_ids = cp_links_get_links_ids_for_post($post_id)){
+    if ($link_ids = post_bkmarks_get_links_ids_for_post($post_id)){
 
-        $args['include'] = implode(',',$cp_links_ids);
+        $args['include'] = implode(',',$link_ids);
         $links = get_bookmarks( $args );
 
         //We could use the 'include' arg with get_bookmarks(); but it override some other ones (eg.category).  So let's rather filter links now.
         foreach($links as $link){
-            if ( !in_array($link->link_id,$cp_links_ids) ) continue;
+            if ( !in_array($link->link_id,$link_ids) ) continue;
             $post_links[] = $link;
             
         }
 
         if ($orderby == 'custom'){
-            $links = cp_links_sort_using_ids_array($post_links,$cp_links_ids); //TO FIX should be a filter ?
+            $links = post_bkmarks_sort_using_ids_array($post_links,$link_ids); //TO FIX should be a filter ?
         }
     }
     
     //allow plugins to filter this
-    $post_links = apply_filters('cp_links_get_for_post_pre',$post_links,$post_id,$orderby);
+    $post_links = apply_filters('post_bkmarks_get_for_post_pre',$post_links,$post_id,$orderby);
     
     //sanitize links
     foreach ((array)$post_links as $key=>$link){
-        $post_links[$key] = (object)cp_links()->sanitize_link($link);
+        $post_links[$key] = (object)post_bkmarks()->sanitize_link($link);
     }
 
     return $post_links;
@@ -63,12 +63,12 @@ function cp_links_get_for_post($post_id = null,$args= array()){
 /*
  * the_content filter to append custom post links to the post content
  */
-function cp_links_output_links( $content ){
+function post_bkmarks_output_links( $content ){
     global $post;
-    if ( !in_array( $post->post_type, cp_links()->allowed_post_types() ) ) return $content;
+    if ( !in_array( $post->post_type, post_bkmarks()->allowed_post_types() ) ) return $content;
     
-    $option = cp_links()->get_options('display_links');
-    $links = cp_links_output_for_post($post->ID);
+    $option = post_bkmarks()->get_options('display_links');
+    $links = post_bkmarks_output_for_post($post->ID);
     
     switch($option){
         case 'before':
@@ -86,35 +86,35 @@ function cp_links_output_links( $content ){
  * Template a single link
  */
 
-function cp_links_get_favicon($url){
+function post_bkmarks_get_favicon($url){
 
     $favicon = null;
     
     //get domain url
-    if ( $domain = cp_links_get_url_domain($url) && (cp_links()->get_options('get_favicon')=='on') ){
+    if ( $domain = post_bkmarks_get_url_domain($url) && (post_bkmarks()->get_options('get_favicon')=='on') ){
         //favicon
         $favicon = sprintf('https://www.google.com/s2/favicons?domain=%s',$url);
         $favicon_style = sprintf(' style="background-image:url(\'%s\')"',$favicon);
-        $favicon = sprintf('<span class="cp-links-favicon" %s></span>',$favicon_style);
+        $favicon = sprintf('<span class="post-bkmarks-favicon" %s></span>',$favicon_style);
     }
     
     return $favicon;
 }
 
-function cp_links_output_single_link($link){
+function post_bkmarks_output_single_link($link){
     
     $favicon_style = null;
-    $domain = cp_links_get_url_domain($link->link_url);
+    $domain = post_bkmarks_get_url_domain($link->link_url);
 
-    $link_classes_arr = array('cp-links');
-    $link_classes_arr = apply_filters('cp_links_single_link_classes',$link_classes_arr,$link);
-    $link_classes = cp_links_get_classes_attr($link_classes_arr);
+    $link_classes_arr = array('post-bkmarks');
+    $link_classes_arr = apply_filters('post_bkmarks_single_link_classes',$link_classes_arr,$link);
+    $link_classes = post_bkmarks_get_classes_attr($link_classes_arr);
     $link_target_str=null;
     
-    $favicon = cp_links_get_favicon($link->link_url);
+    $favicon = post_bkmarks_get_favicon($link->link_url);
 
     if($link->link_target) {
-        if ( (cp_links()->get_options('ignore_target_local')=='on') && cp_links_is_local_url($link->link_url) ){
+        if ( (post_bkmarks()->get_options('ignore_target_local')=='on') && post_bkmarks_is_local_url($link->link_url) ){
             //nix
         }else{
             $link_target_str = sprintf(' target="%s"',esc_attr($link->link_target) );
@@ -131,15 +131,15 @@ function cp_links_output_single_link($link){
                       $favicon,
                       esc_html($link->link_name)
      );
-    return apply_filters('cp_links_output_single_link',$output,$link);
+    return apply_filters('post_bkmarks_output_single_link',$output,$link);
     
 }
 
 /*
  * Generate the output for links on this post
- * Would be better to use core function '_walk_bookmarks( $cp_links )' here, but it is too limited.
+ * Would be better to use core function '_walk_bookmarks( $post_bkmarks )' here, but it is too limited.
  */
-function cp_links_output_for_post($post_id = null){
+function post_bkmarks_output_for_post($post_id = null){
     global $post;
     
     if (!$post_id) $post_id = $post->ID;
@@ -149,10 +149,10 @@ function cp_links_output_for_post($post_id = null){
     $title_el = null;
     $blogroll = array();
     
-    if ( $cp_links = cp_links_get_for_post($post_id) ){
+    if ( $post_bkmarks = post_bkmarks_get_for_post($post_id) ){
 
-        foreach ((array)$cp_links as $link){
-            $blogroll[] = cp_links_output_single_link($link);
+        foreach ((array)$post_bkmarks as $link){
+            $blogroll[] = post_bkmarks_output_single_link($link);
             
         }
 
@@ -161,7 +161,7 @@ function cp_links_output_for_post($post_id = null){
         
         if ($blogroll_str) {
 
-            $links_html = sprintf('<div class="custom-post-links">%1s<ul>%2s</ul>',$title_el,$blogroll_str);
+            $links_html = sprintf('<div class="post-bookmarks">%1s<ul>%2s</ul>',$title_el,$blogroll_str);
         }
 
     }

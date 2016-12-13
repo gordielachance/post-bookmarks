@@ -1,4 +1,4 @@
-=== Custom Post Links ===
+=== Post Bookmarks ===
 Contributors:grosbouff
 Donate link:http://bit.ly/gbreant
 Tags: links,quick links,related links,custom links, post links
@@ -23,13 +23,13 @@ Adds a new metabox to the editor, allowing you to attach a set of related links 
 
 = Contributors =
 
-Contributors [are listed here](https://github.com/gordielachance/custom-post-links/contributors)
+Contributors [are listed here](https://github.com/gordielachance/post-bookmarks/contributors)
 
 = Notes =
 
-For feature request and bug reports, [please use the forums](http://wordpress.org/support/plugin/custom-post-links#postform).
+For feature request and bug reports, [please use the forums](http://wordpress.org/support/plugin/post-bookmarks#postform).
 
-If you are a plugin developer, [we would like to hear from you](https://github.com/gordielachance/custom-post-links). Any contribution would be very welcome.
+If you are a plugin developer, [we would like to hear from you](https://github.com/gordielachance/post-bookmarks). Any contribution would be very welcome.
 
 == Installation ==
 
@@ -41,13 +41,13 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 Use the *data-cp-link-domain* attribute, for example : 
 
-`li.cp-links[data-cp-link-domain='wikipedia.org'] .cp-links-favicon {
+`li.post-bkmarks[data-cp-link-domain='wikipedia.org'] .post-bkmarks-favicon {
     background-image: url('https://wikipedia.org/static/favicon/wikipedia.ico');
 }`
 
 = How can I change the way links are displayed ? =
 
-Use the filter *cp_links_output_single_link* (located in the **cp_links_output_single_link** function), for example : 
+Use the filter *post_bkmarks_output_single_link* (located in the **post_bkmarks_output_single_link** function), for example : 
 
 `<?php
 
@@ -55,13 +55,13 @@ function custom_output_single_link($output,$link){
     return $output;
 }
 
-add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
+add_filter('post_bkmarks_output_single_link','custom_output_single_link',10,2);
 
 ?>`
 
 == Screenshots ==
 
-1. Custom Post Links metabox in the backend editor
+1. Post Bookmarks metabox in the backend editor
 2. Settings page
 3. Links displayed under a post
 
@@ -86,7 +86,7 @@ add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
 = 2.0.5 =
 * Better output styling
 * Favicons : Option to automatically load URL pictures from Google API
-* New filter ‘cp_links_get_for_post_pre’
+* New filter ‘post_bkmarks_get_for_post_pre’
 * New function ::get_blank_link()
 
 = 2.0.4 =
@@ -98,26 +98,26 @@ add_filter('cp_links_output_single_link','custom_output_single_link',10,2);
 * implemented links targets
 
 = 2.0.2 =
-* Importer and admin notice for links from the original [Custom Post Links](https://github.com/daggerhart/custom-post-links) plugin (metas '_custom_post_links').
-* new function CP_Links::insert_link()
-* Improved function 'cp_links_get_existing_link_id'
-* new function ‘cp_links_get_metas’
+* Importer and admin notice for links from the original [Custom Post Links](https://github.com/daggerhart/post-bookmarks) plugin (metas '_custom_post_links').
+* new function Post_Bookmarks::insert_link()
+* Improved function 'post_bkmarks_get_existing_link_id'
+* new function ‘post_bkmarks_get_metas’
 
 = 2.0.1 =
-* Do not use the same post meta key than than the original [Custom Post Links](https://github.com/daggerhart/custom-post-links) plugin.
+* Do not use the same post meta key than than the original [Custom Post Links](https://github.com/daggerhart/post-bookmarks) plugin.
 
 = 2.0 =
 * custom sorting
 * options page
 * set the link domain as class in the link output
-* display entries in metabox using class CP_Links_List_Table (extends WP_List_Table)
+* display entries in metabox using class Post_Bookmarks_List_Table (extends WP_List_Table)
 * store / read entries from the Link Manager plugin (Worpress core) instead of metas
 * wrapped in a class, better code structure
 * use fontAwesome css, deleted drag_handle.png
 * various other improvements
 
 = 1.0 =
-* Forked from [Custom Post Links](https://github.com/daggerhart/custom-post-links) by Jonathan Daggerhart.
+* Forked from [Custom Post Links](https://github.com/daggerhart/post-bookmarks) by Jonathan Daggerhart.
 
 == Upgrade Notice ==
 

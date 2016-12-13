@@ -3,14 +3,14 @@ jQuery(function($){
     $(document).ready(function(){
         
         //Quick Edit
-        $('#custom-post-links .row-actions .edit a').live("click", function(event){
+        $('#post-bookmarks .row-actions .edit a').live("click", function(event){
             event.preventDefault();
             var row = $(this).parents('tr');
-            row.addClass('cp-links-row-edit');
+            row.addClass('post-bkmarks-row-edit');
         });
 
         // Look for changes in the value
-        $('#custom-post-links .cp-links-row-edit .column-url input').live("change paste", function(event){
+        $('#post-bookmarks .post-bkmarks-row-edit .column-url input').live("change paste", function(event){
             
             var row = $(this).parents('tr');
             
@@ -42,7 +42,7 @@ jQuery(function($){
             if (domain && tld){ //ok for ajax
 
                 var ajax_data = {
-                    'action': 'cp_links_refresh_url',
+                    'action': 'post_bkmarks_refresh_url',
                     'url':  link_url,
                     'name': link_name
                 };
@@ -81,12 +81,12 @@ jQuery(function($){
 
         });
 
-        var section_list =  $("#custom-post-links #list-links-section")
+        var section_list =  $("#post-bookmarks #list-links-section")
         
         var table_list =    section_list.find("table");
 
         //add new link
-        $("#cp-links-add-link").click(function(event){
+        $("#post-bkmarks-add-link").click(function(event){
 
             event.preventDefault();
             
@@ -124,7 +124,7 @@ jQuery(function($){
 
         // sort links
         ( table_list ).find( '#the-list' ).sortable({
-          handle: '.cp-links-link-draghandle',
+          handle: '.post-bkmarks-link-draghandle',
 
           update: function(event, ui) {
                 var all_rows = ( table_list ).find( '#the-list tr' );

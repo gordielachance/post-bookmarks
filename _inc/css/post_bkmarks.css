@@ -1,17 +1,17 @@
 @import "//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css";
-.custom-post-links ul {
+.post-bookmarks ul {
   list-style: none !important;
 }
-.custom-post-links ul li.cp-links {
+.post-bookmarks ul li.post-bkmarks {
   position: relative;
 }
-.custom-post-links ul li.cp-links i.fa-link {
+.post-bookmarks ul li.post-bkmarks i.fa-link {
   font-size: 0.75em;
   text-align: center;
   opacity: 0.2;
   margin-right: 0.2em;
 }
-.custom-post-links ul li.cp-links .cp-links-favicon {
+.post-bookmarks ul li.post-bkmarks .post-bkmarks-favicon {
   display: inline-block;
   height: 1em;
   width: 1em;
@@ -24,10 +24,10 @@
   padding-left: 20px;
   /* Adjust according to image size to push text across. */
 }
-.custom-post-links ul li.cp-links[data-cp-link-domain='wikipedia.org'] .cp-links-favicon {
+.post-bookmarks ul li.post-bkmarks[data-cp-link-domain='wikipedia.org'] .post-bkmarks-favicon {
   /* example of custom icon regarding the link domain */
   background-image: url("https://wikipedia.org/static/favicon/wikipedia.ico");
 }
-.custom-post-links ul a {
+.post-bookmarks ul a {
   box-shadow: none;
 }

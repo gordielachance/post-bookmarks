@@ -4,7 +4,7 @@ if(!class_exists('WP_List_Table')){
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 }
 
-class CP_Links_List_Table extends WP_List_Table {
+class Post_Bookmarks_List_Table extends WP_List_Table {
     
     var $current_link_idx = -1;
     var $links_per_page = 20;
@@ -39,7 +39,7 @@ class CP_Links_List_Table extends WP_List_Table {
         
         //append blank row
         if ( current_user_can( 'manage_links' ) ){
-            $blank_link = (object)cp_links()->sanitize_link(array('default_checked' => true,'row_classes' => 'cp-links-row-new cp-links-row-edit'));
+            $blank_link = (object)post_bkmarks()->sanitize_link(array('default_checked' => true,'row_classes' => 'post-bkmarks-row-new post-bkmarks-row-edit'));
             $this->single_row($blank_link);
         }
         
@@ -95,7 +95,7 @@ class CP_Links_List_Table extends WP_List_Table {
                     //add link
                     if ( current_user_can( 'manage_links' ) ){   
                         ?>
-                        <a id="cp-links-add-link" href="link-add.php" class="button"><?php echo esc_html_x('Add New', 'link'); ?></a>
+                        <a id="post-bkmarks-add-link" href="link-add.php" class="button"><?php echo esc_html_x('Add New', 'link'); ?></a>
                         <?php
                     }
                 }
@@ -131,26 +131,26 @@ class CP_Links_List_Table extends WP_List_Table {
         $link_attached_count = $link_library_count = 0;
         $link_attached_classes = $link_library_classes = array();
         
-        if ( !cp_links()->links_tab ) $link_attached_classes[] = 'current';
-        $link_attached_count = count( cp_links_get_for_post($post->ID) );
+        if ( !post_bkmarks()->links_tab ) $link_attached_classes[] = 'current';
+        $link_attached_count = count( post_bkmarks_get_for_post($post->ID) );
         
         $link_attached = sprintf(
             __('<a href="%1$s"%2$s>%3$s <span class="count">(<span class="imported-count">%4$s</span>)</span></a>'),
             get_edit_post_link(),
-            cp_links_get_classes_attr($link_attached_classes),
-            __('Attached','cp-links'),
+            post_bkmarks_get_classes_attr($link_attached_classes),
+            __('Attached','post-bkmarks'),
             $link_attached_count
         );
         
-        if ( cp_links()->links_tab == 'library' ) $link_library_classes[] = 'current';
+        if ( post_bkmarks()->links_tab == 'library' ) $link_library_classes[] = 'current';
         $link_library_count = count( get_bookmarks( array('limit'=>-1) ) );
         
         if ($link_library_count){
             $link_library = sprintf(
                 __('<a href="%1$s"%2$s>%3$s <span class="count">(<span class="imported-count">%4$s</span>)</span></a>'),
-                add_query_arg(array('cpl_tab'=>'library'),get_edit_post_link()),
-                cp_links_get_classes_attr($link_library_classes),
-                __('Links library','cp-links'),
+                add_query_arg(array('pbkm_tab'=>'library'),get_edit_post_link()),
+                post_bkmarks_get_classes_attr($link_library_classes),
+                __('Links library','post-bkmarks'),
                 $link_library_count
             );
         }
@@ -161,7 +161,7 @@ class CP_Links_List_Table extends WP_List_Table {
         );
         
         //allow plugins to filter this
-        $links = apply_filters('cp_links_get_table_tabs',$links);
+        $links = apply_filters('post_bkmarks_get_table_tabs',$links);
         
         $links = array_filter($links);
         
@@ -171,22 +171,22 @@ class CP_Links_List_Table extends WP_List_Table {
     function get_tab_links(){
         global $post;
         $links = array();
-        switch (cp_links()->links_tab){
+        switch (post_bkmarks()->links_tab){
             case 'library':
                 $links = get_bookmarks( array('limit'=>-1) );
             break;
             default: //attached links
-                $links = cp_links_get_for_post($post->ID);
+                $links = post_bkmarks_get_for_post($post->ID);
             break;
         }
-        $links = apply_filters('cp_links_get_table_tab_links',$links);
+        $links = apply_filters('post_bkmarks_get_table_tab_links',$links);
         
         foreach ((array)$links as $key=>$link){
-            $links[$key] = (object)cp_links()->sanitize_link($link);
+            $links[$key] = (object)post_bkmarks()->sanitize_link($link);
         }
         
         //filter results
-        if ( $search = strtolower(cp_links()->filter_links_text) ){
+        if ( $search = strtolower(post_bkmarks()->filter_links_text) ){
             
             foreach ($links as $key=>$link){
                 
@@ -215,7 +215,7 @@ class CP_Links_List_Table extends WP_List_Table {
 	 */
 	public function search_box( $text, $input_id ) {
         /*
-		if ( !cp_links()->filter_links_text && ! $this->has_items() ) {
+		if ( !post_bkmarks()->filter_links_text && ! $this->has_items() ) {
 			return;
 		}
         */
@@ -228,13 +228,13 @@ class CP_Links_List_Table extends WP_List_Table {
 		if ( ! empty( $_REQUEST['order'] ) ) {
 			echo '<input type="hidden" name="order" value="' . esc_attr( $_REQUEST['order'] ) . '" />';
 		}
-		if ( cp_links()->links_tab ) {
-			echo '<input type="hidden" name="cpl_tab" value="' . esc_attr( cp_links()->links_tab ) . '" />';
+		if ( post_bkmarks()->links_tab ) {
+			echo '<input type="hidden" name="pbkm_tab" value="' . esc_attr( post_bkmarks()->links_tab ) . '" />';
 		}
 		?>
 		<p class="search-box">
 			<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php echo $text; ?>:</label>
-			<input type="search" id="<?php echo esc_attr( $input_id ); ?>" class="wp-filter-search" name="cpl_filter" value="<?php echo cp_links()->filter_links_text; ?>" />
+			<input type="search" id="<?php echo esc_attr( $input_id ); ?>" class="wp-filter-search" name="pbkm_filter" value="<?php echo post_bkmarks()->filter_links_text; ?>" />
 			<?php submit_button( $text, '', '', false, array( 'id' => 'search-submit' ) ); ?>
 		</p>
 		<?php
@@ -294,7 +294,7 @@ class CP_Links_List_Table extends WP_List_Table {
             'target'        => __('Target')
         );
         
-        return apply_filters('cp_links_list_table_columns',$columns); //allow plugins to filter the columns
+        return apply_filters('post_bkmarks_list_table_columns',$columns); //allow plugins to filter the columns
     }
     /*
     function get_sortable_columns(){
@@ -322,13 +322,13 @@ class CP_Links_List_Table extends WP_List_Table {
      */
     function column_default( $link, $column_name ){
         
-        $classes = array('cp-links-data');
-        $display_classes = array_merge( $classes,array('cp-links-data-display') );
-        $edit_classes = array_merge( $classes,array('cp-links-data-edit') );
+        $classes = array('post-bkmarks-data');
+        $display_classes = array_merge( $classes,array('post-bkmarks-data-display') );
+        $edit_classes = array_merge( $classes,array('post-bkmarks-data-edit') );
         switch($column_name){
                 
             case 'cb':
-                $post_links_ids = cp_links_get_links_ids_for_post();
+                $post_links_ids = post_bkmarks_get_links_ids_for_post();
                 $checked = ( in_array($link->link_id,$post_links_ids) || $link->default_checked ) ? true : false;
 
                 $input_cb = sprintf( '<input type="checkbox" name="%s" value="on" %s />',
@@ -346,7 +346,7 @@ class CP_Links_List_Table extends WP_List_Table {
             case 'reorder':
 
                 $classes = array(
-                    'cp-links-link-draghandle'
+                    'post-bkmarks-link-draghandle'
                 );
 
                 $input_el = sprintf( '<input type="hidden" name="%s" value="%s"/>',
@@ -354,12 +354,12 @@ class CP_Links_List_Table extends WP_List_Table {
                                     $this->current_link_idx
                                    );
 
-                return $input_el . sprintf('<div %s><i class="fa fa-arrows-v" aria-hidden="true"></i></div>',cp_links_get_classes_attr($classes));
+                return $input_el . sprintf('<div %s><i class="fa fa-arrows-v" aria-hidden="true"></i></div>',post_bkmarks_get_classes_attr($classes));
                 
             break;
                 
             case 'favicon':
-                return cp_links_get_favicon($link->link_url);
+                return post_bkmarks_get_favicon($link->link_url);
             break;
                 
             case 'name':
@@ -384,7 +384,7 @@ class CP_Links_List_Table extends WP_List_Table {
                     $name
                 );
                 
-                return sprintf( '<p%s>%s</p>',cp_links_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes_attr($edit_classes),$edit_el );
+                return sprintf( '<p%s>%s</p>',post_bkmarks_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($edit_classes),$edit_el );
 
             break;
 
@@ -402,12 +402,12 @@ class CP_Links_List_Table extends WP_List_Table {
                 $short_url = url_shorten( $link->link_url );
                 $display_el = sprintf('<a target="_blank" href="%s">%s</a>',$link->link_url,$short_url);
                 
-                return sprintf( '<span%s>%s</span>',cp_links_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes_attr($edit_classes),$edit_el );
+                return sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($edit_classes),$edit_el );
                 
             break;
                 
             case 'category': //based on core function ion wp_link_category_checklist()
-                $default = cp_links()->get_options('links_category');
+                $default = post_bkmarks()->get_options('links_category');
 
                 $checked_categories = array();
 
@@ -450,24 +450,24 @@ class CP_Links_List_Table extends WP_List_Table {
                 
                 $target = ($link->link_target) ? $link->link_target : '_none';
 
-                $option_target = cp_links()->get_options('default_target');
+                $option_target = post_bkmarks()->get_options('default_target');
 
                 //edit
                 $edit_el = sprintf('<input id="link_target_blank" type="checkbox" name="%s" value="_blank" %s/><small>%s</small>',
                                    $this->get_field_name('link_target'),
                                    checked( $option_target, '_blank',false),
-                                   __('<code>_blank</code> &mdash; new window or tab.','cp_links')
+                                   __('<code>_blank</code> &mdash; new window or tab.','post-bkmarks')
                                   );
 
                 //display
                 $display_el = sprintf('<code>%s</code>',$target);
-                return sprintf( '<span%s>%s</span>',cp_links_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',cp_links_get_classes_attr($edit_classes),$edit_el );
+                return sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($edit_classes),$edit_el );
                 
             break;
                 
             default:
                 $output = null;
-                return apply_filters('cp_links_list_table_column_content',$output,$link,$column_name); //allow plugins to filter the content
+                return apply_filters('post_bkmarks_list_table_column_content',$output,$link,$column_name); //allow plugins to filter the content
             break;
 
         }

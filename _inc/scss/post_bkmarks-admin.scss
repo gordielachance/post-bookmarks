@@ -9,7 +9,7 @@
 
 body{
     
-    .postbox#custom-post-links{
+    .postbox#post-bookmarks{
 
         td{
             overflow:hidden;
@@ -40,7 +40,7 @@ body{
             }
         }
 
-        .cp-links-favicon{
+        .post-bkmarks-favicon{
             display: inline-block;
             width: 2em;
             height: 2em;
@@ -52,20 +52,20 @@ body{
         #the-list {
 
             tr{
-                .cp-links-data{
-                    &.cp-links-data-display{
+                .post-bkmarks-data{
+                    &.post-bkmarks-data-display{
                         display:inherit;
                     }
-                    &.cp-links-data-edit{
+                    &.post-bkmarks-data-edit{
                         display:none;
                     }
                 }
-                &.cp-links-row-edit{
-                    .cp-links-data{
-                        &.cp-links-data-display{
+                &.post-bkmarks-row-edit{
+                    .post-bkmarks-data{
+                        &.post-bkmarks-data-display{
                             display:none;
                         }
-                        &.cp-links-data-edit{
+                        &.post-bkmarks-data-edit{
                             display:inherit;
                         }
                     }
@@ -76,7 +76,7 @@ body{
             }
 
 
-            .cp-links-link-draghandle {
+            .post-bkmarks-link-draghandle {
                 text-align: center;
                 &:not(.disabled) {
                     cursor: pointer;
@@ -89,7 +89,7 @@ body{
 
         }
 
-        .cpl-metabox-section{
+        .pbkm-metabox-section{
             padding:1em;
             //border-bottom:1px solid #ddd;
             &#add-link-section{
@@ -103,14 +103,14 @@ body{
                         background:none;
                     }
                 }
-                #cp_links_add_new{
+                #post_bkmarks_add_new{
                     display:none;
                 }
                 &.has-js{
                     h4,table{
                         display:none;
                     }
-                    #cp_links_add_new{
+                    #post_bkmarks_add_new{
                         display:inherit;
                     }
                 }
@@ -127,7 +127,7 @@ body{
                         display:table;
                     }
                 }
-                .cp-links-link-draghandle{
+                .post-bkmarks-link-draghandle{
                     display:none;
                 }
 
@@ -140,14 +140,14 @@ body{
     }
     
     &.js{
-        .postbox#custom-post-links{
-            #the-list tr.cp-links-row-new:first-child{ //blank row
+        .postbox#post-bookmarks{
+            #the-list tr.post-bkmarks-row-new:first-child{ //blank row
                 display:none;
             }
         }
     }
     &.no-js{
-        .postbox#custom-post-links{
+        .postbox#post-bookmarks{
             #add-link-section{
                 .page-title-action{
                     display:none;
