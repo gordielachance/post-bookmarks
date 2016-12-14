@@ -407,7 +407,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             break;
                 
             case 'category': //based on core function ion wp_link_category_checklist()
-                $default = post_bkmarks()->get_options('links_category');
+                $default = post_bkmarks()->get_links_category();
 
                 $checked_categories = array();
 

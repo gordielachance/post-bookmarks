@@ -5,7 +5,7 @@ Description: Adds a new metabox to the editor, allowing you to attach a set of r
 Plugin URI: https://github.com/gordielachance/post-bookmarks
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.0.7
+Version: 2.1.0
 License: GPL2
 */
 
@@ -14,11 +14,11 @@ class Post_Bookmarks {
     /**
     * @public string plugin version
     */
-    public $version = '2.0.7';
+    public $version = '2.1.0';
     /**
     * @public string plugin DB version
     */
-    public $db_version = '202';
+    public $db_version = '203';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -68,14 +68,12 @@ class Post_Bookmarks {
 
         $this->options_default = array(
             'ignored_post_type'     => array('attachment','revision','nav_menu_item'),
-            'links_category'        => null,
             'display_links'         => 'after',
             'default_target'        => '_blank',
             'links_orderby'         => 'name',
             'ignore_target_local'   => 'on',
             'get_favicon'           => 'on',
-            'hide_from_bookmarks'   => 'on',
-            'links_category'        => $this->get_links_category()
+            'hide_from_bookmarks'   => 'on'
         );
         $this->options = wp_parse_args(get_option( self::$meta_name_options), $this->options_default);
 
@@ -152,55 +150,35 @@ class Post_Bookmarks {
 
     function upgrade(){
         global $wpdb;
-
-        //old plugin import
-        $old_metas = post_bkmarks_get_metas('_custom_post_links');
-        if ($old_metas){
-            add_action( 'admin_notices', array(&$this,'upgrade_notice'));
-
-            if (isset($_GET['pbkm_do_import_old_links'])){
-                
-                foreach((array)$old_metas as $meta){
-                    
-                    $old_links = maybe_unserialize($meta->meta_value);
-
-                    $link_ids = array();
-                    
-                    foreach((array)$old_links as $old_link){
-                        
-                        $linkdata = array(
-                            'link_name'     => ( isset($old_link['title']) ) ? $old_link['title'] : null,
-                            'link_url'      => ( isset($old_link['url']) ) ? $old_link['url'] : null,
-                            'link_target'      => ( isset($old_link['new_window']) ) ? '_blank' : null
-                        );
-                        
-                        //ignore target
-                        /*
-                        if( isset($linkdata['link_target']) && (post_bkmarks()->get_options('ignore_target_local') == 'on') && post_bkmarks_is_local_url($linkdata['link_url']) ){
-                            unset($linkdata['link_target']);
-                        }
-                        */
-                        if ( ($link_id = $this->insert_link($linkdata)) && !is_wp_error($link_id)){
-                            $link_ids[] = $link_id;
-                        }
-                        
-                    }
-                }
-                
-                if ( update_post_meta( $meta->post_id, '_custom_post_links_ids', array_unique($link_ids) ) ){
-                    delete_post_meta( $meta->post_id, '_custom_post_links'); //old plugin
-                }
-                
-            }
-            
-        }
         
-
         $current_version = get_option("_post_bkmarks-db_version");
         if ($current_version==$this->db_version) return false;
         
         if(!$current_version){ //not installed
             
+            if ( $has_old_plugin = get_option('cp_links_options') ){
+                
+                //rename options
+                $update_options = $wpdb->prepare( 
+                    "UPDATE `".$wpdb->prefix . "options` SET option_name = '%s' WHERE option_name = '%s'",
+                    self::$meta_name_options,
+                    'cp_links_options'
+                );
+                $wpdb->query($update_options);
+
+                //rename category
+                $update_category = $wpdb->prepare( 
+                    "UPDATE `".$wpdb->prefix . "terms` SET name = '%s', slug = '%s' WHERE slug = '%s'",
+                    __('Post Bookmarks','post-bkmarks'),
+                    'post-bookmarks',
+                    'cp-links'
+                );
+                $wpdb->query($update_category);
+                
+            }
+            
+
+
             /*
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
             dbDelta($sql);
@@ -228,7 +206,7 @@ class Post_Bookmarks {
     public function get_links_category(){
         
         $cat_id = null;
-        $cat_slug = 'cp-links';
+        $cat_slug = 'post-bookmarks';
         
         if ( $cat = get_term_by( 'slug', $cat_slug, 'link_category') ){
             $cat_id = $cat->term_id;
@@ -331,7 +309,7 @@ class Post_Bookmarks {
         if ( isset($r['post_bkmarks']) ){
             
             $do_include = (bool)$r['post_bkmarks'];
-            $pbkm_category = post_bkmarks()->get_options('links_category');
+            $pbkm_category = $this->get_links_category();
             $args_categories = array();
 
             // category already set, abord
@@ -555,7 +533,7 @@ class Post_Bookmarks {
             'link_url'      => null,
             'link_name'     => null,
             'link_target'   => null,
-            'link_category' => (array)$this->get_options('links_category'),
+            'link_category' => (array)$this->get_links_category(),
             'default_checked'   => false,
             'row_classes'   => null, //class for the row, in the links table. eg. 'post-bkmarks-row-edit post-bkmarks-row-new post-bkmarks-row-suggest'
         );
@@ -572,7 +550,7 @@ class Post_Bookmarks {
             $args['link_category'][$key] = intval($cat);
         }
         //force default category
-        $default_category = post_bkmarks()->get_options('links_category');
+        $default_category = $this->get_links_category();
         if ( !in_array($default_category,$args['link_category']) ){
             $args['link_category'][] = $default_category;
         }
