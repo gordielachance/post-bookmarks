@@ -5,7 +5,7 @@ Description: Adds a new metabox to the editor, allowing you to attach a set of r
 Plugin URI: https://github.com/gordielachance/post-bookmarks
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.1.0
+Version: 2.0.9
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class Post_Bookmarks {
     /**
     * @public string plugin version
     */
-    public $version = '2.1.0';
+    public $version = '2.0.9';
     /**
     * @public string plugin DB version
     */
@@ -129,24 +129,6 @@ class Post_Bookmarks {
     function load_textdomain() {
         load_plugin_textdomain( 'post-bkmarks', false, $this->plugin_dir . '/languages' );
     }
-    
-    function upgrade_notice(){
-
-        $link = add_query_arg(array('pbkm_do_import_old_links'=>true),admin_url('options-general.php?page=pbkm_settings'));
-        
-    ?>
-    <div class="notice notice-success is-dismissible">
-        <p>
-            <?php printf( 
-        __('Click %s to import the links from the %s plugin. %s', 'post-bookmarks' ),
-        sprintf(__('<a href="%s">here</a>','post-bookmarks'),$link),
-        sprintf('<a href="https://github.com/daggerhart/post-bookmarks" target="_blank">Custom Post Links 1.0 (daggerhart)</a>',$link),
-        '<small>'.__("They will be moved to the new plugin's architecture.",'post-bookmarks').'</small>'
-        ); ?>
-        </p>
-    </div>
-    <?php
-    }
 
     function upgrade(){
         global $wpdb;
@@ -175,6 +157,13 @@ class Post_Bookmarks {
                 );
                 $wpdb->query($update_category);
                 
+                //rename post metas
+                $update_posts = $wpdb->prepare( 
+                    "UPDATE `".$wpdb->prefix . "postmeta` SET meta_key = '%s' WHERE meta_key = '%s'",
+                    '_post_bkmarks_ids',
+                    '_custom_post_links_ids'
+                );
+                $wpdb->query($update_posts);
             }
             
 
@@ -408,7 +397,7 @@ class Post_Bookmarks {
         <?php
 
       // Add an nonce field so we can check for it later.
-      wp_nonce_field( 'custom_post_links_meta_box', 'custom_post_links_meta_box_nonce' );
+      wp_nonce_field( 'post_bkmarks_meta_box', 'post_bkmarks_meta_box_nonce' );
 
     }
 
@@ -425,10 +414,10 @@ class Post_Bookmarks {
         */
 
         // Check if our nonce is set.
-        if ( ! isset( $_POST['custom_post_links_meta_box_nonce'] ) ) return;
+        if ( ! isset( $_POST['post_bkmarks_meta_box_nonce'] ) ) return;
 
         // Verify that the nonce is valid.
-        if ( ! wp_verify_nonce( $_POST['custom_post_links_meta_box_nonce'], 'custom_post_links_meta_box' ) ) return;
+        if ( ! wp_verify_nonce( $_POST['post_bkmarks_meta_box_nonce'], 'post_bkmarks_meta_box' ) ) return;
 
         // If this is an autosave, our form has not been submitted, so we don't want to do anything.
         if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
@@ -451,7 +440,7 @@ class Post_Bookmarks {
         }
         
         /* OK, its safe for us to save the data now. */
-        $form_data = ( isset($_POST['custom_post_links']) ) ? $_POST['custom_post_links'] : null;
+        $form_data = ( isset($_POST['post_bkmarks']) ) ? $_POST['post_bkmarks'] : null;
         $link_ids = array();
 
         $form_data_links = (isset($form_data['links'])) ? $form_data['links'] : array();
@@ -498,7 +487,7 @@ class Post_Bookmarks {
         }
         
         $link_ids = array_unique((array)$link_ids);
-        update_post_meta( $post_id, '_custom_post_links_ids', $link_ids );
+        update_post_meta( $post_id, '_post_bkmarks_ids', $link_ids );
         return $link_ids;
 
     }

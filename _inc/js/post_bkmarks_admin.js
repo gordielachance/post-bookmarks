@@ -109,8 +109,8 @@ jQuery(function($){
 
             //increment input name prefixes
             new_row.html(function(index,html){
-                var pattern = 'custom_post_links[links][0]';
-                var replaceby = 'custom_post_links[links]['+rows_list.length+']';
+                var pattern = 'post_bkmarks[links][0]';
+                var replaceby = 'post_bkmarks[links]['+rows_list.length+']';
                 return html.split(pattern).join(replaceby);
             }); 
  

@@ -303,7 +303,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
     */
     
     public function get_field_name( $slug ) {
-        return sprintf('custom_post_links[links][%d][%s]',$this->current_link_idx,$slug);
+        return sprintf('post_bkmarks[links][%d][%s]',$this->current_link_idx,$slug);
     }
     
     

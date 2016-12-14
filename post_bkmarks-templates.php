@@ -12,7 +12,7 @@ function post_bkmarks_get_classes_attr($classes){
 function post_bkmarks_get_links_ids_for_post($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    return get_post_meta( $post_id, '_custom_post_links_ids', true );
+    return get_post_meta( $post_id, '_post_bkmarks_ids', true );
 }
 
 function post_bkmarks_get_for_post($post_id = null,$args= array()){

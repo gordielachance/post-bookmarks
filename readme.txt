@@ -3,7 +3,7 @@ Contributors:grosbouff
 Donate link:http://bit.ly/gbreant
 Tags: links,quick links,related links,custom links, post links
 Requires at least: 3.5
-Tested up to: 4.6.1
+Tested up to: 4.7
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -67,7 +67,12 @@ add_filter('post_bkmarks_output_single_link','custom_output_single_link',10,2);
 
 == Changelog ==
 
-= *** =
+= 2.0.9 =
+* Renamed plugin from 'Custom Post Links' to 'Post Bookmarks'
+* Upgrade routine for 'Custom Post Links' plugin
+* Improved class Post_Bookmarks_List_Table
+
+= 2.0.8 =
 * 'Quick Edit' mode
 * Link categories column
 * Better way of saving existing / new links
@@ -98,7 +103,7 @@ add_filter('post_bkmarks_output_single_link','custom_output_single_link',10,2);
 * implemented links targets
 
 = 2.0.2 =
-* Importer and admin notice for links from the original [Custom Post Links](https://github.com/daggerhart/post-bookmarks) plugin (metas '_custom_post_links').
+* Importer and admin notice for links from the original [Custom Post Links](https://github.com/daggerhart/post-bookmarks) plugin (metas '_post_bkmarks').
 * new function Post_Bookmarks::insert_link()
 * Improved function 'post_bkmarks_get_existing_link_id'
 * new function ‘post_bkmarks_get_metas’
