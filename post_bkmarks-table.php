@@ -39,7 +39,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         
         //append blank row
         if ( current_user_can( 'manage_links' ) ){
-            $blank_link = (object)post_bkmarks()->sanitize_link(array('default_checked' => true,'row_classes' => 'post-bkmarks-row-new post-bkmarks-row-edit'));
+            $blank_link = (object)post_bkmarks()->sanitize_link(array('row_checked' => true,'row_classes' => 'post-bkmarks-row-new post-bkmarks-row-edit'));
             $this->single_row($blank_link);
         }
         
@@ -329,7 +329,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 
             case 'cb':
                 $post_links_ids = post_bkmarks_get_links_ids_for_post();
-                $checked = ( in_array($link->link_id,(array)$post_links_ids) || $link->default_checked ) ? true : false;
+                $checked = ( $link->row_checked ) ? true : false;
 
                 $input_cb = sprintf( '<input type="checkbox" name="%s" value="on" %s />',
                                     $this->get_field_name('enabled'),

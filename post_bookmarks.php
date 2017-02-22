@@ -523,7 +523,7 @@ class Post_Bookmarks {
             'link_name'     => null,
             'link_target'   => null,
             'link_category' => (array)$this->get_links_category(),
-            'default_checked'   => false,
+            'row_checked'   => false,
             'row_classes'   => null, //class for the row, in the links table. eg. 'post-bkmarks-row-edit post-bkmarks-row-new post-bkmarks-row-suggest'
         );
 
