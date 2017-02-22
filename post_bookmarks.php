@@ -445,44 +445,48 @@ class Post_Bookmarks {
 
         $form_data_links = (isset($form_data['links'])) ? $form_data['links'] : array();
         $form_data_links = stripslashes_deep($form_data_links); //strip slashes for $_POST args if any
+        
+        /* get links IDs from database */
+        $link_ids = get_post_meta( $post_id, '_post_bkmarks_ids', true );
 
         foreach($form_data_links as $form_data_link){
-            if ( isset($form_data_link['enabled']) ){
-                $link_id = null;
-                $link_data = $this->sanitize_link($form_data_link);
+            
+            if ( !isset($form_data_link['selected']) ) continue;
+            
+            $link_id = null;
+            $link_data = $this->sanitize_link($form_data_link);
 
-                $link_data = apply_filters('post_bkmarks_before_save_data',$link_data,$form_data_link);
+            $link_data = apply_filters('post_bkmarks_before_save_data',$link_data,$form_data_link);
 
-                //existing links
-                if ($link_id = $link_data['link_id']){
+            //existing links
+            if ($link_id = $link_data['link_id']){
 
-                    //get stored bookmark
-                    $bookmark = get_bookmark($link_id,ARRAY_A);
+                //get stored bookmark
+                $bookmark = get_bookmark($link_id,ARRAY_A);
 
-                    //compare keys that are shared by both arrays
-                    $link_data_reduced = array_intersect_key($link_data, $bookmark); //keep only keys shared in both arrays - values are from the first one
-                    $bookmark_reduced = array_intersect_key($bookmark, $link_data);
+                //compare keys that are shared by both arrays
+                $link_data_reduced = array_intersect_key($link_data, $bookmark); //keep only keys shared in both arrays - values are from the first one
+                $bookmark_reduced = array_intersect_key($bookmark, $link_data);
 
-                    /*
-                    print_r($link_data_reduced);
-                    print_r('<br/>VS<br/>');
-                    print_r($bookmark_reduced);
-                    die();
-                    */
+                /*
+                print_r($link_data_reduced);
+                print_r('<br/>VS<br/>');
+                print_r($bookmark_reduced);
+                die();
+                */
 
-                    //update link only if data has been changed
-                    if ($link_data_reduced != $bookmark_reduced){
-                        wp_update_link( $link_data );
-                    }
-
-                }else{ //create new link
-                    $link_id = $this->insert_link($link_data);
+                //update link only if data has been changed
+                if ($link_data_reduced != $bookmark_reduced){
+                    wp_update_link( $link_data );
                 }
 
-                //add to IDs list
-                if ($link_id && !is_wp_error($link_id)){
-                    $link_ids[] = $link_id;
-                }
+            }else{ //create new link
+                $link_id = $this->insert_link($link_data);
+            }
+
+            //add to IDs list
+            if ($link_id && !is_wp_error($link_id)){
+                $link_ids[] = $link_id;
             }
         }
         

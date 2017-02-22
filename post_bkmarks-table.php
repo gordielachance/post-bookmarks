@@ -332,7 +332,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 $checked = ( $link->row_checked ) ? true : false;
 
                 $input_cb = sprintf( '<input type="checkbox" name="%s" value="on" %s />',
-                                    $this->get_field_name('enabled'),
+                                    $this->get_field_name('selected'),
                                     checked($checked, true,false) 
                                    );
                 $input_id = sprintf( '<input type="hidden" name="%s" value="%s"/>',
