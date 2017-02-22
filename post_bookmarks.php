@@ -395,10 +395,8 @@ class Post_Bookmarks {
         </div>
         <!--search links-->
         <?php
-
-      // Add an nonce field so we can check for it later.
-      wp_nonce_field( 'post_bkmarks_meta_box', 'post_bkmarks_meta_box_nonce' );
-
+        // Add an nonce field so we can check for it later.
+        wp_nonce_field( 'post_bkmarks_meta_box', 'post_bkmarks_meta_box_nonce', false );
     }
 
     /**
