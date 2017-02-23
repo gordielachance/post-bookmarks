@@ -5,7 +5,7 @@ Description: Adds a new metabox to the editor, allowing you to attach a set of r
 Plugin URI: https://github.com/gordielachance/post-bookmarks
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.0.9
+Version: 2.1.0
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class Post_Bookmarks {
     /**
     * @public string plugin version
     */
-    public $version = '2.0.9';
+    public $version = '2.1.0';
     /**
     * @public string plugin DB version
     */
@@ -72,8 +72,7 @@ class Post_Bookmarks {
             'default_target'        => '_blank',
             'links_orderby'         => 'name',
             'ignore_target_local'   => 'on',
-            'get_favicon'           => 'on',
-            'hide_from_bookmarks'   => 'on'
+            'get_favicon'           => 'on'
         );
         $this->options = wp_parse_args(get_option( self::$meta_name_options), $this->options_default);
 
@@ -116,8 +115,6 @@ class Post_Bookmarks {
         add_filter('the_content', 'post_bkmarks_output_links', 100, 2);
         
         add_filter( 'get_bookmarks', array(&$this,'filter_bookmarks'),10,2);
-        add_filter( 'get_bookmarks', array(&$this,'exclude_from_bookmarks'),10,2);
-        
         
         add_filter('redirect_post_location',array($this, 'metabox_variables_redirect')); //redirect with searched links text - http://wordpress.stackexchange.com/a/52052/70449
         
@@ -278,21 +275,6 @@ class Post_Bookmarks {
         
     }
 
-    function exclude_from_bookmarks($bookmarks,$r){
-        $hide_from_bookmarks = ( post_bkmarks()->get_options('hide_from_bookmarks') == "on" ) ? true : false;
-        if (!$hide_from_bookmarks) return $bookmarks;
-        
-        remove_filter( 'get_bookmarks', array(&$this,'exclude_from_bookmarks'),10,2); //unhook to avoid infinite loop
-
-        $r['post_bkmarks'] = false;
-        $bookmarks = get_bookmarks($r);
-        
-        add_filter( 'get_bookmarks', array(&$this,'exclude_from_bookmarks'),10,2); //rehook
-
-        return $bookmarks;
-        
-    }
-    
     function filter_bookmarks($bookmarks,$r){
 
         if ( isset($r['post_bkmarks']) ){
@@ -301,10 +283,10 @@ class Post_Bookmarks {
             $pbkm_category = $this->get_links_category();
             $args_categories = array();
 
-            // category already set, abord
+            //category
             if ( isset($r['category']) ){
                 if ( $args_categories = explode(',',$r['category']) ){
-                    if (in_array($pbkm_category,$args_categories)) return $bookmarks; //already there, abord
+                    if (in_array($pbkm_category,$args_categories)) return $bookmarks; //we are looking for the post bookmarks category, abord
                 }
             }
             
@@ -377,15 +359,20 @@ class Post_Bookmarks {
     }
 
     function metabox_content( $post ){
+        
+        //checkbox notice
+        add_settings_error('post_bkmarks_table', 'checkboxes_notice', __("Don't forget to check the rows concerned before clicking 'Apply' !",'post-bkmarks'),'updated inline');
 
         //attached links
-        
         $links_table = new Post_Bookmarks_List_Table();
         $links_table->items = $links_table->get_tab_links();
         ?>
         <!--current links list-->
         <div class="pbkm-metabox-section" id="list-links-section">
             <?php
+        
+                settings_errors('post_bkmarks');
+        
                 $links_table->prepare_items();
                 $links_table->search_box( __( 'Filter links', 'post-bkmarks' ), 'pbkm_filter' );
                 $links_table->append_blank_row();
@@ -395,10 +382,8 @@ class Post_Bookmarks {
         </div>
         <!--search links-->
         <?php
-
-      // Add an nonce field so we can check for it later.
-      wp_nonce_field( 'post_bkmarks_meta_box', 'post_bkmarks_meta_box_nonce' );
-
+        // Add an nonce field so we can check for it later.
+        wp_nonce_field( 'post_bkmarks_meta_box', 'post_bkmarks_meta_box_nonce' );
     }
 
     /**
@@ -406,6 +391,7 @@ class Post_Bookmarks {
     *
     * @param int $post_id The ID of the post being saved.
     */
+
     function metabox_save( $post_id ) {
 
         /*
@@ -440,79 +426,122 @@ class Post_Bookmarks {
         }
         
         /* OK, its safe for us to save the data now. */
-        $form_data = ( isset($_POST['post_bkmarks']) ) ? $_POST['post_bkmarks'] : null;
-        $link_ids = array();
-
-        $form_data_links = (isset($form_data['links'])) ? $form_data['links'] : array();
-        $form_data_links = stripslashes_deep($form_data_links); //strip slashes for $_POST args if any
-
-        foreach($form_data_links as $form_data_link){
-            if ( isset($form_data_link['enabled']) ){
-                $link_id = null;
-                $link_data = $this->sanitize_link($form_data_link);
-
-                $link_data = apply_filters('post_bkmarks_before_save_data',$link_data,$form_data_link);
-
-                //existing links
-                if ($link_id = $link_data['link_id']){
-
-                    //get stored bookmark
-                    $bookmark = get_bookmark($link_id,ARRAY_A);
-
-                    //compare keys that are shared by both arrays
-                    $link_data_reduced = array_intersect_key($link_data, $bookmark); //keep only keys shared in both arrays - values are from the first one
-                    $bookmark_reduced = array_intersect_key($bookmark, $link_data);
-
-                    /*
-                    print_r($link_data_reduced);
-                    print_r('<br/>VS<br/>');
-                    print_r($bookmark_reduced);
-                    die();
-                    */
-
-                    //update link only if data has been changed
-                    if ($link_data_reduced != $bookmark_reduced){
-                        wp_update_link( $link_data );
-                    }
-
-                }else{ //create new link
-                    $link_id = $this->insert_link($link_data);
-                }
-
-                //add to IDs list
-                if ($link_id && !is_wp_error($link_id)){
-                    $link_ids[] = $link_id;
-                }
-            }
-        }
         
-        $link_ids = array_unique((array)$link_ids);
-        update_post_meta( $post_id, '_post_bkmarks_ids', $link_ids );
-        return $link_ids;
+        // get existing links IDs for post
+        $post_link_ids = (array)get_post_meta( $post_id, '_post_bkmarks_ids', true );
+        
+        //keep only the checked links
+        $post_link_ids = array_filter(
+            $post_link_ids,
+            function ($link){
+            return ( is_int($link) );
+            }
+        );
+
+        // get links data from form
+        $form_data = ( isset($_POST['post_bkmarks']) ) ? $_POST['post_bkmarks'] : null;
+        $form_links = (isset($form_data['links'])) ? $form_data['links'] : array();
+        $form_links = stripslashes_deep($form_links); //strip slashes for $_POST args if any
+        
+        //keep only the checked links
+        $form_links = array_filter(
+            $form_links,
+            function ($link){
+            return ( isset($link['selected']) );
+            }
+        );
+
+        //table bulk actions
+        if ( $bulk_action = $this->metabox_table_get_current_action() ){
+
+            switch($bulk_action){
+                case 'save':
+                    $add_ids = array();
+                    foreach($form_links as $link_form){
+                        $link_id = $this->save_link($link_form);
+                        if ( ($link_id = $this->save_link($link_form)) && (!is_wp_error($link_id)) ){
+                            $add_ids[] = $link_id;
+                        }
+                    }
+                    $post_link_ids = array_merge($post_link_ids, $add_ids);
+                break;
+                case 'unlink':
+                    //TO FIX : remove from category 'post bookmarks' if link belongs only to this post
+                case 'delete':
+                    $remove_ids = array();
+                    $form_links = array_filter( //keep only the existing links
+                        $form_links,
+                        function ($link){
+                        return ( $link['link_id'] );
+                        }
+                    );
+                    
+                    foreach($form_links as $link_form){
+                        if ( ($bulk_action == 'delete') && ( current_user_can( 'manage_links' ) ) ){
+                            wp_delete_link($link_form['link_id']);
+                        }
+                        $remove_ids[] = $link_form['link_id'];
+                    }
+                    $post_link_ids = array_diff($post_link_ids, $remove_ids);
+                break;
+            }
+
+        }
+
+        $post_link_ids = array_unique($post_link_ids);
+        update_post_meta( $post_id, '_post_bkmarks_ids', $post_link_ids );
+        return $post_link_ids;
 
     }
     
-    function insert_link($new_link){
+	/**
+	 * Get the current action selected from the bulk actions dropdown.
+	 *
+	 * @return string|false The action name or False if no action was selected
+	 */
+	public function metabox_table_get_current_action() {
+        //TO FIX TO CHECK
+		if ( isset( $_REQUEST['filter_action'] ) && ! empty( $_REQUEST['filter_action'] ) )
+			return false;
+
+		if ( isset( $_REQUEST['post-bkmarks-action'] ) && -1 != $_REQUEST['post-bkmarks-action'] )
+			return $_REQUEST['post-bkmarks-action'];
+
+		if ( isset( $_REQUEST['post-bkmarks-action2'] ) && -1 != $_REQUEST['post-bkmarks-action2'] )
+			return $_REQUEST['post-bkmarks-action2'];
+
+		return false;
+	}
+
+    function save_link($link){
 
         //sanitize
-        $linkdata = $this->sanitize_link($new_link);
+        $link = $this->sanitize_link($link);
 
-        if ( !$linkdata['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','post-bookmarks') );
+        if ( !$link['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','post-bookmarks') );
 
         //force name
-        if ( !$linkdata['link_name'] ){
-            $linkdata['link_name'] = post_bkmarks_get_name_from_url($linkdata['link_url']);
+        if ( !$link['link_name'] ){
+            $link['link_name'] = post_bkmarks_get_name_from_url($link['link_url']);
         }
 
-        //TO FIX check url is valid
-        if ( !$link_id = post_bkmarks_get_existing_link_id($linkdata['link_url'],$linkdata['link_name']) ){ //check the link does not exists yet
-            if( !function_exists( 'wp_insert_link' ) ) include_once( ABSPATH . '/wp-admin/includes/bookmark.php' );
+        if (!$link['link_id']){ //new link
             
-            $linkdata = apply_filters('post_bkmarks_insert_link_pre',$linkdata);
-
-            $link_id = wp_insert_link( $linkdata, true ); //return id
+            //check this bookmark (url + name) does not exists already
+            if ( $link_id = post_bkmarks_get_existing_link_id($link['link_url'],$link['link_name']) ){
+                $link['link_id'] = $link_id;
+                $link_id = $this->save_link($link); //will update the link
+            }else{
+                if( !function_exists( 'wp_insert_link' ) ) include_once( ABSPATH . '/wp-admin/includes/bookmark.php' );
+                $link = apply_filters('post_bkmarks_add_link_pre',$link);
+                $link_id = wp_insert_link( $link, true ); //return id
+            }
+            
+        }else{ //update link
+            $link = apply_filters('post_bkmarks_update_link_pre',$link);
+            $link_id = wp_update_link( $link );
         }
-        
+
         return $link_id;
     }
     
@@ -523,7 +552,6 @@ class Post_Bookmarks {
             'link_name'     => null,
             'link_target'   => null,
             'link_category' => (array)$this->get_links_category(),
-            'default_checked'   => false,
             'row_classes'   => null, //class for the row, in the links table. eg. 'post-bkmarks-row-edit post-bkmarks-row-new post-bkmarks-row-suggest'
         );
 
@@ -531,7 +559,7 @@ class Post_Bookmarks {
         
         //validating, sanitizing
         $args['link_id'] = intval( $args['link_id'] );
-        $args['link_url'] = sanitize_text_field($args['link_url']);
+        $args['link_url'] = esc_url($args['link_url']);
         $args['link_name'] = sanitize_text_field($args['link_name']);
         $args['link_target'] = sanitize_text_field($args['link_target']);
         

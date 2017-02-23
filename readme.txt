@@ -3,7 +3,7 @@ Contributors:grosbouff
 Donate link:http://bit.ly/gbreant
 Tags: links,quick links,related links,custom links, post links
 Requires at least: 3.5
-Tested up to: 4.7
+Tested up to: 4.7.2
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -37,6 +37,13 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 == Frequently Asked Questions ==
 
+= How can I hide the links from Post Bookmarks ? =
+You can add the links created with Post Bookmarks using the 'post_bkmarks' argument when querying bookmarks.
+Example : 
+`<?php
+get_bookmarks( array('post_bkmarks'=>false) );
+?>`
+
 = How can I style a link based on its domain, using CSS ? =
 
 Use the *data-cp-link-domain* attribute, for example : 
@@ -66,6 +73,12 @@ add_filter('post_bkmarks_output_single_link','custom_output_single_link',10,2);
 3. Links displayed under a post
 
 == Changelog ==
+
+= 2.1.0 =
+* remove 'hide_from_bookmarks' option (see FAQ)
+* fix protocol bug
+* fix url field not hiding when quick editing a link
+* bulk actions
 
 = 2.0.9 =
 * Renamed plugin from 'Custom Post Links' to 'Post Bookmarks'
@@ -104,7 +117,7 @@ add_filter('post_bkmarks_output_single_link','custom_output_single_link',10,2);
 
 = 2.0.2 =
 * Importer and admin notice for links from the original [Custom Post Links](https://github.com/daggerhart/post-bookmarks) plugin (metas '_post_bkmarks').
-* new function Post_Bookmarks::insert_link()
+* new function Post_Bookmarks::save_link()
 * Improved function 'post_bkmarks_get_existing_link_id'
 * new function ‘post_bkmarks_get_metas’
 

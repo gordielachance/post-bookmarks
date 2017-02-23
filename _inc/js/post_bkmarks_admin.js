@@ -23,60 +23,64 @@ jQuery(function($){
             
             var cell_favicon = row.find('.column-favicon');
 
-            var link = $('<a>',{href: link_url});
-            var uri = link.uri();
+            if (link_url){
+                
+                var link = $('<a>',{href: link_url});
+                var uri = link.uri();
 
-            //check for protocol
-            var protocol = uri.protocol();
-            if ( !protocol ){
-                link_url = 'http://' + link_url;
-                $(this).val(link_url);
-                $(this).trigger( "change" );
-                return;
-            }
+                //check for protocol
+                var protocol = uri.protocol();
+                if ( !protocol ){
+                    link_url = 'http://' + link_url;
+                    $(this).val(link_url);
+                    $(this).trigger( "change" );
+                    return;
+                }
 
-            //check for domain and top level domain
-            var domain = uri.domain();
-            var tld = uri.tld();
+                //check for domain and top level domain
+                var domain = uri.domain();
+                var tld = uri.tld();
 
-            if (domain && tld){ //ok for ajax
+                if (domain && tld){ //ok for ajax
 
-                var ajax_data = {
-                    'action': 'post_bkmarks_refresh_url',
-                    'url':  link_url,
-                    'name': link_name
-                };
+                    var ajax_data = {
+                        'action': 'post_bkmarks_refresh_url',
+                        'url':  link_url,
+                        'name': link_name
+                    };
 
-                $.ajax({
+                    $.ajax({
 
-                    type: "post",
-                    url: ajaxurl,
-                    data:ajax_data,
-                    dataType: 'json',
-                    beforeSend: function() {
-                        row.addClass('loading');
-                    },
-                    success: function(data){
-                        if (data.success === false) {
-                            console.log(data);
-                        }else{
-                            if (!link_name){ //if field was empty
-                                name_input.val(data.name);
+                        type: "post",
+                        url: ajaxurl,
+                        data:ajax_data,
+                        dataType: 'json',
+                        beforeSend: function() {
+                            row.addClass('loading');
+                        },
+                        success: function(data){
+                            if (data.success === false) {
+                                console.log(data);
+                            }else{
+                                if (!link_name){ //if field was empty
+                                    name_input.val(data.name);
+                                }
+                                cell_favicon.html(data.favicon);
+
                             }
-                            cell_favicon.html(data.favicon);
-                            
+                        },
+                        error: function (xhr, ajaxOptions, thrownError) {
+                            console.log(xhr.status);
+                            console.log(thrownError);
+                        },
+                        complete: function() {
+                            row.removeClass('loading');
                         }
-                    },
-                    error: function (xhr, ajaxOptions, thrownError) {
-                        console.log(xhr.status);
-                        console.log(thrownError);
-                    },
-                    complete: function() {
-                        row.removeClass('loading');
-                    }
-                })
-            }else{
-                cell_favicon.html('');
+                    })
+                }else{
+                    cell_favicon.html('');
+                }
+                
             }
 
         });

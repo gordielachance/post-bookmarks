@@ -52,12 +52,8 @@ class Post_Bookmarks_Settings {
             
             //get favicon
             $new_input['get_favicon'] = ( isset($input['get_favicon']) ) ? "on" : "off";
-            
-            //hide from bookmarks
-            $new_input['hide_from_bookmarks'] = ( isset($input['hide_from_bookmarks']) ) ? "on" : "off";
 
         }
-        
 
         $new_input = array_filter($new_input);
 
@@ -119,15 +115,7 @@ class Post_Bookmarks_Settings {
             array( $this, 'post_bkmarks_settings_system_desc' ), // Callback
             'post_bkmarks-settings-page' // Page
         );
-        
-        add_settings_field(
-            'hide_from_bookmarks', 
-            __('Hide from bookmarks','post-bkmarks'), 
-            array( $this, 'hide_from_bookmarks_callback' ), 
-            'post_bkmarks-settings-page', // Page
-            'settings_system'//section
-        );
-        
+
         add_settings_field(
             'reset_options', 
             __('Reset Options','post-bkmarks'), 
@@ -230,17 +218,7 @@ class Post_Bookmarks_Settings {
     function post_bkmarks_settings_system_desc(){
         
     }
-    
-    function hide_from_bookmarks_callback(){
-        $hide_from_bookmarks = ( post_bkmarks()->get_options('hide_from_bookmarks') == "on" ) ? true : false;
-        printf(
-            '<p><input type="checkbox" name="%1$s[hide_from_bookmarks]" value="on" %2$s /> %3$s</p>',
-            Post_Bookmarks::$meta_name_options,
-            checked( $hide_from_bookmarks, true, false ),
-            __("Hide links created with this plugin from regular bookmarks.",'post-bkmarks')
-        );
-    }
-    
+
     function reset_options_callback(){
         printf(
             '<input type="checkbox" name="%1$s[reset_options]" value="on"/> %2$s',

@@ -12,7 +12,7 @@ body .postbox#post-bookmarks td input[type='text'] {
   width: 100%;
 }
 body .postbox#post-bookmarks .column-name .ellipsis {
-  display: block !important;
+  display: block;
   white-space: nowrap;
   overflow: hidden;
   -ms-text-overflow: ellipsis;
@@ -94,7 +94,7 @@ body .postbox#post-bookmarks .pbkm-metabox-section#search-links-section.has-sear
 body .postbox#post-bookmarks .pbkm-metabox-section#search-links-section .post-bkmarks-link-draghandle {
   display: none;
 }
-body.js .postbox#post-bookmarks #the-list tr:first-child {
+body.js .postbox#post-bookmarks #the-list tr.post-bkmarks-row-new:first-child {
   display: none;
 }
 body.no-js .postbox#post-bookmarks #add-link-section .page-title-action {
