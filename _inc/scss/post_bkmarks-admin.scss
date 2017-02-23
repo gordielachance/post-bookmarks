@@ -19,7 +19,7 @@ body{
         }
         
         .column-name .ellipsis{
-            display:block!important;
+            display:block;
             @include ellipsis($no-wrap: true);
         }
 
