@@ -72,8 +72,7 @@ class Post_Bookmarks {
             'default_target'        => '_blank',
             'links_orderby'         => 'name',
             'ignore_target_local'   => 'on',
-            'get_favicon'           => 'on',
-            'hide_from_bookmarks'   => 'on'
+            'get_favicon'           => 'on'
         );
         $this->options = wp_parse_args(get_option( self::$meta_name_options), $this->options_default);
 
@@ -116,8 +115,6 @@ class Post_Bookmarks {
         add_filter('the_content', 'post_bkmarks_output_links', 100, 2);
         
         add_filter( 'get_bookmarks', array(&$this,'filter_bookmarks'),10,2);
-        add_filter( 'get_bookmarks', array(&$this,'exclude_from_bookmarks'),10,2);
-        
         
         add_filter('redirect_post_location',array($this, 'metabox_variables_redirect')); //redirect with searched links text - http://wordpress.stackexchange.com/a/52052/70449
         
@@ -278,21 +275,6 @@ class Post_Bookmarks {
         
     }
 
-    function exclude_from_bookmarks($bookmarks,$r){
-        $hide_from_bookmarks = ( post_bkmarks()->get_options('hide_from_bookmarks') == "on" ) ? true : false;
-        if (!$hide_from_bookmarks) return $bookmarks;
-        
-        remove_filter( 'get_bookmarks', array(&$this,'exclude_from_bookmarks'),10,2); //unhook to avoid infinite loop
-
-        $r['post_bkmarks'] = false;
-        $bookmarks = get_bookmarks($r);
-        
-        add_filter( 'get_bookmarks', array(&$this,'exclude_from_bookmarks'),10,2); //rehook
-
-        return $bookmarks;
-        
-    }
-    
     function filter_bookmarks($bookmarks,$r){
 
         if ( isset($r['post_bkmarks']) ){
@@ -302,10 +284,9 @@ class Post_Bookmarks {
             $args_categories = array();
 
             //category
-            //TO FIX we SHOULD display the links if the category arg is set ?
             if ( isset($r['category']) ){
                 if ( $args_categories = explode(',',$r['category']) ){
-                    if (in_array($pbkm_category,$args_categories)) return $bookmarks; //we are looking for post bookmarks category, abord
+                    if (in_array($pbkm_category,$args_categories)) return $bookmarks; //we are looking for the post bookmarks category, abord
                 }
             }
             
