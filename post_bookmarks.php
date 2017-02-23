@@ -5,7 +5,7 @@ Description: Adds a new metabox to the editor, allowing you to attach a set of r
 Plugin URI: https://github.com/gordielachance/post-bookmarks
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.1
+Version: 2.1.0
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class Post_Bookmarks {
     /**
     * @public string plugin version
     */
-    public $version = '2.1';
+    public $version = '2.1.0';
     /**
     * @public string plugin DB version
     */
