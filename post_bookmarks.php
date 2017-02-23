@@ -359,15 +359,20 @@ class Post_Bookmarks {
     }
 
     function metabox_content( $post ){
+        
+        //checkbox notice
+        add_settings_error('post_bkmarks_table', 'checkboxes_notice', __("Don't forget to check the rows concerned before clicking 'Apply' !",'post-bkmarks'),'updated inline');
 
         //attached links
-        
         $links_table = new Post_Bookmarks_List_Table();
         $links_table->items = $links_table->get_tab_links();
         ?>
         <!--current links list-->
         <div class="pbkm-metabox-section" id="list-links-section">
             <?php
+        
+                settings_errors('post_bkmarks');
+        
                 $links_table->prepare_items();
                 $links_table->search_box( __( 'Filter links', 'post-bkmarks' ), 'pbkm_filter' );
                 $links_table->append_blank_row();
