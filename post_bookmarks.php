@@ -301,10 +301,11 @@ class Post_Bookmarks {
             $pbkm_category = $this->get_links_category();
             $args_categories = array();
 
-            // category already set, abord
+            //category
+            //TO FIX we SHOULD display the links if the category arg is set ?
             if ( isset($r['category']) ){
                 if ( $args_categories = explode(',',$r['category']) ){
-                    if (in_array($pbkm_category,$args_categories)) return $bookmarks; //already there, abord
+                    if (in_array($pbkm_category,$args_categories)) return $bookmarks; //we are looking for post bookmarks category, abord
                 }
             }
             
