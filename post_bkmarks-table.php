@@ -259,9 +259,11 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 
         $actions['save'] = __('Save items','post-bkmarks');
         $actions['unlink'] = __('Unlink items','post-bkmarks');
-        $actions['delete'] = __('Move to Trash');
         
-        
+        if ( current_user_can( 'manage_links' ) ){
+            $actions['delete'] = __('Move to Trash');
+        }
+
         return apply_filters('post_bkmarks_get_bulk_actions',$actions);
     }
     

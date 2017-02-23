@@ -490,7 +490,7 @@ class Post_Bookmarks {
                     );
                     
                     foreach($form_links as $link_form){
-                        if ($bulk_action == 'delete'){
+                        if ( ($bulk_action == 'delete') && ( current_user_can( 'manage_links' ) ) ){
                             wp_delete_link($link_form['link_id']);
                         }
                         $remove_ids[] = $link_form['link_id'];
