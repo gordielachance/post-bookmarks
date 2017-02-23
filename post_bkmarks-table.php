@@ -28,7 +28,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         $this->items = $this->items;
 
     }
-    
+
 	/**
 	 * Generate the tbody element for the list table.
 	 *
@@ -39,7 +39,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         
         //append blank row
         if ( current_user_can( 'manage_links' ) ){
-            $blank_link = (object)post_bkmarks()->sanitize_link(array('row_checked' => true,'row_classes' => 'post-bkmarks-row-new post-bkmarks-row-edit'));
+            $blank_link = (object)post_bkmarks()->sanitize_link(array('row_classes' => 'post-bkmarks-row-new post-bkmarks-row-edit'));
             $this->single_row($blank_link);
         }
         
@@ -75,7 +75,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         <div class="tablenav <?php echo esc_attr( $which ); ?>">
 
             <div class="alignleft actions bulkactions">
-                <?php //$this->bulk_actions( $which ); ?>
+                <?php $this->bulk_actions( $which ); ?>
             </div>
             <?php
             $this->extra_tablenav( $which );
@@ -257,31 +257,57 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
     function get_bulk_actions() {
         $actions = array();
 
+        $actions['save'] = __('Save items','post-bkmarks');
+        $actions['unlink'] = __('Unlink items','post-bkmarks');
         $actions['delete'] = __('Move to Trash');
+        
         
         return $actions;
     }
+    
+	/**
+	 * Display the bulk actions dropdown.
+	 * Instanciated because we need a different name for the 'select' form elements (default is 'action' & 'action2') or it will interfer with WP.
+	 */
+	function bulk_actions( $which = '' ) {
+		if ( is_null( $this->_actions ) ) {
+			$this->_actions = $this->get_bulk_actions();
+			/**
+			 * Filters the list table Bulk Actions drop-down.
+			 *
+			 * The dynamic portion of the hook name, `$this->screen->id`, refers
+			 * to the ID of the current screen, usually a string.
+			 *
+			 * This filter can currently only be used to remove bulk actions.
+			 *
+			 * @since 3.5.0
+			 *
+			 * @param array $actions An array of the available bulk actions.
+			 */
+			$this->_actions = apply_filters( "post_bkmarks_bulk_actions-{$this->screen->id}", $this->_actions );
+			$two = '';
+		} else {
+			$two = '2';
+		}
 
-    /** ************************************************************************
-     * Optional. You can handle your bulk actions anywhere or anyhow you prefer.
-     * For this example package, we will handle it in the class to keep things
-     * clean and organized.
-     * 
-     * @see $this->prepare_items()
-     **************************************************************************/
-    function process_bulk_action() {
-        
-        //Detect when a bulk action is being triggered...
-        if( 'delete'===$this->current_action() ) {
-            wp_die('Items deleted (or they would be if we had items to delete)!');
-        }
-        
-    }
-    /*
-    function display_tablenav($which){
-        
-    }
-    */
+		if ( empty( $this->_actions ) )
+			return;
+
+		echo '<label for="post-bkmarks-bulk-action-selector-' . esc_attr( $which ) . '" class="screen-reader-text">' . __( 'Select bulk action' ) . '</label>';
+		echo '<select name="post-bkmarks-action' . $two . '" id="post-bkmarks-bulk-action-selector-' . esc_attr( $which ) . "\">\n";
+		echo '<option value="-1">' . __( 'Bulk Actions' ) . "</option>\n";
+
+		foreach ( $this->_actions as $name => $title ) {
+			$class = 'edit' === $name ? ' class="hide-if-no-js"' : '';
+
+			echo "\t" . '<option value="' . $name . '"' . $class . '>' . $title . "</option>\n";
+		}
+
+		echo "</select>\n";
+
+		submit_button( __( 'Apply' ), 'action', '', false, array( 'id' => "post-bkmarks-doaction$two" ) );
+		echo "\n";
+	}
 
     function get_columns(){
         $columns = array(
@@ -329,11 +355,9 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 
             case 'cb':
                 $post_links_ids = post_bkmarks_get_links_ids_for_post();
-                $checked = ( $link->row_checked ) ? true : false;
 
-                $input_cb = sprintf( '<input type="checkbox" name="%s" value="on" %s />',
-                                    $this->get_field_name('selected'),
-                                    checked($checked, true,false) 
+                $input_cb = sprintf( '<input type="checkbox" name="%s" value="on"/>',
+                                    $this->get_field_name('selected')
                                    );
                 $input_id = sprintf( '<input type="hidden" name="%s" value="%s"/>',
                                     $this->get_field_name('link_id'),
