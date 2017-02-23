@@ -262,7 +262,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         $actions['delete'] = __('Move to Trash');
         
         
-        return $actions;
+        return apply_filters('post_bkmarks_get_bulk_actions',$actions);
     }
     
 	/**
