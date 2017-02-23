@@ -79,12 +79,11 @@ function post_bkmarks_get_url_title($url){
 
 }
 
-
 function post_bkmarks_get_existing_link_id($link_url,$link_name){
 
     global $wpdb;
     
-    $query = sprintf('SELECT * FROM %s WHERE link_url = "%s" AND link_name = "%s"',$wpdb->links,$link_url,$link_name);
+    $query = $wpdb->prepare( "SELECT * FROM $wpdb->links WHERE `link_url` = %s AND `link_name` = %s",esc_url_raw($link_url),sanitize_text_field($link_name) );
     
     $r = $wpdb->get_row( $query );
     
