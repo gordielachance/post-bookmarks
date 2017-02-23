@@ -95,7 +95,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                     //add link
                     if ( current_user_can( 'manage_links' ) ){   
                         ?>
-                        <a id="post-bkmarks-add-link" href="link-add.php" class="button"><?php echo esc_html_x('Add New', 'link'); ?></a>
+                        <a id="post-bkmarks-add-link" href="link-add.php" class="button"><?php echo esc_html_x('Add Row', 'link', 'post-bkmarks'); ?></a>
                         <?php
                     }
                 }
