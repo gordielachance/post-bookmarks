@@ -116,7 +116,11 @@ jQuery(function($){
                 var pattern = 'post_bkmarks[links][0]';
                 var replaceby = 'post_bkmarks[links]['+rows_list.length+']';
                 return html.split(pattern).join(replaceby);
-            }); 
+            });
+            
+            //check checkbox & set 'Save' action
+            new_row.find('.check-column input[type="checkbox"]').prop('checked', true);
+            $('#post-bkmarks-bulk-action-selector-top').val("save");
  
             //add line
             new_row.insertAfter( row_blank );

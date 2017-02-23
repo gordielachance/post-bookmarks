@@ -359,9 +359,6 @@ class Post_Bookmarks {
     }
 
     function metabox_content( $post ){
-        
-        //checkbox notice
-        add_settings_error('post_bkmarks', 'checkboxes_notice', __("Don't forget to check the rows concerned before clicking 'Apply' !",'post-bkmarks'),'updated inline');
 
         //attached links
         $links_table = new Post_Bookmarks_List_Table();
