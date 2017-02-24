@@ -69,8 +69,8 @@ add_filter('post_bkmarks_output_single_link','custom_output_single_link',10,2);
 == Screenshots ==
 
 1. Post Bookmarks metabox in the backend editor
-2. Settings page
-3. Links displayed under a post
+2. Links displayed under a post
+3. Settings page
 
 == Changelog ==
 
