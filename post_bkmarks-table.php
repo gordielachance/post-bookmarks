@@ -524,10 +524,10 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 
         if ( $link->link_id ){
             //edit
-            $actions['edit'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-edit post-bkmarks-row-action',get_edit_bookmark_link( $link ),__('Edit'));
+            $actions['edit'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-edit',get_edit_bookmark_link( $link ),__('Edit'));
             //delete
             $onclick = sprintf("return confirm('%s');",__("Are you sure you want to delete this item?",'post-bkmarks'));
-            $actions['delete'] = sprintf('<a class="%s" href="%s" onclick="%s">%s</a>','post-bkmarks-row-action-delete post-bkmarks-row-action',wp_nonce_url("link.php?action=delete&link_id=$link->link_id", 'delete-bookmark_' . $link->link_id),$onclick,__('Delete'));
+            $actions['delete'] = sprintf('<a class="%s" href="%s" onclick="%s">%s</a>','post-bkmarks-row-action-delete',wp_nonce_url("link.php?action=delete&link_id=$link->link_id", 'delete-bookmark_' . $link->link_id),$onclick,__('Delete'));
         }
 
 		return $this->row_actions( $actions, true );

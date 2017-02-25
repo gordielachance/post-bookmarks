@@ -60,6 +60,13 @@ body{
                         display:none;
                     }
                 }
+
+                .row-actions{
+                    span.save{
+                        display:none;
+                    }
+                }
+
                 &.post-bkmarks-row-edit{
                     .post-bkmarks-data{
                         &.post-bkmarks-data-display{
@@ -69,9 +76,16 @@ body{
                             display:inherit;
                         }
                     }
+
                     .row-actions{
-                        
+                        span.save{
+                            display:inline;
+                        }
+                        span.edit{
+                            display:none;
+                        }
                     }
+
                 }
             }
 
@@ -150,6 +164,11 @@ body{
         .postbox#post-bookmarks{
             #add-link-section{
                 .page-title-action{
+                    display:none;
+                }
+            }
+            .wp-list-table{
+                .column-action{
                     display:none;
                 }
             }

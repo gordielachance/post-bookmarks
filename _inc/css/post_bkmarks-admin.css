@@ -41,11 +41,20 @@ body .postbox#post-bookmarks #the-list tr .post-bkmarks-data.post-bkmarks-data-d
 body .postbox#post-bookmarks #the-list tr .post-bkmarks-data.post-bkmarks-data-edit {
   display: none;
 }
+body .postbox#post-bookmarks #the-list tr .row-actions span.save {
+  display: none;
+}
 body .postbox#post-bookmarks #the-list tr.post-bkmarks-row-edit .post-bkmarks-data.post-bkmarks-data-display {
   display: none;
 }
 body .postbox#post-bookmarks #the-list tr.post-bkmarks-row-edit .post-bkmarks-data.post-bkmarks-data-edit {
   display: inherit;
+}
+body .postbox#post-bookmarks #the-list tr.post-bkmarks-row-edit .row-actions span.save {
+  display: inline;
+}
+body .postbox#post-bookmarks #the-list tr.post-bkmarks-row-edit .row-actions span.edit {
+  display: none;
 }
 body .postbox#post-bookmarks #the-list .post-bkmarks-link-draghandle {
   text-align: center;
@@ -95,5 +104,8 @@ body.js .postbox#post-bookmarks #the-list tr.post-bkmarks-row-new:first-child {
   display: none;
 }
 body.no-js .postbox#post-bookmarks #add-link-section .page-title-action {
+  display: none;
+}
+body.no-js .postbox#post-bookmarks .wp-list-table .column-action {
   display: none;
 }
