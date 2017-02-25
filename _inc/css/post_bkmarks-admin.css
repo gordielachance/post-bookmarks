@@ -35,6 +35,9 @@ body .postbox#post-bookmarks .post-bkmarks-favicon {
   background-position: center center;
   background-repeat: no-repeat;
 }
+body .postbox#post-bookmarks #the-list tr.is-url-attached .check-column input[type="checkbox"] {
+  background-color: #d9ffbf;
+}
 body .postbox#post-bookmarks #the-list tr .post-bkmarks-data.post-bkmarks-data-display {
   display: inherit;
 }

@@ -52,6 +52,9 @@ body{
         #the-list {
 
             tr{
+                &.is-url-attached .check-column input[type="checkbox"]{
+                    background-color:#d9ffbf;
+                }
                 .post-bkmarks-data{
                     &.post-bkmarks-data-display{
                         display:inherit;

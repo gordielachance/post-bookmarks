@@ -8,8 +8,11 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
     
     var $current_link_idx = -1;
     var $links_per_page = 20;
+    var $post_link_ids = array(); //IDs of links attached to this post
 
     function prepare_items() {
+        global $post;
+        
         $columns = $this->get_columns();
         $hidden = array();
         $sortable = $this->get_sortable_columns();
@@ -26,6 +29,8 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         'per_page'    => $this->links_per_page
         ) );
         $this->items = $this->items;
+        
+        $this->post_link_ids = (array)get_post_meta( $post->ID, '_post_bkmarks_ids', true );
 
     }
 
@@ -51,7 +56,13 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
     */
 	public function single_row( $item ) {
         $this->current_link_idx ++;
-
+        
+        if ( ($check_attached_id = $item->link_id) || ( $check_attached_id = post_bkmarks_get_existing_link_id($item->link_url) ) ){
+            if ( in_array($check_attached_id,$this->post_link_ids) ){
+                $item->row_classes[] = 'is-url-attached';
+            }
+        }
+        
 		printf( '<tr %s data-link-key="%s" data-link-id="%s">',post_bkmarks_get_classes_attr($item->row_classes),$this->current_link_idx,$item->link_id );
 		$this->single_row_columns( $item );
 		echo '</tr>';
@@ -522,12 +533,9 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 			return '';
 		}
         
-        global $post;
         $actions = array();
         
-        // get existing links IDs for post
-        $post_link_ids = (array)get_post_meta( $post->ID, '_post_bkmarks_ids', true );
-        $is_attached = in_array($link->link_id,$post_link_ids);
+        $is_attached = in_array($link->link_id,$this->post_link_ids);
 
         //save
         $save_text = ($is_attached) ? __('Save') : __('Save & Link','post-bkmarks');
