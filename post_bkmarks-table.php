@@ -522,10 +522,12 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         
         $actions = array();
 
-        $edit_link = get_edit_bookmark_link( $link );
-        $actions['edit'] = '<a href="' . $edit_link . '">' . __('Edit') . '</a>';
         if ( $link->link_id ){
-            $actions['delete'] = "<a class='submitdelete' href='" . wp_nonce_url("link.php?action=delete&amp;link_id=$link->link_id", 'delete-bookmark_' . $link->link_id) . "' onclick=\"if ( confirm( '" . esc_js(sprintf(__("You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete."), $link->link_name)) . "' ) ) { return true;}return false;\">" . __('Delete') . "</a>";
+            //edit
+            $actions['edit'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-edit post-bkmarks-row-action',get_edit_bookmark_link( $link ),__('Edit'));
+            //delete
+            $onclick = sprintf("return confirm('%s');",__("Are you sure you want to delete this item?",'post-bkmarks'));
+            $actions['delete'] = sprintf('<a class="%s" href="%s" onclick="%s">%s</a>','post-bkmarks-row-action-delete post-bkmarks-row-action',wp_nonce_url("link.php?action=delete&link_id=$link->link_id", 'delete-bookmark_' . $link->link_id),$onclick,__('Delete'));
         }
 
 		return $this->row_actions( $actions, true );
