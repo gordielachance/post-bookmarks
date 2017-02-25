@@ -46,9 +46,12 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 		parent::display_rows_or_placeholder();
 	}
     
-    //override parent function so we can add class to our rows
+    /*
+    override parent function so we can add attributes, etc.
+    */
 	public function single_row( $item ) {
-		printf( '<tr class="%s" data-link-id="%s">',$item->row_classes,$item->link_id );
+        $this->current_link_idx ++;
+		printf( '<tr class="%s" data-link-key="%s" data-link-id="%s">',$item->row_classes,$this->current_link_idx,$item->link_id );
 		$this->single_row_columns( $item );
 		echo '</tr>';
 	}
@@ -341,7 +344,6 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
      * This function SHOULD be overriden but we want to use column_defaut() as it is more handy, so use a trick here.
 	 */
 	public function column_cb( $link ) {
-        $this->current_link_idx += 1;
         return $this->column_default( $link, 'cb');
 	}
 
@@ -474,8 +476,8 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 
             case 'target':
                 
+                //TO FIX
                 $target = ($link->link_target) ? $link->link_target : '_none';
-
                 $option_target = post_bkmarks()->get_options('default_target');
 
                 //edit
@@ -490,7 +492,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 return sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($edit_classes),$edit_el );
                 
             break;
-                
+
             default:
                 $output = null;
                 return apply_filters('post_bkmarks_list_table_column_content',$output,$link,$column_name); //allow plugins to filter the content
