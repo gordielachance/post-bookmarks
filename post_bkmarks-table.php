@@ -322,7 +322,8 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             'url'           => __('URL'),
             'name'          => __('Name'),
             'category'          => __('Categories') . sprintf(' <small><a href="%s">+</a></small>',admin_url('edit-tags.php?taxonomy=link_category')),
-            'target'        => __('Target')
+            'target'        => __('Target','post-bkmarks'),
+            'action'        => __('Action','post-bkmarks')
         );
         
         return apply_filters('post_bkmarks_list_table_columns',$columns); //allow plugins to filter the columns
@@ -515,7 +516,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 	 * @return string Row action output for links.
 	 */
 	protected function handle_row_actions( $link, $column_name, $primary ) {
-		if ( 'url' !== $column_name ) {
+		if ( 'action' !== $column_name ) {
 			return '';
 		}
         
@@ -527,7 +528,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             $actions['delete'] = "<a class='submitdelete' href='" . wp_nonce_url("link.php?action=delete&amp;link_id=$link->link_id", 'delete-bookmark_' . $link->link_id) . "' onclick=\"if ( confirm( '" . esc_js(sprintf(__("You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete."), $link->link_name)) . "' ) ) { return true;}return false;\">" . __('Delete') . "</a>";
         }
 
-		return $this->row_actions( $actions );
+		return $this->row_actions( $actions, true );
 	}
     
 }

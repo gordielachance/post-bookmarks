@@ -47,9 +47,6 @@ body .postbox#post-bookmarks #the-list tr.post-bkmarks-row-edit .post-bkmarks-da
 body .postbox#post-bookmarks #the-list tr.post-bkmarks-row-edit .post-bkmarks-data.post-bkmarks-data-edit {
   display: inherit;
 }
-body .postbox#post-bookmarks #the-list tr.post-bkmarks-row-edit .row-actions {
-  display: none;
-}
 body .postbox#post-bookmarks #the-list .post-bkmarks-link-draghandle {
   text-align: center;
 }
