@@ -79,11 +79,14 @@ function post_bkmarks_get_url_title($url){
 
 }
 
-function post_bkmarks_get_existing_link_id($link_url,$link_name){
-
+function post_bkmarks_get_existing_link_id($link_url,$link_name = null){
     global $wpdb;
-    
-    $query = $wpdb->prepare( "SELECT * FROM $wpdb->links WHERE `link_url` = %s AND `link_name` = %s",esc_url_raw($link_url),sanitize_text_field($link_name) );
+
+    if ($link_name){
+        $query = $wpdb->prepare( "SELECT * FROM $wpdb->links WHERE `link_url` = %s AND `link_name` = %s",esc_url_raw($link_url),sanitize_text_field($link_name) );
+    }else{
+        $query = $wpdb->prepare( "SELECT * FROM $wpdb->links WHERE `link_url` = %s",esc_url_raw($link_url) );
+    }
     
     $r = $wpdb->get_row( $query );
     
