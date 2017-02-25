@@ -516,11 +516,15 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 	 * @return string Row action output for links.
 	 */
 	protected function handle_row_actions( $link, $column_name, $primary ) {
+        global $post;
+        
 		if ( 'action' !== $column_name ) {
 			return '';
 		}
         
         $actions = array();
+        // get existing links IDs for post
+        $post_link_ids = (array)get_post_meta( $post->ID, '_post_bkmarks_ids', true );
         
         //save
         $actions['save'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-save','#',__('Save'));
@@ -528,8 +532,12 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         if ( $link->link_id ){
             //edit
             $actions['edit'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-edit',get_edit_bookmark_link( $link ),__('Edit'));
-            //unlink
-            $actions['unlink'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-unlink','#',__('Unlink','post-bkmarks'));
+            
+            if ( in_array($link->link_id,$post_link_ids) ){
+                //unlink
+                $actions['unlink'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-unlink','#',__('Unlink','post-bkmarks'));
+            }
+            
             //delete
             $onclick = sprintf("return confirm('%s');",__("Are you sure you want to delete this item?",'post-bkmarks'));
             $actions['delete'] = sprintf('<a class="%s" href="%s" onclick="%s">%s</a>','post-bkmarks-row-action-delete',wp_nonce_url("link.php?action=delete&link_id=$link->link_id", 'delete-bookmark_' . $link->link_id),$onclick,__('Delete'));
