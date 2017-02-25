@@ -39,7 +39,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         
         //append blank row
         if ( current_user_can( 'manage_links' ) ){
-            $blank_link = (object)post_bkmarks()->sanitize_link(array('row_classes' => 'post-bkmarks-row-new post-bkmarks-row-edit'));
+            $blank_link = (object)post_bkmarks()->sanitize_link(array('row_classes' => array('post-bkmarks-row-new','post-bkmarks-row-edit')));
             $this->single_row($blank_link);
         }
         
@@ -51,7 +51,8 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
     */
 	public function single_row( $item ) {
         $this->current_link_idx ++;
-		printf( '<tr class="%s" data-link-key="%s" data-link-id="%s">',$item->row_classes,$this->current_link_idx,$item->link_id );
+
+		printf( '<tr %s data-link-key="%s" data-link-id="%s">',post_bkmarks_get_classes_attr($item->row_classes),$this->current_link_idx,$item->link_id );
 		$this->single_row_columns( $item );
 		echo '</tr>';
 	}

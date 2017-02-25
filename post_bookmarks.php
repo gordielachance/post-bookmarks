@@ -549,7 +549,7 @@ class Post_Bookmarks {
             'link_name'     => null,
             'link_target'   => null,
             'link_category' => (array)$this->get_links_category(),
-            'row_classes'   => null, //class for the row, in the links table. eg. 'post-bkmarks-row-edit post-bkmarks-row-new post-bkmarks-row-suggest'
+            'row_classes'   => array(), //class for the row, in the links table. eg. array('post-bkmarks-row-edit','post-bkmarks-row-new','post-bkmarks-row-suggest')
         );
 
         $args = wp_parse_args((array)$args,$defaults);
