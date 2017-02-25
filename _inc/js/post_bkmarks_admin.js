@@ -2,11 +2,49 @@ jQuery(function($){
 
     $(document).ready(function(){
         
-        //Quick Edit
+        /**
+        To avoid creating complex ajax functions, trick it!
+        - check a single row checkbox 
+        - set the bulk action
+        - click the bulk action button
+        **/
+        function single_row_fire_bulk_action(row,bulk_action){
+            //add loading class
+            row.addClass('loading');
+            //uncheck all rows
+            var table = row.closest('.wp-list-table').find('.check-column input[type="checkbox"]').prop( "checked", false );
+            //check this row
+            row.find('.check-column input[type="checkbox"]').prop( "checked", true );
+            //set top bulk action
+            $('#post-bkmarks-bulk-action-selector-top').val(bulk_action);
+            //click top bulk button
+            $('#post-bkmarks-doaction').trigger('click');
+        }
+        
+        /* Row actions */
+        //edit
         $('#post-bookmarks .row-actions .edit a').live("click", function(event){
             event.preventDefault();
             var row = $(this).parents('tr');
             row.addClass('post-bkmarks-row-edit');
+        });
+        //save
+        $('#post-bookmarks .row-actions .save a').live("click", function(event){
+            event.preventDefault();
+            var row = $(this).parents('tr');
+            single_row_fire_bulk_action(row,'save');
+        });
+        //save
+        $('#post-bookmarks .row-actions .unlink a').live("click", function(event){
+            event.preventDefault();
+            var row = $(this).parents('tr');
+            single_row_fire_bulk_action(row,'unlink');
+        });
+        //save
+        $('#post-bookmarks .row-actions .delete a').live("click", function(event){
+            event.preventDefault();
+            var row = $(this).parents('tr');
+            single_row_fire_bulk_action(row,'delete');
         });
 
         // Look for changes in the value
