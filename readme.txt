@@ -76,6 +76,7 @@ add_filter('post_bkmarks_output_single_link','custom_output_single_link',10,2);
 
 = 2.1.1 =
 * improved row actions
+* colorize the checkbox if the URL of the link is attached to the post
 
 = 2.1.0 =
 * remove 'hide_from_bookmarks' option (see FAQ)
