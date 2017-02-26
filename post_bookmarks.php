@@ -117,7 +117,8 @@ class Post_Bookmarks {
         
         add_filter('the_content', 'post_bkmarks_output_links', 100, 2);
         
-        add_filter( 'get_bookmarks', array(&$this,'filter_bookmarks'),10,2);
+        add_filter( 'get_bookmarks', array(&$this,'exclude_posts_bookmarks'),10,2);
+        add_filter( 'get_bookmarks', array(&$this,'filter_bookmarks_for_post'),10,2);
         
         add_filter('redirect_post_location',array($this, 'metabox_variables_redirect')); //redirect with searched links text - http://wordpress.stackexchange.com/a/52052/70449
         
@@ -278,52 +279,61 @@ class Post_Bookmarks {
         
     }
 
-    function filter_bookmarks($bookmarks,$r){
+    /**
+    Exclude all posts bookmarks from the bookmarks query
+    **/
+    
+    function exclude_posts_bookmarks($bookmarks,$r){
 
-        if ( isset($r['post_bkmarks']) ){
-            
-            $do_include = (bool)$r['post_bkmarks'];
-            $pbkm_category = $this->get_links_category();
-            $args_categories = array();
+        if ( !isset($r['post_bkmarks_exclude']) ) return $bookmarks;
 
-            //category
-            if ( isset($r['category']) ){
-                if ( $args_categories = explode(',',$r['category']) ){
-                    if (in_array($pbkm_category,$args_categories)) return $bookmarks; //we are looking for the post bookmarks category, abord
-                }
-            }
-            
-            switch( $do_include ){
+        $pbkm_category = $this->get_links_category();
+        
+        //there is no 'exclude_category' parameter, so exclude all links IDs from the post bookmarks category
 
-                case true: //include only our links
-
-                    $args_categories[] = $pbkm_category;
-                    $r['category'] = implode(',',$args_categories);
-
-                break;
-
-                case false: //exclude our links
-
-                    //re-run query.
-                    //there is no 'exclude_category' parameter, so exclude all links IDs
-                    if ( $pbkm_links = get_bookmarks( array('post_bkmarks' => true) ) ){
-                        $pbkm_links_ids = array();
-                        foreach((array)$pbkm_links as $link){
-                            $pbkm_links_ids[] = $link->link_id;
-                        }
-
-                        $r['exclude'] = implode(',',$pbkm_links_ids);
-                    }
-
-                break;
+        if ( $pbkm_links = get_bookmarks( array('category' => $pbkm_category) ) ){
+            $pbkm_links_ids = array();
+            foreach((array)$pbkm_links as $link){
+                $pbkm_links_ids[] = $link->link_id;
             }
 
-            unset($r['post_bkmarks']);
+            $r['exclude'] = implode(',',$pbkm_links_ids);
+            unset($r['post_bkmarks_exclude']); //avoid infinite loop
             $bookmarks = get_bookmarks($r);
+            
+        }
+        
+        return $bookmarks;
 
+
+    }
+    
+    /**
+    Filter the bookmarks attached to a post
+    **/
+    
+    function filter_bookmarks_for_post($bookmarks,$r){
+
+        if ( !isset($r['post_bkmarks_for_post']) ) return $bookmarks;
+        
+        $post_id = $r['post_bkmarks_for_post'];
+        $pbkm_links_ids = post_bkmarks_get_links_ids_for_post($post_id);
+        
+        $r['include'] = implode(',',$pbkm_links_ids);
+        unset($r['post_bkmarks_for_post']); //avoid infinite loop
+        $bookmarks = get_bookmarks($r);
+        
+        //sort
+        //TO FIX TO CHECK
+        $r['orderby'] = post_bkmarks()->get_options('links_orderby');
+        
+        if ($r['orderby'] == 'custom'){
+            $link_ids = post_bkmarks_get_links_ids_for_post($post_id);
+            $bookmarks = post_bkmarks_sort_using_ids_array($bookmarks,$link_ids);
         }
 
         return $bookmarks;
+        
     }
     
     function metabox_variables_redirect($location) {
@@ -365,12 +375,11 @@ class Post_Bookmarks {
 
         //attached links
         $links_table = new Post_Bookmarks_List_Table();
-        $links_table->items = $links_table->get_tab_links();
+        $links_table->items = post_bkmarks_get_tab_links();
+
         $classes = array('metabox-table-tab');
         $classes[] = sprintf('metabox-table-tab-%s',$this->links_tab);
-        
-        
-        
+
         ?>
         <!--current links list-->
         <div id="post-bkmarks-list" <?php post_bkmarks_classes_attr($classes);?>>

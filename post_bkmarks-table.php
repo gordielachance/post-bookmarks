@@ -141,7 +141,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         $link_attached_classes = $link_library_classes = array();
         
         if ( post_bkmarks()->links_tab == 'attached' ) $link_attached_classes[] = 'current';
-        $link_attached_count = count( $this->get_tab_links('attached') );
+        $link_attached_count = count( post_bkmarks_get_tab_links('attached') );
         
         $link_attached = sprintf(
             __('<a href="%1$s"%2$s>%3$s <span class="count">(<span class="imported-count">%4$s</span>)</span></a>'),
@@ -152,7 +152,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         );
         
         if ( post_bkmarks()->links_tab == 'library' ) $link_library_classes[] = 'current';
-        $link_library_count = count( $this->get_tab_links('library') );
+        $link_library_count = count( post_bkmarks_get_tab_links('library') );
         
         if ($link_library_count){
             $link_library = sprintf(
@@ -173,61 +173,6 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         $links = apply_filters('post_bkmarks_get_table_tabs',$links);
         
         $links = array_filter($links);
-        
-        return $links;
-    }
-    
-    function get_tab_links($tab = null){
-        global $post;
-        $links = array();
-        
-        //current tab
-        if (!$tab) $tab = post_bkmarks()->links_tab;
-
-        switch ($tab){
-            case 'library':
-                $links = get_bookmarks( array('limit'=>-1) );
-            break;
-            case 'attached':
-                $links = post_bkmarks_get_for_post($post->ID);
-            break;
-        }
-        $links = apply_filters('post_bkmarks_get_table_tab_links',$links,$tab);
-        
-        //sanitize links
-        foreach ($links as $key=>$link){
-            $links[$key] = (object)post_bkmarks()->sanitize_link($link);
-        }
-        
-        //if this is not the attached tab, remove the attached links (check by link ID and link URL)
-        if ($tab != 'attached'){
-            
-            //attached links IDs
-            $attached_links_ids = post_bkmarks_get_links_ids_for_post($post->ID);
-            
-            $links = array_filter(
-                (array)$links,
-                function ($link) use ($attached_links_ids) {
-                    return ( (!in_array($link->link_id,$attached_links_ids)) && (!post_bkmarks_get_existing_link_id($link->link_url)) );
-                }
-            );  
-        }
-
-        
-        //filter results
-        if ( $search = strtolower(post_bkmarks()->filter_links_text) ){
-            
-            foreach ($links as $key=>$link){
-                
-                $in_name    = strpos(strtolower($link->link_name), $search);
-                $in_url     = strpos(strtolower($link->link_url), $search);
-                
-                if ( ($in_name === false) && ($in_url === false) ){
-                    unset($links[$key]);
-                }
-                
-            }
-        }
         
         return $links;
     }

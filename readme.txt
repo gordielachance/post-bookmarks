@@ -37,11 +37,16 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 == Frequently Asked Questions ==
 
-= How can I hide the links from Post Bookmarks ? =
-You can add the links created with Post Bookmarks using the 'post_bkmarks' argument when querying bookmarks.
-Example : 
+= How can I get only the links attached to a post using get_bookmarks() ? =
+Use the 'post_bkmarks_for_post' argument.  Example : 
 `<?php
-get_bookmarks( array('post_bkmarks'=>false) );
+get_bookmarks( array('post_bkmarks_for_post'=>YOUR-POST-ID-HERE) );
+?>`
+
+= How can I exclude all the links created by this using get_bookmarks() ? =
+Use the 'post_bkmarks_exclude' argument.  Example : 
+`<?php
+get_bookmarks( array('post_bkmarks_exclude'=>true) );
 ?>`
 
 = How can I style a link based on its domain, using CSS ? =

@@ -20,49 +20,56 @@ function post_bkmarks_get_links_ids_for_post($post_id = null){
     return get_post_meta( $post_id, '_post_bkmarks_ids', true );
 }
 
-function post_bkmarks_get_for_post($post_id = null,$args= array()){
+function post_bkmarks_get_tab_links($tab = null){
     global $post;
-    if (!$post_id) $post_id = $post->ID;
-    if (!$post_id) return;
-    
-    $post_links = array();
-    $defaults = array(
-        'orderby'   => post_bkmarks()->get_options('links_orderby'),
-        'order'     => 'ASC'
-    );
-    
-    $orderby_allowed = array('name','custom');
-    $orderby = ( isset($args['orderby']) && in_array($args['orderby'],$orderby_allowed) ) ? $args['orderby'] : null;
-    
-    $args = wp_parse_args($args,$defaults);
-    
-    if ($link_ids = post_bkmarks_get_links_ids_for_post($post_id)){
+    $links = array();
 
-        $args['include'] = implode(',',$link_ids);
-        $links = get_bookmarks( $args );
+    //current tab
+    if (!$tab) $tab = post_bkmarks()->links_tab;
 
-        //We could use the 'include' arg with get_bookmarks(); but it override some other ones (eg.category).  So let's rather filter links now.
-        foreach($links as $link){
-            if ( !in_array($link->link_id,$link_ids) ) continue;
-            $post_links[] = $link;
-            
-        }
+    $args = array();
+    $args = apply_filters('post_bkmarks_tab_links_args',$args,$tab,$post->ID);
 
-        if ($orderby == 'custom'){
-            $links = post_bkmarks_sort_using_ids_array($post_links,$link_ids); //TO FIX should be a filter ?
-        }
+    if ($tab == 'attached'){
+        $args['post_bkmarks_for_post'] = $post->ID;
     }
     
-    //allow plugins to filter this
-    $post_links = apply_filters('post_bkmarks_get_for_post_pre',$post_links,$post_id,$orderby);
+    //search filter
+    if ( $search = strtolower(post_bkmarks()->filter_links_text) ){
+        $args['search'] = $search;
+    }
     
+    $links = get_bookmarks( $args );
+    $links = apply_filters('post_bkmarks_get_tab_links',$links,$tab,$post->ID);
+
     //sanitize links
-    foreach ((array)$post_links as $key=>$link){
-        $post_links[$key] = (object)post_bkmarks()->sanitize_link($link);
+    foreach ($links as $key=>$link){
+        $links[$key] = (object)post_bkmarks()->sanitize_link($link);
     }
 
-    return $post_links;
-    
+    //if this is not the attached tab, remove the attached links (check by link ID and link URL)
+    if ($tab != 'attached'){
+        
+        //attached links
+        $attached_ids = array();
+        $attached_urls = array();
+        if ( $attached_links = get_bookmarks( array('post_bkmarks_for_post' => $post->ID) ) ){
+            foreach ($attached_links as $attached_link){
+                $attached_ids[] = $attached_link->link_id;
+                $attached_urls[] = $attached_link->link_url;
+            }
+        }
+
+        $links = array_filter(
+            $links,
+            function ($link) use ($attached_ids,$attached_urls) {
+                return ( (!in_array($link->link_id,$attached_ids)) && (!in_array($link->link_url,$attached_urls)) );
+            }
+        );
+
+    }
+
+    return $links;
 }
 
 /*
@@ -154,7 +161,9 @@ function post_bkmarks_output_for_post($post_id = null){
     $title_el = null;
     $blogroll = array();
     
-    if ( $post_bkmarks = post_bkmarks_get_for_post($post_id) ){
+    $args = array('post_bkmarks_for_post'=>$post_id);
+    
+    if ( $post_bkmarks = get_bookmarks($args) ){
 
         foreach ((array)$post_bkmarks as $link){
             $blogroll[] = post_bkmarks_output_single_link($link);
