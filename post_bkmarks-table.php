@@ -425,7 +425,9 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                     $name
                 );
                 
-                return sprintf( '<p%s>%s</p>',post_bkmarks_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($edit_classes),$edit_el );
+                return 
+                    sprintf( '<p%s>%s</p>',post_bkmarks_get_classes_attr($display_classes),$display_el ) . //display
+                    sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($edit_classes),$edit_el ); //edit
 
             break;
 
@@ -443,7 +445,9 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 $short_url = url_shorten( $link->link_url );
                 $display_el = sprintf('<a target="_blank" href="%s">%s</a>',$link->link_url,$short_url);
                 
-                return sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($edit_classes),$edit_el );
+                return 
+                    sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($display_classes),$display_el ) . //display
+                    sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($edit_classes),$edit_el ); //edit
                 
             break;
                 
@@ -463,27 +467,42 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 if ( empty( $categories ) )
                     return;
                 
-                $cats_str = null;
+                $cats_display = array();
+                $cats_edit = array();
 
                 foreach ( $categories as $category ) {
                     $cat_id = $category->term_id;
 
                     /** This filter is documented in wp-includes/category-template.php */
                     $name = esc_html( apply_filters( 'the_category', $category->name ) );
+                    
+                    $is_checked = in_array( $cat_id, $checked_categories );
+                    $is_default_cat = ($cat_id == $default);
+                    
+                    if ($is_checked && !$is_default_cat){
+                        $cats_display[] = $name;
+                    }
 
-                    $cats_str.= sprintf('<li id="link-category-%s"><label for="in-link-category-%s" class="selectit"><input value="%s" type="checkbox" name="%s[]" id="in-link-category-%s" %s %s />%s</label></li>',
-                           $cat_id,
-                           $cat_id,
-                           $cat_id,
-                           $this->get_field_name( 'link_category' ),
-                           $cat_id,
-                           checked( in_array( $cat_id, $checked_categories ), true, false),
-                           disabled( $cat_id, $default, false),
-                           $name
+                    $cats_edit[]= sprintf('<li id="link-category-%s"><label for="in-link-category-%s" class="selectit"><input value="%s" type="checkbox" name="%s[]" id="in-link-category-%s" %s %s />%s</label></li>',
+                        $cat_id,
+                        $cat_id,
+                        $cat_id,
+                        $this->get_field_name( 'link_category' ),
+                        $cat_id,
+                        checked( $is_checked, true, false),
+                        disabled( $is_default_cat, true, false),
+                        $name
                     );
                 }
                 
-                return sprintf('<ul>%s</ul>',$cats_str);
+                $display_el = implode(", ",$cats_display);
+                $edit_el = sprintf('<ul>%s</ul>',implode("\n",$cats_edit));
+                
+                return 
+                    sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($display_classes),$display_el ) . //display
+                    sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($edit_classes),$edit_el ); //edit
+                
+                
                 
             break;
                 
