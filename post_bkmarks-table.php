@@ -516,7 +516,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 $edit_el = sprintf('<input id="link_target_blank" type="checkbox" name="%s" value="_blank" %s/><small>%s</small>',
                                    $this->get_field_name('link_target'),
                                    checked( $option_target, '_blank',false),
-                                   __('<code>_blank</code> &mdash; new window or tab.','post-bkmarks')
+                                   '<code>_blank</code>'
                                   );
 
                 //display
