@@ -276,7 +276,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         $actions['unlink'] = __('Unlink items','post-bkmarks');
         
         if ( current_user_can( 'manage_links' ) ){
-            $actions['delete'] = __('Move to Trash');
+            $actions['delete'] = __('Delete');
         }
 
         return apply_filters('post_bkmarks_get_bulk_actions',$actions);
@@ -566,12 +566,15 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             
             if ( $is_attached ){
                 //unlink
-                $actions['unlink'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-unlink','#',__('Unlink','post-bkmarks'));
+                $unlink_url = add_query_arg(array('post-bkmarks-action'=>'unlink','link_id'=>$link->link_id),get_edit_post_link());
+                $unlink_url = wp_nonce_url($unlink_url,'post_bkmarks_link','post_bkmarks_link_nonce');
+                $actions['unlink'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-unlink',$unlink_url,__('Unlink','post-bkmarks'));
             }
             
             //delete
-            $onclick = sprintf("return confirm('%s');",__("Are you sure you want to delete this item?",'post-bkmarks'));
-            $actions['delete'] = sprintf('<a class="%s" href="%s" onclick="%s">%s</a>','post-bkmarks-row-action-delete',wp_nonce_url("link.php?action=delete&link_id=$link->link_id", 'delete-bookmark_' . $link->link_id),$onclick,__('Delete'));
+            $delete_url = add_query_arg(array('post-bkmarks-action'=>'delete','link_id'=>$link->link_id),get_edit_post_link());
+            $delete_url = wp_nonce_url($delete_url,'post_bkmarks_link','post_bkmarks_link_nonce');
+            $actions['delete'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-delete',$delete_url,__('Delete'));
         }
 
 		return $this->row_actions( $actions, true );

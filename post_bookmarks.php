@@ -109,8 +109,11 @@ class Post_Bookmarks {
         
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts_styles' ) );
         
+        add_action( 'admin_init', array(&$this,'save_link_action'));
+        
         add_action( 'add_meta_boxes', array($this, 'metabox_add'));
-        add_action( 'save_post', array(&$this,'metabox_save'));
+        add_action( 'save_post', array(&$this,'save_bulk_action'));
+        
         
         add_filter('the_content', 'post_bkmarks_output_links', 100, 2);
         
@@ -386,7 +389,7 @@ class Post_Bookmarks {
         <!--search links-->
         <?php
         // Add an nonce field so we can check for it later.
-        wp_nonce_field( 'post_bkmarks_meta_box', 'post_bkmarks_meta_box_nonce' );
+        wp_nonce_field( 'post_bkmarks_bulk', 'post_bkmarks_bulk_nonce' );
     }
 
     /**
@@ -395,7 +398,7 @@ class Post_Bookmarks {
     * @param int $post_id The ID of the post being saved.
     */
 
-    function metabox_save( $post_id ) {
+    function save_bulk_action( $post_id ) {
 
         /*
         * We need to verify this came from our screen and with proper authorization,
@@ -403,43 +406,13 @@ class Post_Bookmarks {
         */
 
         // Check if our nonce is set.
-        if ( ! isset( $_POST['post_bkmarks_meta_box_nonce'] ) ) return;
+        if ( ! isset( $_POST['post_bkmarks_bulk_nonce'] ) ) return;
 
         // Verify that the nonce is valid.
-        if ( ! wp_verify_nonce( $_POST['post_bkmarks_meta_box_nonce'], 'post_bkmarks_meta_box' ) ) return;
+        if ( ! wp_verify_nonce( $_POST['post_bkmarks_bulk_nonce'], 'post_bkmarks_bulk' ) ) return;
 
         // If this is an autosave, our form has not been submitted, so we don't want to do anything.
         if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
-
-        // Check the user's permissions.
-        
-        if ( ! current_user_can( 'manage_links' ) ) return;//user cannot edit links
-        
-        if ( isset( $_REQUEST['post_type'] ) ){
-            
-            if ( !in_array( $_REQUEST['post_type'], $this->allowed_post_types() ) ) return;//is not allowed post type
-            
-            //TO FIX TO CHECK
-            if ( 'page' == $_REQUEST['post_type'] ){
-                if ( !current_user_can( 'edit_page', $post_id ) ) return;//user cannot edit page
-            }else{
-                if ( !current_user_can( 'edit_post', $post_id ) ) return;//user cannot edit post
-            }
-
-        }
-        
-        /* OK, its safe for us to save the data now. */
-        
-        // get existing links IDs for post
-        $post_link_ids = (array)get_post_meta( $post_id, '_post_bkmarks_ids', true );
-        
-        //keep only the checked links
-        $post_link_ids = array_filter(
-            $post_link_ids,
-            function ($link){
-            return ( is_int($link) );
-            }
-        );
 
         // get links data from form
         $form_data = ( isset($_POST['post_bkmarks']) ) ? $_POST['post_bkmarks'] : null;
@@ -456,45 +429,96 @@ class Post_Bookmarks {
 
         //table bulk actions
         if ( $bulk_action = $this->metabox_table_get_current_action() ){
-
-            switch($bulk_action){
-                case 'save':
-                    $add_ids = array();
-                    foreach($form_links as $link_form){
-                        $link_id = $this->save_link($link_form);
-                        if ( ($link_id = $this->save_link($link_form)) && (!is_wp_error($link_id)) ){
-                            $add_ids[] = $link_id;
-                        }
-                    }
-                    $post_link_ids = array_merge($post_link_ids, $add_ids);
-                break;
-                case 'unlink':
-                    //TO FIX : remove from category 'post bookmarks' if link belongs only to this post
-                case 'delete':
-                    $remove_ids = array();
-                    $form_links = array_filter( //keep only the existing links
-                        $form_links,
-                        function ($link){
-                        return ( $link['link_id'] );
-                        }
-                    );
-                    
-                    foreach($form_links as $link_form){
-                        if ( ($bulk_action == 'delete') && ( current_user_can( 'manage_links' ) ) ){
-                            wp_delete_link($link_form['link_id']);
-                        }
-                        $remove_ids[] = $link_form['link_id'];
-                    }
-                    $post_link_ids = array_diff($post_link_ids, $remove_ids);
-                break;
-            }
-
+            return $this->do_post_bookmarks_action($post_id,$form_links,$bulk_action);
         }
 
-        $post_link_ids = array_unique($post_link_ids);
-        update_post_meta( $post_id, '_post_bkmarks_ids', $post_link_ids );
-        return $post_link_ids;
+    }
+    
+    /**
+    Do action for direct links or via ajax.
+    **/
+    
+    function save_link_action( $post_id ){
 
+        // Check if our nonce is set.
+        if ( ! isset( $_GET['post_bkmarks_link_nonce'] ) ) return;
+
+        // Verify that the nonce is valid.
+        if ( ! wp_verify_nonce( $_GET['post_bkmarks_link_nonce'], 'post_bkmarks_link' ) ) return;
+        
+        // Check post ID
+        $post_id = ( isset($_GET['post']) ) ? $_GET['post'] : null;
+        if (!$post_id) return;
+        
+        // Check action
+        $action = $this->metabox_table_get_current_action();
+        $allowed_actions = array('unlink','delete');
+        if (!in_array($action,$allowed_actions)) return;
+
+        // Populate link; we only need the link ID for the 'unlink' and 'delete' actions.
+        $link['link_id'] = ( isset($_GET['link_id']) ) ? $_GET['link_id'] : null;
+        $links = array($link);
+        
+        return $this->do_post_bookmarks_action($post_id,$links,$action);
+        
+    }
+    
+    /**
+    The main action that treats the links for this post.
+    Can be called when the metabox is submitted, or via ajax.
+    **/
+    
+    function do_post_bookmarks_action($post_id,$links,$action){
+
+        $post_type = get_post_type($post_id);
+        if (!$post_type) return;
+        
+        //TO FIX TO CHECK
+        // Check the user's permissions.
+        
+        if ( ! current_user_can( 'manage_links' ) ) return;//user cannot edit links
+        if ( !in_array( $post_type, $this->allowed_post_types() ) ) return;//is not allowed post type
+
+        // get existing links IDs for post
+        $post_link_ids = $post_link_db_ids = (array)get_post_meta( $post_id, '_post_bkmarks_ids', true );
+        
+        switch($action){
+            case 'save':
+                $add_ids = array();
+                foreach($links as $link){
+                    $link_id = $this->save_link($link);
+                    if ( ($link_id = $this->save_link($link)) && (!is_wp_error($link_id)) ){
+                        $add_ids[] = $link_id;
+                    }
+                }
+                $post_link_ids = array_merge($post_link_ids, $add_ids);
+            break;
+            case 'unlink':
+                //TO FIX : remove from category 'post bookmarks' if link belongs only to this post
+            case 'delete':
+                $remove_ids = array();
+                $links = array_filter( //keep only the existing links
+                    $links,
+                    function ($link){
+                    return ( $link['link_id'] );
+                    }
+                );
+
+                foreach($links as $link){
+                    if ( ($action == 'delete') && ( current_user_can( 'manage_links' ) ) ){
+                        wp_delete_link($link['link_id']);
+                    }
+                    $remove_ids[] = $link['link_id'];
+                }
+                $post_link_ids = array_diff($post_link_ids, $remove_ids);
+            break;
+        }
+        
+        $post_link_ids = array_unique($post_link_ids);
+        if ($post_link_ids != $post_link_db_ids){
+            update_post_meta( $post_id, '_post_bkmarks_ids', $post_link_ids );
+        }
+        return $post_link_ids;
     }
     
 	/**
