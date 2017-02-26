@@ -64,7 +64,7 @@ class Post_Bookmarks {
         $this->basename   = plugin_basename( $this->file );
         $this->plugin_dir = plugin_dir_path( $this->file );
         $this->plugin_url = plugin_dir_url ( $this->file );
-        $this->links_tab = ( isset($_REQUEST['pbkm_tab'] ) ) ? $_REQUEST['pbkm_tab'] : null; //links tab selected backend
+        $this->links_tab = ( isset($_REQUEST['pbkm_tab'] ) ) ? $_REQUEST['pbkm_tab'] : 'attached'; //links tab selected backend
 
         $this->options_default = array(
             'ignored_post_type'     => array('attachment','revision','nav_menu_item'),
@@ -337,7 +337,7 @@ class Post_Bookmarks {
             );
         }
         
-        if ($this->links_tab){
+        if ($this->links_tab != 'attached'){
             $location = add_query_arg( 
                 array(
                     'pbkm_tab'   => $this->links_tab
@@ -367,16 +367,14 @@ class Post_Bookmarks {
         $links_table = new Post_Bookmarks_List_Table();
         $links_table->items = $links_table->get_tab_links();
         $classes = array('metabox-table-tab');
-        if ( $tab = post_bkmarks()->links_tab ){
-            $classes[] = sprintf('metabox-table-tab-%s',$tab);
-        }else{
-            $classes[] = 'metabox-table-tab-attached';
-        }
+        $classes[] = sprintf('metabox-table-tab-%s',$this->links_tab);
+        
+        
+        
         ?>
         <!--current links list-->
         <div id="post-bkmarks-list" <?php post_bkmarks_classes_attr($classes);?>>
             <?php
-        
                 settings_errors('post_bkmarks');
         
                 $links_table->prepare_items();

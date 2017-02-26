@@ -57,12 +57,6 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 	public function single_row( $item ) {
         $this->current_link_idx ++;
         
-        if ( ($check_attached_id = $item->link_id) || ( $check_attached_id = post_bkmarks_get_existing_link_id($item->link_url) ) ){
-            if ( in_array($check_attached_id,$this->post_link_ids) ){
-                $item->row_classes[] = 'is-url-attached';
-            }
-        }
-        
 		printf( '<tr %s data-link-key="%s" data-link-id="%s">',post_bkmarks_get_classes_attr($item->row_classes),$this->current_link_idx,$item->link_id );
 		$this->single_row_columns( $item );
 		echo '</tr>';
@@ -146,8 +140,8 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         $link_attached_count = $link_library_count = 0;
         $link_attached_classes = $link_library_classes = array();
         
-        if ( !post_bkmarks()->links_tab ) $link_attached_classes[] = 'current';
-        $link_attached_count = count( post_bkmarks_get_for_post($post->ID) );
+        if ( post_bkmarks()->links_tab == 'attached' ) $link_attached_classes[] = 'current';
+        $link_attached_count = count( $this->get_tab_links('attached') );
         
         $link_attached = sprintf(
             __('<a href="%1$s"%2$s>%3$s <span class="count">(<span class="imported-count">%4$s</span>)</span></a>'),
@@ -158,7 +152,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         );
         
         if ( post_bkmarks()->links_tab == 'library' ) $link_library_classes[] = 'current';
-        $link_library_count = count( get_bookmarks( array('limit'=>-1) ) );
+        $link_library_count = count( $this->get_tab_links('library') );
         
         if ($link_library_count){
             $link_library = sprintf(
@@ -183,22 +177,42 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         return $links;
     }
     
-    function get_tab_links(){
+    function get_tab_links($tab = null){
         global $post;
         $links = array();
-        switch (post_bkmarks()->links_tab){
+        
+        //current tab
+        if (!$tab) $tab = post_bkmarks()->links_tab;
+
+        switch ($tab){
             case 'library':
                 $links = get_bookmarks( array('limit'=>-1) );
             break;
-            default: //attached links
+            case 'attached':
                 $links = post_bkmarks_get_for_post($post->ID);
             break;
         }
-        $links = apply_filters('post_bkmarks_get_table_tab_links',$links);
+        $links = apply_filters('post_bkmarks_get_table_tab_links',$links,$tab);
         
-        foreach ((array)$links as $key=>$link){
+        //sanitize links
+        foreach ($links as $key=>$link){
             $links[$key] = (object)post_bkmarks()->sanitize_link($link);
         }
+        
+        //if this is not the attached tab, remove the attached links (check by link ID and link URL)
+        if ($tab != 'attached'){
+            
+            //attached links IDs
+            $attached_links_ids = post_bkmarks_get_links_ids_for_post($post->ID);
+            
+            $links = array_filter(
+                (array)$links,
+                function ($link) use ($attached_links_ids) {
+                    return ( (!in_array($link->link_id,$attached_links_ids)) && (!post_bkmarks_get_existing_link_id($link->link_url)) );
+                }
+            );  
+        }
+
         
         //filter results
         if ( $search = strtolower(post_bkmarks()->filter_links_text) ){
@@ -213,7 +227,6 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 }
                 
             }
-
         }
         
         return $links;
@@ -243,7 +256,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 		if ( ! empty( $_REQUEST['order'] ) ) {
 			echo '<input type="hidden" name="order" value="' . esc_attr( $_REQUEST['order'] ) . '" />';
 		}
-		if ( post_bkmarks()->links_tab ) {
+		if ( post_bkmarks()->links_tab != 'attached' ) {
 			echo '<input type="hidden" name="pbkm_tab" value="' . esc_attr( post_bkmarks()->links_tab ) . '" />';
 		}
 		?>

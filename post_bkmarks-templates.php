@@ -6,8 +6,8 @@ function post_bkmarks_classes_attr($classes){
 
 function post_bkmarks_get_classes_attr($classes){
     if (empty($classes)) return;
-    
-    foreach ($classes as $key=>$class){
+
+    foreach ((array)$classes as $key=>$class){
         $classes[$key] = sanitize_title($class);
     }
     
