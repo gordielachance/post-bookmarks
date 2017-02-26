@@ -2,64 +2,112 @@
 @import "compass/typography/text/ellipsis";
 @import '//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css';
 
-.loading{
-    pointer-events: none;
-    @include opacity(0.5);
-}
 
-body{
+#post-bkmarks-list{
+
+    .loading{
+        pointer-events: none;
+        @include opacity(0.5);
+    }
     
-    .postbox#post-bookmarks{
-
-        td{
-            overflow:hidden;
-            input[type='text']{
-                width:100%;
+    .ellipsis{
+        display:block;
+        @include ellipsis($no-wrap: true);
+    }
+    
+    >.search-box{ //filter links
+        
+    }
+    >.subsubsub{ //tabs
+        margin:0;
+        margin-bottom:1em;
+    }
+    
+    >.tablenav{ //bulk actions
+        #metabox-table-row-add-button{
+            margin:0;
+            body.no-js &{
+                display:none;
             }
         }
-        
-        .column-name .ellipsis{
-            display:block;
-            @include ellipsis($no-wrap: true);
+        &.top{
+            
         }
-
+        &.bottom{
+            
+        }
+        
+    }
+    
+    > table.wp-list-table{
         .column-reorder,.column-favicon {
             width: 2em;
             text-align:center;
         }
         
-        .ellipsis{
-            
-        }
-        
-        .column-category{
-            ul{
-                list-style: none;
-                padding:0;
-                margin:0;
+        .column-action{
+            body.no-js &{
+                display:none;
             }
         }
-
-        .post-bkmarks-favicon{
-            display: inline-block;
-            width: 2em;
-            height: 2em;
-            background-position: center center;
-            background-repeat: no-repeat;
-        }
-
-
+        
         #the-list {
 
             tr{
-                &.is-url-attached .check-column input[type="checkbox"]{
-                    background-color:#d9ffbf;
+
+                td{
+                    overflow:hidden;
+                    input[type='text']{
+                        width:100%;
+                    }
+                    
+                    &.column-reorder{
+                        .metabox-table-row-draghandle {
+                            text-align: center;
+                            &:not(.disabled) {
+                                cursor: pointer;
+                                cursor: hand;
+                            }
+                            &.disabled{
+                                opacity:0.5;
+                            }
+                        }
+                    }
+   
+                    &.column-category{
+                        ul{
+                            list-style: none;
+                            padding:0;
+                            margin:0;
+                        }
+                    }
+                    &.column-favicon{
+                        .post-bkmarks-favicon{
+                            display: inline-block;
+                            width: 2em;
+                            height: 2em;
+                            background-position: center center;
+                            background-repeat: no-repeat;
+                        }
+                    }
+                    
+                    
                 }
-                .post-bkmarks-data{
-                    &.post-bkmarks-data-display{
+                
+                &.metabox-table-row-new{
+                    &:first-child { //reference blank row
+                        body.js &{ //hide it if js enabled
+                            display:none;
+                        }
+                    }
+                    
+                }
+                
+                .metabox-table-cell-toggle{
+                    &.metabox-table-cell-display{
                         display:inherit;
                     }
-                    &.post-bkmarks-data-edit{
+                    &.metabox-table-cell-edit{
                         display:none;
                     }
                 }
@@ -69,114 +117,38 @@ body{
                         display:none;
                     }
                 }
-
-                &.post-bkmarks-row-edit{
-                    .post-bkmarks-data{
-                        &.post-bkmarks-data-display{
+                
+                &.is-url-attached{
+                    th.check-column input[type="checkbox"]{
+                        background-color:#d9ffbf;
+                    }
+                }
+                
+                &.metabox-table-row-edit{
+                    .metabox-table-cell-toggle{
+                        &.metabox-table-cell-display{
                             display:none;
                         }
-                        &.post-bkmarks-data-edit{
+                        &.metabox-table-cell-edit{
                             display:inherit;
                         }
                     }
-
+                    
                     .row-actions{
                         span.save{
-                            display:inline;
+                            display:inherit;
                         }
-                        span.edit{
+                        span.edit,span.unlink,span.delete{
                             display:none;
                         }
                     }
-
+                    
                 }
-            }
-
-
-            .post-bkmarks-link-draghandle {
-                text-align: center;
-                &:not(.disabled) {
-                    cursor: pointer;
-                    cursor: hand;
-                }
-                &.disabled{
-                    opacity:0.5;
-                }
+                
             }
 
         }
-
-        .pbkm-metabox-section{
-            padding:1em;
-            //border-bottom:1px solid #ddd;
-            &#add-link-section{
-                table{
-                    border:none;
-                    margin:1em 0;
-                    thead,tfoot{
-                        display:none;
-                    }
-                    tr{
-                        background:none;
-                    }
-                }
-                #post_bkmarks_add_new{
-                    display:none;
-                }
-                &.has-js{
-                    h4,table{
-                        display:none;
-                    }
-                    #post_bkmarks_add_new{
-                        display:inherit;
-                    }
-                }
-            }
-            &#search-links-section{
-                #search-links-form{
-                    padding:1em;
-                }
-                .wp-list-table{
-                    display:none;
-                }
-                &.has-search-term{
-                    .wp-list-table{
-                        display:table;
-                    }
-                }
-                .post-bkmarks-link-draghandle{
-                    display:none;
-                }
-
-            }
-            &:last-child {
-                //border-bottom:0;
-            }
-        }
-
+        
     }
-    
-    &.js{
-        .postbox#post-bookmarks{
-            #the-list tr.post-bkmarks-row-new:first-child{ //blank row
-                display:none;
-            }
-        }
-    }
-    &.no-js{
-        .postbox#post-bookmarks{
-            #add-link-section{
-                .page-title-action{
-                    display:none;
-                }
-            }
-            .wp-list-table{
-                .column-action{
-                    display:none;
-                }
-            }
-        }
-    }
-    
-    
+
 }

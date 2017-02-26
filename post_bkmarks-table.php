@@ -44,7 +44,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         
         //append blank row
         if ( current_user_can( 'manage_links' ) ){
-            $blank_link = (object)post_bkmarks()->sanitize_link(array('row_classes' => array('post-bkmarks-row-new','post-bkmarks-row-edit')));
+            $blank_link = (object)post_bkmarks()->sanitize_link(array('row_classes' => array('metabox-table-row-new','metabox-table-row-edit')));
             $this->single_row($blank_link);
         }
         
@@ -110,7 +110,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                     //add link
                     if ( current_user_can( 'manage_links' ) ){   
                         ?>
-                        <a id="post-bkmarks-add-link" href="link-add.php" class="button"><?php echo esc_html_x('Add Row', 'link', 'post-bkmarks'); ?></a>
+                        <a id="metabox-table-row-add-button" href="link-add.php" class="button"><?php echo esc_html_x('Add Row', 'link', 'post-bkmarks'); ?></a>
                         <?php
                     }
                 }
@@ -365,9 +365,9 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
      */
     function column_default( $link, $column_name ){
         
-        $classes = array('post-bkmarks-data');
-        $display_classes = array_merge( $classes,array('post-bkmarks-data-display') );
-        $edit_classes = array_merge( $classes,array('post-bkmarks-data-edit') );
+        $classes = array('metabox-table-cell-toggle');
+        $display_classes = array_merge( $classes,array('metabox-table-cell-display') );
+        $edit_classes = array_merge( $classes,array('metabox-table-cell-edit') );
         switch($column_name){
                 
             case 'cb':
@@ -387,7 +387,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             case 'reorder':
 
                 $classes = array(
-                    'post-bkmarks-link-draghandle'
+                    'metabox-table-row-draghandle'
                 );
 
                 $input_el = sprintf( '<input type="hidden" name="%s" value="%s"/>',

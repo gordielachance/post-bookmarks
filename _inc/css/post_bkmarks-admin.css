@@ -1,17 +1,10 @@
 @import "//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css";
-.loading {
+#post-bkmarks-list .loading {
   pointer-events: none;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
-
-body .postbox#post-bookmarks td {
-  overflow: hidden;
-}
-body .postbox#post-bookmarks td input[type='text'] {
-  width: 100%;
-}
-body .postbox#post-bookmarks .column-name .ellipsis {
+#post-bkmarks-list .ellipsis {
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -19,96 +12,75 @@ body .postbox#post-bookmarks .column-name .ellipsis {
   -o-text-overflow: ellipsis;
   text-overflow: ellipsis;
 }
-body .postbox#post-bookmarks .column-reorder, body .postbox#post-bookmarks .column-favicon {
+#post-bkmarks-list > .subsubsub {
+  margin: 0;
+  margin-bottom: 1em;
+}
+#post-bkmarks-list > .tablenav #metabox-table-row-add-button {
+  margin: 0;
+}
+body.no-js #post-bkmarks-list > .tablenav #metabox-table-row-add-button {
+  display: none;
+}
+#post-bkmarks-list > table.wp-list-table .column-reorder, #post-bkmarks-list > table.wp-list-table .column-favicon {
   width: 2em;
   text-align: center;
 }
-body .postbox#post-bookmarks .column-category ul {
+body.no-js #post-bkmarks-list > table.wp-list-table .column-action {
+  display: none;
+}
+#post-bkmarks-list > table.wp-list-table #the-list tr td {
+  overflow: hidden;
+}
+#post-bkmarks-list > table.wp-list-table #the-list tr td input[type='text'] {
+  width: 100%;
+}
+#post-bkmarks-list > table.wp-list-table #the-list tr td.column-reorder .metabox-table-row-draghandle {
+  text-align: center;
+}
+#post-bkmarks-list > table.wp-list-table #the-list tr td.column-reorder .metabox-table-row-draghandle:not(.disabled) {
+  cursor: pointer;
+  cursor: hand;
+}
+#post-bkmarks-list > table.wp-list-table #the-list tr td.column-reorder .metabox-table-row-draghandle.disabled {
+  opacity: 0.5;
+}
+#post-bkmarks-list > table.wp-list-table #the-list tr td.column-category ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-body .postbox#post-bookmarks .post-bkmarks-favicon {
+#post-bkmarks-list > table.wp-list-table #the-list tr td.column-favicon .post-bkmarks-favicon {
   display: inline-block;
   width: 2em;
   height: 2em;
   background-position: center center;
   background-repeat: no-repeat;
 }
-body .postbox#post-bookmarks #the-list tr.is-url-attached .check-column input[type="checkbox"] {
+body.js #post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-new:first-child {
+  display: none;
+}
+#post-bkmarks-list > table.wp-list-table #the-list tr .metabox-table-cell-toggle.metabox-table-cell-display {
+  display: inherit;
+}
+#post-bkmarks-list > table.wp-list-table #the-list tr .metabox-table-cell-toggle.metabox-table-cell-edit {
+  display: none;
+}
+#post-bkmarks-list > table.wp-list-table #the-list tr .row-actions span.save {
+  display: none;
+}
+#post-bkmarks-list > table.wp-list-table #the-list tr.is-url-attached th.check-column input[type="checkbox"] {
   background-color: #d9ffbf;
 }
-body .postbox#post-bookmarks #the-list tr .post-bkmarks-data.post-bkmarks-data-display {
+#post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .metabox-table-cell-toggle.metabox-table-cell-display {
+  display: none;
+}
+#post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .metabox-table-cell-toggle.metabox-table-cell-edit {
   display: inherit;
 }
-body .postbox#post-bookmarks #the-list tr .post-bkmarks-data.post-bkmarks-data-edit {
-  display: none;
-}
-body .postbox#post-bookmarks #the-list tr .row-actions span.save {
-  display: none;
-}
-body .postbox#post-bookmarks #the-list tr.post-bkmarks-row-edit .post-bkmarks-data.post-bkmarks-data-display {
-  display: none;
-}
-body .postbox#post-bookmarks #the-list tr.post-bkmarks-row-edit .post-bkmarks-data.post-bkmarks-data-edit {
+#post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.save {
   display: inherit;
 }
-body .postbox#post-bookmarks #the-list tr.post-bkmarks-row-edit .row-actions span.save {
-  display: inline;
-}
-body .postbox#post-bookmarks #the-list tr.post-bkmarks-row-edit .row-actions span.edit {
-  display: none;
-}
-body .postbox#post-bookmarks #the-list .post-bkmarks-link-draghandle {
-  text-align: center;
-}
-body .postbox#post-bookmarks #the-list .post-bkmarks-link-draghandle:not(.disabled) {
-  cursor: pointer;
-  cursor: hand;
-}
-body .postbox#post-bookmarks #the-list .post-bkmarks-link-draghandle.disabled {
-  opacity: 0.5;
-}
-body .postbox#post-bookmarks .pbkm-metabox-section {
-  padding: 1em;
-}
-body .postbox#post-bookmarks .pbkm-metabox-section#add-link-section table {
-  border: none;
-  margin: 1em 0;
-}
-body .postbox#post-bookmarks .pbkm-metabox-section#add-link-section table thead, body .postbox#post-bookmarks .pbkm-metabox-section#add-link-section table tfoot {
-  display: none;
-}
-body .postbox#post-bookmarks .pbkm-metabox-section#add-link-section table tr {
-  background: none;
-}
-body .postbox#post-bookmarks .pbkm-metabox-section#add-link-section #post_bkmarks_add_new {
-  display: none;
-}
-body .postbox#post-bookmarks .pbkm-metabox-section#add-link-section.has-js h4, body .postbox#post-bookmarks .pbkm-metabox-section#add-link-section.has-js table {
-  display: none;
-}
-body .postbox#post-bookmarks .pbkm-metabox-section#add-link-section.has-js #post_bkmarks_add_new {
-  display: inherit;
-}
-body .postbox#post-bookmarks .pbkm-metabox-section#search-links-section #search-links-form {
-  padding: 1em;
-}
-body .postbox#post-bookmarks .pbkm-metabox-section#search-links-section .wp-list-table {
-  display: none;
-}
-body .postbox#post-bookmarks .pbkm-metabox-section#search-links-section.has-search-term .wp-list-table {
-  display: table;
-}
-body .postbox#post-bookmarks .pbkm-metabox-section#search-links-section .post-bkmarks-link-draghandle {
-  display: none;
-}
-body.js .postbox#post-bookmarks #the-list tr.post-bkmarks-row-new:first-child {
-  display: none;
-}
-body.no-js .postbox#post-bookmarks #add-link-section .page-title-action {
-  display: none;
-}
-body.no-js .postbox#post-bookmarks .wp-list-table .column-action {
+#post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.edit, #post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.unlink, #post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.delete {
   display: none;
 }

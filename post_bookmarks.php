@@ -363,9 +363,15 @@ class Post_Bookmarks {
         //attached links
         $links_table = new Post_Bookmarks_List_Table();
         $links_table->items = $links_table->get_tab_links();
+        $classes = array('metabox-table-tab');
+        if ( $tab = post_bkmarks()->links_tab ){
+            $classes[] = sprintf('metabox-table-tab-%s',$tab);
+        }else{
+            $classes[] = 'metabox-table-tab-attached';
+        }
         ?>
         <!--current links list-->
-        <div class="pbkm-metabox-section" id="list-links-section">
+        <div id="post-bkmarks-list" <?php post_bkmarks_classes_attr($classes);?>>
             <?php
         
                 settings_errors('post_bkmarks');
@@ -549,7 +555,7 @@ class Post_Bookmarks {
             'link_name'     => null,
             'link_target'   => null,
             'link_category' => (array)$this->get_links_category(),
-            'row_classes'   => array(), //class for the row, in the links table. eg. array('post-bkmarks-row-edit','post-bkmarks-row-new','post-bkmarks-row-suggest')
+            'row_classes'   => array(), //classes for the row
         );
 
         $args = wp_parse_args((array)$args,$defaults);
