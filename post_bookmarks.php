@@ -425,8 +425,14 @@ class Post_Bookmarks {
 
         if ( empty($form_links) ) return;
         
-        $form_links = stripslashes_deep($form_links); //strip slashes for $_POST args if any
+        //strip slashes for $_POST args if any
+        $form_links = stripslashes_deep($form_links); 
         
+        if ( post_bkmarks()->links_tab == 'attached' ){
+            $this->update_links_order($post_id,$form_links);
+        }
+        
+
         //keep only the checked links
         $checked_links = array_filter(
             $form_links,
@@ -441,6 +447,20 @@ class Post_Bookmarks {
         }
 
 
+    }
+    
+    function update_links_order($post_id,$form_links){
+        $post_link_db_ids = (array)get_post_meta( $post_id, '_post_bkmarks_ids', true );
+        $post_link_ids = array();
+        foreach((array)$form_links as $link){
+            if (!$link['link_id']) continue;
+            if (!in_array($link['link_id'],$post_link_db_ids)) continue;
+            $post_link_ids[] = $link['link_id'];
+        }
+        
+        if ($post_link_ids != $post_link_db_ids){
+            update_post_meta( $post_id, '_post_bkmarks_ids', $post_link_ids );
+        }
     }
     
     /**
