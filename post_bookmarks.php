@@ -425,13 +425,17 @@ class Post_Bookmarks {
 
         if ( empty($form_links) ) return;
         
+        $bulk_action = $this->metabox_table_get_current_action();
+        if (!$bulk_action) return;
+        
         //strip slashes for $_POST args if any
         $form_links = stripslashes_deep($form_links); 
         
-        if ( post_bkmarks()->links_tab == 'attached' ){
+        //Save links order.
+        //This should be done before links are filtered by checked items.
+        if ( ($bulk_action == 'save') && ( post_bkmarks()->links_tab == 'attached' ) ){
             $this->update_links_order($post_id,$form_links);
         }
-        
 
         //keep only the checked links
         $checked_links = array_filter(
@@ -440,11 +444,11 @@ class Post_Bookmarks {
             return ( isset($link['selected']) );
             }
         );
+        
+        if (!$checked_links) return;
 
-        //table bulk actions
-        if ( ( $bulk_action = $this->metabox_table_get_current_action() ) && $checked_links ){
-            return $this->do_post_bookmarks_action($post_id,$checked_links,$bulk_action);
-        }
+        //do it !
+        return $this->do_post_bookmarks_action($post_id,$checked_links,$bulk_action);
 
 
     }
