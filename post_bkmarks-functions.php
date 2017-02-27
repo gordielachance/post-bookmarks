@@ -99,6 +99,7 @@ function post_bkmarks_get_existing_link_id($link_url,$link_name = null){
 function post_bkmarks_sort_using_ids_array($links,$sort_ids){
     
     if (!$links) return $links;
+    $ordered = array();
 
     foreach ((array)$sort_ids as $id){ //correct order
         //select link
