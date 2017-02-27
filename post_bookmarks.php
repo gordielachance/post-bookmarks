@@ -422,10 +422,13 @@ class Post_Bookmarks {
         // get links data from form
         $form_data = ( isset($_POST['post_bkmarks']) ) ? $_POST['post_bkmarks'] : null;
         $form_links = (isset($form_data['links'])) ? $form_data['links'] : array();
+
+        if ( empty($form_links) ) return;
+        
         $form_links = stripslashes_deep($form_links); //strip slashes for $_POST args if any
         
         //keep only the checked links
-        $form_links = array_filter(
+        $checked_links = array_filter(
             $form_links,
             function ($link){
             return ( isset($link['selected']) );
@@ -433,9 +436,10 @@ class Post_Bookmarks {
         );
 
         //table bulk actions
-        if ( $bulk_action = $this->metabox_table_get_current_action() ){
-            return $this->do_post_bookmarks_action($post_id,$form_links,$bulk_action);
+        if ( ( $bulk_action = $this->metabox_table_get_current_action() ) && $checked_links ){
+            return $this->do_post_bookmarks_action($post_id,$checked_links,$bulk_action);
         }
+
 
     }
     
@@ -615,19 +619,3 @@ function post_bkmarks() {
 }
 
 post_bkmarks();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

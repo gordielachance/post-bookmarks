@@ -69,9 +69,6 @@ body.js #post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-
 #post-bkmarks-list > table.wp-list-table #the-list tr .row-actions span.save {
   display: none;
 }
-#post-bkmarks-list > table.wp-list-table #the-list tr.is-url-attached th.check-column input[type="checkbox"] {
-  background-color: #d9ffbf;
-}
 #post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .metabox-table-cell-toggle.metabox-table-cell-display {
   display: none;
 }
