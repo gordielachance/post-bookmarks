@@ -130,9 +130,9 @@
                     
                     .row-actions{
                         span.save{
-                            display:inherit;
+                            display:inline;
                         }
-                        span.edit,span.unlink,span.delete{
+                        span.edit{
                             display:none;
                         }
                     }

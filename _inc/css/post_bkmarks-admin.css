@@ -76,8 +76,8 @@ body.js #post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-
   display: inherit;
 }
 #post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.save {
-  display: inherit;
+  display: inline;
 }
-#post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.edit, #post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.unlink, #post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.delete {
+#post-bkmarks-list > table.wp-list-table #the-list tr.metabox-table-row-edit .row-actions span.edit {
   display: none;
 }
