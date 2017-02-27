@@ -32,6 +32,7 @@ function post_bkmarks_get_tab_links($tab = null){
 
     if ($tab == 'attached'){
         $args['post_bkmarks_for_post'] = $post->ID;
+        $args['orderby'] = post_bkmarks()->get_options('links_orderby');
     }
     
     //search filter
@@ -161,7 +162,10 @@ function post_bkmarks_output_for_post($post_id = null){
     $title_el = null;
     $blogroll = array();
     
-    $args = array('post_bkmarks_for_post'=>$post_id);
+    $args = array(
+        'post_bkmarks_for_post'=>$post_id,
+        'orderby' => post_bkmarks()->get_options('links_orderby')
+    );
     
     if ( $post_bkmarks = get_bookmarks($args) ){
 

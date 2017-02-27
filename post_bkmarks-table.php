@@ -296,6 +296,10 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             'action'        => __('Action','post-bkmarks')
         );
         
+        if( post_bkmarks()->get_options('links_orderby') != 'custom' ){
+            unset($columns['reorder']);
+        }
+        
         return apply_filters('post_bkmarks_list_table_columns',$columns); //allow plugins to filter the columns
     }
     /*

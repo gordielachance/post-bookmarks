@@ -323,9 +323,7 @@ class Post_Bookmarks {
         unset($r['post_bkmarks_for_post']); //avoid infinite loop
         $bookmarks = get_bookmarks($r);
         
-        //sort
-        //TO FIX TO CHECK
-        $r['orderby'] = post_bkmarks()->get_options('links_orderby');
+        //sort custom
         
         if ($r['orderby'] == 'custom'){
             $link_ids = post_bkmarks_get_links_ids_for_post($post_id);
