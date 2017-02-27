@@ -297,10 +297,8 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             'action'        => __('Action','post-bkmarks')
         );
         
-        if ( post_bkmarks()->links_tab == 'attached' ){ //attached links
-            if( post_bkmarks()->get_options('links_orderby') != 'custom' ){
-                unset($columns['reorder']);
-            }
+        if ( ( post_bkmarks()->links_tab != 'attached' ) || ( post_bkmarks()->get_options('links_orderby') != 'custom' ) ){
+            unset($columns['reorder']);
         }
         
 
