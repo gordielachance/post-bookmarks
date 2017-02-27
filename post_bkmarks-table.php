@@ -7,7 +7,7 @@ if(!class_exists('WP_List_Table')){
 class Post_Bookmarks_List_Table extends WP_List_Table {
     
     var $current_link_idx = -1;
-    var $links_per_page = 20;
+    var $links_per_page = -1;
     var $post_link_ids = array(); //IDs of links attached to this post
 
     function prepare_items() {
@@ -21,8 +21,9 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         $current_page = $this->get_pagenum();
         $total_items = count($this->items);
 
-        // only necessary because we have sample data
-        $this->items = array_slice((array)$this->items,(($current_page-1)*$this->links_per_page),$this->links_per_page);
+        if ($this->links_per_page > 0){
+            $this->items = array_slice((array)$this->items,(($current_page-1)*$this->links_per_page),$this->links_per_page);
+        }
 
         $this->set_pagination_args( array(
         'total_items' => $total_items,
@@ -296,9 +297,13 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             'action'        => __('Action','post-bkmarks')
         );
         
-        if( post_bkmarks()->get_options('links_orderby') != 'custom' ){
-            unset($columns['reorder']);
+        if ( post_bkmarks()->links_tab == 'attached' ){ //attached links
+            if( post_bkmarks()->get_options('links_orderby') != 'custom' ){
+                unset($columns['reorder']);
+            }
         }
+        
+
         
         return apply_filters('post_bkmarks_list_table_columns',$columns); //allow plugins to filter the columns
     }
