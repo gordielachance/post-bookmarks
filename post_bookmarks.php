@@ -317,7 +317,7 @@ class Post_Bookmarks {
         if ( !isset($r['post_bkmarks_for_post']) ) return $bookmarks;
         
         $post_id = $r['post_bkmarks_for_post'];
-        $pbkm_links_ids = post_bkmarks_get_links_ids_for_post($post_id);
+        if ( !$pbkm_links_ids = post_bkmarks_get_links_ids_for_post($post_id) ) return array();
         
         $r['include'] = implode(',',$pbkm_links_ids);
         unset($r['post_bkmarks_for_post']); //avoid infinite loop
