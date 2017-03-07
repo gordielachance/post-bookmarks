@@ -364,7 +364,7 @@ class Post_Bookmarks {
         $title = __('Post Bookmarks','post-bkmarks');
 
         foreach ( $post_types as $post_type ) {
-            add_meta_box( 'post-bookmarks', $title,array($this,'metabox_content'),$post_type, 'normal', 'high' );
+            add_meta_box( 'post-bookmarks', $title,array($this,'metabox_content'),$post_type, 'normal', 'low' );
         }
         
     }
