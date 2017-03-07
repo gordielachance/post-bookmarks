@@ -9,6 +9,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
     var $current_link_idx = -1;
     var $links_per_page = -1;
     var $post_link_ids = array(); //IDs of links attached to this post
+    var $can_manage_rows;
 
     function prepare_items() {
         global $post;
@@ -31,6 +32,8 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         ) );
         $this->items = $this->items;
         
+        $this->can_manage_rows = current_user_can( $this->cap_row_add );
+        
         $this->post_link_ids = (array)get_post_meta( $post->ID, '_post_bkmarks_ids', true );
 
     }
@@ -44,7 +47,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 	public function display_rows_or_placeholder() {
         
         //append blank row
-        if ( current_user_can( 'manage_links' ) ){
+        if ( $this->can_manage_rows ){ 
             $blank_link = (object)post_bkmarks()->sanitize_link(array('row_classes' => array('metabox-table-row-new','metabox-table-row-edit')));
             $this->single_row($blank_link);
         }
@@ -103,9 +106,9 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 <?php
                 if ( 'top' === $which && !is_singular() ) {
                     //add link
-                    if ( current_user_can( 'manage_links' ) ){   
+                    if ( $this->can_manage_rows ){   
                         ?>
-                        <a id="metabox-table-row-add-button" href="link-add.php" class="button"><?php echo esc_html_x('Add Row', 'link', 'post-bkmarks'); ?></a>
+                        <a href="link-add.php" class="row-add-button button"><?php echo esc_html_x('Add Row', 'link', 'post-bkmarks'); ?></a>
                         <?php
                     }
                 }
@@ -234,7 +237,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         $actions['save'] = __('Save items','post-bkmarks');
         $actions['unlink'] = __('Unlink items','post-bkmarks');
         
-        if ( current_user_can( 'manage_links' ) ){
+        if ( $this->can_manage_rows ){
             $actions['delete'] = __('Delete');
         }
 
@@ -321,14 +324,14 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 	 *
      * This function SHOULD be overriden but we want to use column_defaut() as it is more handy, so use a trick here.
 	 */
-	public function column_cb( $link ) {
-        return $this->column_default( $link, 'cb');
+	public function column_cb( $item ) {
+        return $this->column_default( $item, 'cb');
 	}
 
     /**
      * Handles the columns output.
      */
-    function column_default( $link, $column_name ){
+    function column_default( $item, $column_name ){
         
         $classes = array('metabox-table-cell-toggle');
         $display_classes = array_merge( $classes,array('metabox-table-cell-display') );
@@ -343,7 +346,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                                    );
                 $input_id = sprintf( '<input type="hidden" name="%s" value="%s"/>',
                                     $this->get_field_name('link_id'),
-                                    $link->link_id
+                                    $item->link_id
                                    );
 
                 return $input_cb . $input_id;
@@ -365,12 +368,12 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             break;
                 
             case 'favicon':
-                return post_bkmarks_get_favicon($link->link_url);
+                return post_bkmarks_get_favicon($item->link_url);
             break;
                 
             case 'name':
                 
-                $name = ($link->link_name) ? $link->link_name : null;
+                $name = ($item->link_name) ? $item->link_name : null;
 
                 //edit
                 $edit_el = sprintf('<input type="text" name="%s" value="%s" />',
@@ -380,7 +383,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 
                 //display
 
-                $edit_link = get_edit_bookmark_link( $link );
+                $edit_link = get_edit_bookmark_link( $item );
                 $display_classes[] = 'ellipsis';
                 
                 $display_el = sprintf( '<strong><a class="row-title" href="%s" aria-label="%s">%s</a></strong>',
@@ -398,7 +401,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 
             case 'url':
                 
-                $url = ($link->link_url) ? esc_url($link->link_url) : null;
+                $url = ($item->link_url) ? esc_url($item->link_url) : null;
 
                 //edit
                 $edit_el = sprintf('<input type="text" name="%s" value="%s" />',
@@ -407,8 +410,8 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                                   );
 
                 //display
-                $short_url = url_shorten( $link->link_url );
-                $display_el = sprintf('<a target="_blank" href="%s">%s</a>',$link->link_url,$short_url);
+                $short_url = url_shorten( $item->link_url );
+                $display_el = sprintf('<a target="_blank" href="%s">%s</a>',$item->link_url,$short_url);
                 
                 return 
                     sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($display_classes),$display_el ) . //display
@@ -421,8 +424,8 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 
                 $checked_categories = array();
 
-                if ( $link->link_id ) {
-                    $checked_categories = wp_get_link_cats( $link->link_id );
+                if ( $item->link_id ) {
+                    $checked_categories = wp_get_link_cats( $item->link_id );
                 } else {
                     $checked_categories[] = $default;
                 }
@@ -474,7 +477,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             case 'target':
                 
                 //TO FIX
-                $target = ($link->link_target) ? $link->link_target : '_none';
+                $target = ($item->link_target) ? $item->link_target : '_none';
                 $option_target = post_bkmarks()->get_options('default_target');
 
                 //edit
@@ -489,10 +492,14 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 return sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($display_classes),$display_el ) . sprintf( '<span%s>%s</span>',post_bkmarks_get_classes_attr($edit_classes),$edit_el );
                 
             break;
+                
+            case 'action':
+                //will be handled by handle_row_actions()
+            break;
 
             default:
                 $output = null;
-                return apply_filters('post_bkmarks_list_table_column_content',$output,$link,$column_name); //allow plugins to filter the content
+                return apply_filters('post_bkmarks_list_table_column_content',$output,$item,$column_name); //allow plugins to filter the content
             break;
 
         }
@@ -506,12 +513,12 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 	 * @since 4.3.0
 	 * @access protected
 	 *
-	 * @param object $link        Link being acted upon.
+	 * @param object $item        Link being acted upon.
 	 * @param string $column_name Current column name.
 	 * @param string $primary     Primary column name.
 	 * @return string Row action output for links.
 	 */
-	protected function handle_row_actions( $link, $column_name, $primary ) {
+	protected function handle_row_actions( $item, $column_name, $primary ) {
 
 		if ( 'action' !== $column_name ) {
 			return '';
@@ -519,25 +526,25 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         
         $actions = array();
         
-        $is_attached = in_array($link->link_id,$this->post_link_ids);
+        $is_attached = in_array($item->link_id,$this->post_link_ids);
 
         //save
         $save_text = ($is_attached) ? __('Save') : __('Save & Link','post-bkmarks');
         $actions['save'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-save','#',$save_text);
 
-        if ( $link->link_id ){
+        if ( $item->link_id ){
             //edit
-            $actions['edit'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-edit',get_edit_bookmark_link( $link ),__('Edit'));
+            $actions['edit'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-edit',get_edit_bookmark_link( $item ),__('Edit'));
             
             if ( $is_attached ){
                 //unlink
-                $unlink_url = add_query_arg(array('post-bkmarks-action'=>'unlink','link_id'=>$link->link_id),get_edit_post_link());
+                $unlink_url = add_query_arg(array('post-bkmarks-action'=>'unlink','link_id'=>$item->link_id),get_edit_post_link());
                 $unlink_url = wp_nonce_url($unlink_url,'post_bkmarks_link','post_bkmarks_link_nonce');
                 $actions['unlink'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-unlink',$unlink_url,__('Unlink','post-bkmarks'));
             }
             
             //delete
-            $delete_url = add_query_arg(array('post-bkmarks-action'=>'delete','link_id'=>$link->link_id),get_edit_post_link());
+            $delete_url = add_query_arg(array('post-bkmarks-action'=>'delete','link_id'=>$item->link_id),get_edit_post_link());
             $delete_url = wp_nonce_url($delete_url,'post_bkmarks_link','post_bkmarks_link_nonce');
             $actions['delete'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-delete',$delete_url,__('Delete'));
         }
