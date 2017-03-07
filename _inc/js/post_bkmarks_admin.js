@@ -2,6 +2,8 @@ jQuery(function($){
 
     $(document).ready(function(){
         
+        var metabox = $("#post-bookmarks");
+        
         /**
         To avoid creating complex ajax functions, trick it!
         - check a single row checkbox 
@@ -23,32 +25,35 @@ jQuery(function($){
         
         /* Row actions */
         //edit
-        $('#post-bookmarks .row-actions .edit a').live("click", function(event){
+        metabox.find('.row-actions .edit a').live("click", function(event){
             event.preventDefault();
             var row = $(this).parents('tr');
             row.addClass('metabox-table-row-edit');
         });
+        /*
         //save
-        $('#post-bookmarks .row-actions .save a').live("click", function(event){
+        metabox.find('.row-actions .save a').live("click", function(event){
             event.preventDefault();
+
             var row = $(this).parents('tr');
             single_row_fire_bulk_action(row,'save');
         });
-        //save
-        $('#post-bookmarks .row-actions .unlink a').live("click", function(event){
+        //unlink
+        metabox.find('.row-actions .unlink a').live("click", function(event){
             event.preventDefault();
             var row = $(this).parents('tr');
             single_row_fire_bulk_action(row,'unlink');
         });
         //save
-        $('#post-bookmarks .row-actions .delete a').live("click", function(event){
+        metabox.find('.row-actions .delete a').live("click", function(event){
             event.preventDefault();
             var row = $(this).parents('tr');
             single_row_fire_bulk_action(row,'delete');
         });
+         */
 
         // Look for changes in the value
-        $('#post-bookmarks .metabox-table-row-edit .column-url input').live("change paste", function(event){
+        metabox.find('.metabox-table-row-edit .column-url input').live("change paste", function(event){
             
             var row = $(this).parents('tr');
             
@@ -123,17 +128,13 @@ jQuery(function($){
 
         });
 
-        var section_list =  $("#post-bookmarks #post-bkmarks-list")
-        
-        var table_list =    section_list.find("table");
-
         //add new link
-        $("#metabox-table-row-add-button").click(function(event){
+        metabox.find(".row-add-button").click(function(event){
 
             event.preventDefault();
             
-            var rows_list = table_list.find("#the-list tr:not(.no-items)"); //all list items
-            var row_blank = table_list.find("#the-list tr:first-child"); //item to clone
+            var rows_list = metabox.find("table #the-list tr:not(.no-items)"); //all list items
+            var row_blank = metabox.find("table #the-list tr:first-child"); //item to clone
             var rows_filled = rows_list.not(row_blank); //other items
             
             //check last entry is filled
@@ -169,11 +170,11 @@ jQuery(function($){
         });
 
         // sort links
-        ( table_list ).find( '#the-list' ).sortable({
+        ( metabox ).find( 'table #the-list' ).sortable({
           handle: '.metabox-table-row-draghandle',
 
           update: function(event, ui) {
-                var all_rows = ( table_list ).find( '#the-list tr' );
+                var all_rows = ( metabox ).find( 'table #the-list tr' );
                 $.each( all_rows, function( key, value ) {
                   var order_input = $(this).find('.column-reorder input');
                     order_input.val(key);

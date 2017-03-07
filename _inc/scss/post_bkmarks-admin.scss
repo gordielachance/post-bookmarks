@@ -24,7 +24,7 @@
     }
     
     >.tablenav{ //bulk actions
-        #metabox-table-row-add-button{
+        .row-add-button{
             margin:0;
             body.no-js &{
                 display:none;

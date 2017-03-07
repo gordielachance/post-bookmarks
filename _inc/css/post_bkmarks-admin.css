@@ -16,10 +16,10 @@
   margin: 0;
   margin-bottom: 1em;
 }
-#post-bkmarks-list > .tablenav #metabox-table-row-add-button {
+#post-bkmarks-list > .tablenav .row-add-button {
   margin: 0;
 }
-body.no-js #post-bkmarks-list > .tablenav #metabox-table-row-add-button {
+body.no-js #post-bkmarks-list > .tablenav .row-add-button {
   display: none;
 }
 #post-bkmarks-list > table.wp-list-table .column-reorder, #post-bkmarks-list > table.wp-list-table .column-favicon {
