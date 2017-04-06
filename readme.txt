@@ -79,6 +79,10 @@ add_filter('post_bkmarks_output_single_link','custom_output_single_link',10,2);
 
 == Changelog ==
 
+= 2.1.2 =
+* improved filter_bookmarks_for_post: removed the 'include' arg which was incompatible with 'category', 'category_name', and 'exclude' bookmarks parameters.
+* improved post_bkmarks_get_tab_links.
+
 = 2.1.1 =
 * improved row actions
 * colorize the checkbox if the URL of the link is attached to the post

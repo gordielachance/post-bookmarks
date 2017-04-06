@@ -26,48 +26,30 @@ function post_bkmarks_get_tab_links($tab = null){
 
     //current tab
     if (!$tab) $tab = post_bkmarks()->links_tab;
-
+    
     $args = array();
+
+    //attached to the post
+    if ($tab != 'library'){
+        $args = array(
+            'post_bkmarks_for_post' => $post->ID,
+            'orderby' => post_bkmarks()->get_options('links_orderby')
+        );
+    }
+
     $args = apply_filters('post_bkmarks_tab_links_args',$args,$tab,$post->ID);
 
-    if ($tab == 'attached'){
-        $args['post_bkmarks_for_post'] = $post->ID;
-        $args['orderby'] = post_bkmarks()->get_options('links_orderby');
-    }
-    
     //search filter
     if ( $search = strtolower(post_bkmarks()->filter_links_text) ){
         $args['search'] = $search;
     }
-    
+
     $links = get_bookmarks( $args );
     $links = apply_filters('post_bkmarks_get_tab_links',$links,$tab,$post->ID);
 
     //sanitize links
     foreach ($links as $key=>$link){
         $links[$key] = (object)post_bkmarks()->sanitize_link($link);
-    }
-
-    //if this is not the attached tab, remove the attached links (check by link ID and link URL)
-    if ($tab != 'attached'){
-        
-        //attached links
-        $attached_ids = array();
-        $attached_urls = array();
-        if ( $attached_links = get_bookmarks( array('post_bkmarks_for_post' => $post->ID) ) ){
-            foreach ($attached_links as $attached_link){
-                $attached_ids[] = $attached_link->link_id;
-                $attached_urls[] = $attached_link->link_url;
-            }
-        }
-
-        $links = array_filter(
-            $links,
-            function ($link) use ($attached_ids,$attached_urls) {
-                return ( (!in_array($link->link_id,$attached_ids)) && (!in_array($link->link_url,$attached_urls)) );
-            }
-        );
-
     }
 
     return $links;

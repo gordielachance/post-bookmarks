@@ -5,7 +5,7 @@ Description: Adds a new metabox to the editor, allowing you to attach a set of r
 Plugin URI: https://github.com/gordielachance/post-bookmarks
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.1.1
+Version: 2.1.2
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class Post_Bookmarks {
     /**
     * @public string plugin version
     */
-    public $version = '2.1.1';
+    public $version = '2.1.2';
     /**
     * @public string plugin DB version
     */
@@ -244,7 +244,11 @@ class Post_Bookmarks {
         
         // JS
         
-        // uri.js (https://github.com/medialize/URI.js)
+        /* 
+        URI.js
+        https://github.com/medialize/URI.js
+        required to check / validate / work with URIs within jQuery
+        */
         wp_register_script( 'uri', $this->plugin_url . '_inc/js/URI.min.js', null, '1.18.3');
         wp_register_script( 'jquery-uri', $this->plugin_url . '_inc/js/jquery.URI.min.js', array('uri'), '1.18.3');
         
@@ -316,21 +320,33 @@ class Post_Bookmarks {
 
         if ( !isset($r['post_bkmarks_for_post']) ) return $bookmarks;
         
+        $post_bookmarks = array();
         $post_id = $r['post_bkmarks_for_post'];
+        
         if ( !$pbkm_links_ids = post_bkmarks_get_links_ids_for_post($post_id) ) return array();
         
-        $r['include'] = implode(',',$pbkm_links_ids);
         unset($r['post_bkmarks_for_post']); //avoid infinite loop
         $bookmarks = get_bookmarks($r);
         
+        /*
+        https://codex.wordpress.org/Function_Reference/get_bookmarks
+        If the include string is used, the category, category_name, and exclude parameters are ignored
+        So filter the links AFTER the query.
+        */
+        
+        foreach((array)$bookmarks as $bookmark){
+            if ( !in_array($bookmark->link_id,$pbkm_links_ids) ) continue;
+            $post_bookmarks[] = $bookmark;
+        }
+
         //sort custom
         
         if ($r['orderby'] == 'custom'){
             $link_ids = post_bkmarks_get_links_ids_for_post($post_id);
-            $bookmarks = post_bkmarks_sort_using_ids_array($bookmarks,$link_ids);
+            $post_bookmarks = post_bkmarks_sort_using_ids_array($post_bookmarks,$link_ids);
         }
 
-        return $bookmarks;
+        return $post_bookmarks;
         
     }
     
@@ -611,7 +627,7 @@ class Post_Bookmarks {
             'link_url'      => null,
             'link_name'     => null,
             'link_target'   => null,
-            'link_category' => (array)$this->get_links_category(),
+            'link_category' => $this->get_links_category(),
             'row_classes'   => array(), //classes for the row
         );
 
@@ -623,7 +639,8 @@ class Post_Bookmarks {
         $args['link_name'] = sanitize_text_field($args['link_name']);
         $args['link_target'] = sanitize_text_field($args['link_target']);
         
-        foreach((array)$args['link_category'] as $key=>$cat){
+        $args['link_category'] = (array)$args['link_category'];
+        foreach($args['link_category'] as $key=>$cat){
             $args['link_category'][$key] = intval($cat);
         }
         //force default category
