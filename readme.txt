@@ -37,14 +37,24 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 == Frequently Asked Questions ==
 
+= How can I filter the links returned by post_bkmarks_output_for_post() ? =
+Add an array of parameters, the same you would set when using the native [get_bookmarks()](https://codex.wordpress.org/Function_Reference/get_bookmarks) function.  Example : 
+
+`<?php
+$args = array('category'=>12);
+post_bkmarks_output_for_post($post_id,$args);
+?>`
+
 = How can I get only the links attached to a post using get_bookmarks() ? =
 Use the 'post_bkmarks_for_post' argument.  Example : 
+
 `<?php
 get_bookmarks( array('post_bkmarks_for_post'=>YOUR-POST-ID-HERE) );
 ?>`
 
 = How can I exclude all the links created by this using get_bookmarks() ? =
 Use the 'post_bkmarks_exclude' argument.  Example : 
+
 `<?php
 get_bookmarks( array('post_bkmarks_exclude'=>true) );
 ?>`
