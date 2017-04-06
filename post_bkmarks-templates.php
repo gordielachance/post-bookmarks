@@ -132,11 +132,12 @@ function post_bkmarks_output_single_link($link){
 
 /*
  * Generate the output for links on this post
- * Would be better to use core function '_walk_bookmarks( $post_bkmarks )' here, but it is too limited.
+ * $args should be an array with the same parameters you would set while using the native get_bookmarks() function.
+ * https://codex.wordpress.org/Function_Reference/get_bookmarks
  */
-function post_bkmarks_output_for_post($post_id = null){
+function post_bkmarks_output_for_post($post_id = null, $args = null){
     global $post;
-    
+
     if (!$post_id) $post_id = $post->ID;
     if (!$post_id) return false;
 
@@ -144,12 +145,16 @@ function post_bkmarks_output_for_post($post_id = null){
     $title_el = null;
     $blogroll = array();
     
-    $args = array(
+    $post_args = array(
         'post_bkmarks_for_post'=>$post_id,
         'orderby' => post_bkmarks()->get_options('links_orderby')
     );
     
-    if ( $post_bkmarks = get_bookmarks($args) ){
+    if ($args){
+        $post_args = wp_parse_args($post_args,$args); //priority to the post args
+    }
+
+    if ( $post_bkmarks = get_bookmarks($post_args) ){
 
         foreach ((array)$post_bkmarks as $link){
             $blogroll[] = post_bkmarks_output_single_link($link);
