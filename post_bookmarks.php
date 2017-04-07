@@ -547,7 +547,7 @@ class Post_Bookmarks {
         //TO FIX TO CHECK
         // Check the user's permissions.
         
-        if ( ! current_user_can( 'manage_links' ) ) return;//user cannot edit links
+        
         if ( !in_array( $post_type, $this->allowed_post_types() ) ) return;//is not allowed post type
 
         // get existing links IDs for post
@@ -555,6 +555,9 @@ class Post_Bookmarks {
         
         switch($action){
             case 'save':
+                
+                if ( !current_user_can( 'edit_post' , $post_id ) ) break;//user cannot edit links
+                
                 $add_ids = array();
                 foreach($links as $link){
                     $link_id = $this->save_link($link);
@@ -565,8 +568,14 @@ class Post_Bookmarks {
                 $post_link_ids = array_merge($post_link_ids, $add_ids);
             break;
             case 'unlink':
+                
+                 if ( !current_user_can( 'edit_post' , $post_id ) ) break;//user cannot edit links
+                
                 //TO FIX : remove from category 'post bookmarks' if link belongs only to this post
             case 'delete':
+                
+                if ( !current_user_can( 'manage_links' ) ) break;
+                
                 $remove_ids = array();
                 $links = array_filter( //keep only the existing links
                     $links,
@@ -576,9 +585,7 @@ class Post_Bookmarks {
                 );
 
                 foreach($links as $link){
-                    if ( ($action == 'delete') && ( current_user_can( 'manage_links' ) ) ){
-                        wp_delete_link($link['link_id']);
-                    }
+                    wp_delete_link($link['link_id']);
                     $remove_ids[] = $link['link_id'];
                 }
                 $post_link_ids = array_diff($post_link_ids, $remove_ids);

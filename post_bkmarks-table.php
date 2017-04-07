@@ -9,7 +9,6 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
     var $current_link_idx = -1;
     var $links_per_page = -1;
     var $post_link_ids = array(); //IDs of links attached to this post
-    var $can_manage_rows;
 
     function prepare_items() {
         global $post;
@@ -31,9 +30,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         'per_page'    => $this->links_per_page
         ) );
         $this->items = $this->items;
-        
-        $this->can_manage_rows = current_user_can( $this->cap_row_add );
-        
+
         $this->post_link_ids = (array)get_post_meta( $post->ID, '_post_bkmarks_ids', true );
 
     }
@@ -45,9 +42,9 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 	 * @access public
 	 */
 	public function display_rows_or_placeholder() {
-        
+        global $post;
         //append blank row
-        if ( $this->can_manage_rows ){ 
+        if ( current_user_can( 'edit_post' , $post->ID ) ){ 
             $blank_link = (object)post_bkmarks()->sanitize_link(array('row_classes' => array('metabox-table-row-new','metabox-table-row-edit')));
             $this->single_row($blank_link);
         }
@@ -101,12 +98,14 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
     }
     
     function extra_tablenav($which){
+        global $post;
     ?>
             <div class="alignleft actions">
                 <?php
                 if ( 'top' === $which && !is_singular() ) {
+                    
                     //add link
-                    if ( $this->can_manage_rows ){   
+                    if ( current_user_can( 'edit_post' , $post->ID ) ){ 
                         ?>
                         <a href="link-add.php" class="row-add-button button"><?php echo esc_html_x('Add Row', 'link', 'post-bkmarks'); ?></a>
                         <?php
@@ -232,12 +231,13 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
      * @return array An associative array containing all the bulk actions: 'slugs'=>'Visible Titles'
      **************************************************************************/
     function get_bulk_actions() {
+        global $post;
         $actions = array();
 
         $actions['save'] = __('Save items','post-bkmarks');
         $actions['unlink'] = __('Unlink items','post-bkmarks');
         
-        if ( $this->can_manage_rows ){
+        if ( current_user_can( 'edit_post' , $post->ID ) ){ 
             $actions['delete'] = __('Delete');
         }
 
