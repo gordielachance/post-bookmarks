@@ -5,7 +5,7 @@ Description: Adds a new metabox to the editor, allowing you to attach a set of r
 Plugin URI: https://github.com/gordielachance/post-bookmarks
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.1.2
+Version: 2.1.3
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class Post_Bookmarks {
     /**
     * @public string plugin version
     */
-    public $version = '2.1.2';
+    public $version = '2.1.3';
     /**
     * @public string plugin DB version
     */
@@ -109,16 +109,15 @@ class Post_Bookmarks {
         
         add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts_styles' ) );
         
-        add_action( 'admin_init', array(&$this,'save_link_action'));
+        add_action( 'admin_init', array($this,'save_link_action'));
         
         add_action( 'add_meta_boxes', array($this, 'metabox_add'));
-        add_action( 'save_post', array(&$this,'save_bulk_action'));
+        add_action( 'save_post', array($this,'save_bulk_action'));
+
+        add_filter( 'the_content', array($this,'add_links_to_post_content'), 99, 2);
         
-        
-        add_filter('the_content', 'post_bkmarks_output_links', 100, 2);
-        
-        add_filter( 'get_bookmarks', array(&$this,'exclude_posts_bookmarks'),10,2);
-        add_filter( 'get_bookmarks', array(&$this,'filter_bookmarks_for_post'),10,2);
+        add_filter( 'get_bookmarks', array($this,'exclude_posts_bookmarks'),10,2);
+        add_filter( 'get_bookmarks', array($this,'filter_bookmarks_for_post'),10,2);
         
         add_filter('redirect_post_location',array($this, 'metabox_variables_redirect')); //redirect with searched links text - http://wordpress.stackexchange.com/a/52052/70449
         
@@ -348,6 +347,29 @@ class Post_Bookmarks {
 
         return $post_bookmarks;
         
+    }
+    
+    /*
+     * the_content filter to append custom post links to the post content
+     */
+    function add_links_to_post_content( $content ){
+        global $post;
+
+        if ( !in_array( $post->post_type, $this->allowed_post_types() ) ) return $content;
+
+        $option = $this->get_options('display_links');
+        $links = post_bkmarks_links_list($post->ID);
+
+        switch($option){
+            case 'before':
+                $content = $links."\n".$content;
+            break;
+            case 'after':
+                $content.= "\n".$links;
+            break;
+        }
+
+        return $content;
     }
     
     function metabox_variables_redirect($location) {

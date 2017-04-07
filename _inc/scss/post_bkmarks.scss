@@ -1,44 +1,41 @@
 @import "compass/css3";
 @import '//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css';
 
-.post-bookmarks{
-    ul{
-        list-style: none!important;
-        li.post-bkmarks {
+a.post-bkmark{
+    
+    box-shadow:none;
+    
+    .post-bkmarks-favicon{
 
-            position:relative;
-            
-            i.fa-link{
-                font-size:0.75em;
-                text-align:center;
-                opacity:0.2;
-                margin-right:0.2em;
-            }
+        display: inline-block;
+        height: 1em;
+        width: 1em;
+        margin-right:0.2em;
 
-            .post-bkmarks-favicon{
+        @include border-radius(4px, 4px);
 
-                display: inline-block;
-                height: 1em;
-                width: 1em;
-                margin-right:0.2em;
+        background-position: center center;
+        background-repeat: no-repeat;
 
-                @include border-radius(4px, 4px);
+        padding-left: 20px; /* Adjust according to image size to push text across. */
+    }
 
-                background-position: center center;
-                background-repeat: no-repeat;
+    &[data-cp-link-domain='wikipedia.org'] .post-bkmarks-favicon{ /* example of custom icon regarding the link domain */
+        background-image: url('https://wikipedia.org/static/favicon/wikipedia.ico');
+    }
+}
 
-                padding-left: 20px; /* Adjust according to image size to push text across. */
-            }
+ul.post-bookmarks-list{
+    list-style: none!important;
+    li{
 
+        position:relative;
 
-
-            &[data-cp-link-domain='wikipedia.org'] .post-bkmarks-favicon{ /* example of custom icon regarding the link domain */
-                background-image: url('https://wikipedia.org/static/favicon/wikipedia.ico');
-            }
-
-        }
-        a{
-            box-shadow:none;
+        i.fa-link{
+            font-size:0.75em;
+            text-align:center;
+            opacity:0.2;
+            margin-right:0.2em;
         }
     }
 }

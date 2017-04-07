@@ -37,23 +37,20 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 
 == Frequently Asked Questions ==
 
-= How can I filter the links returned by post_bkmarks_output_for_post() ? =
-Add an array of parameters, the same you would set when using the native [get_bookmarks()](https://codex.wordpress.org/Function_Reference/get_bookmarks) function.  Example : 
+= How can I get only the links attached to a post ? =
+Use the function **post_bkmarks_get_post_links($post_id,$args)**.
+If you want to display those links use the function **post_bkmarks_links_list($post_id,$args)**.
+
+The two parameters are optionals.
+$args should be an array of parameters - the same you would set when using the native [get_bookmarks()](https://codex.wordpress.org/Function_Reference/get_bookmarks) function.  Example : 
 
 `<?php
 $args = array('category'=>12);
-post_bkmarks_output_for_post($post_id,$args);
+post_bkmarks_links_list(null,$args);
 ?>`
 
-= How can I get only the links attached to a post using get_bookmarks() ? =
-Use the 'post_bkmarks_for_post' argument.  Example : 
-
-`<?php
-get_bookmarks( array('post_bkmarks_for_post'=>YOUR-POST-ID-HERE) );
-?>`
-
-= How can I exclude all the links created by this using get_bookmarks() ? =
-Use the 'post_bkmarks_exclude' argument.  Example : 
+= How can I get only the links NOT attached to a post ? =
+Use the the native function **get_bookmarks()** with the 'post_bkmarks_exclude' parameter.  Example : 
 
 `<?php
 get_bookmarks( array('post_bkmarks_exclude'=>true) );
@@ -69,7 +66,7 @@ Use the *data-cp-link-domain* attribute, for example :
 
 = How can I change the way links are displayed ? =
 
-Use the filter *post_bkmarks_output_single_link* (located in the **post_bkmarks_output_single_link** function), for example : 
+Use the filter *post_bkmarks_single_link_html* (located in the function **post_bkmarks_get_single_link_html()**), for example : 
 
 `<?php
 
@@ -77,7 +74,7 @@ function custom_output_single_link($output,$link){
     return $output;
 }
 
-add_filter('post_bkmarks_output_single_link','custom_output_single_link',10,2);
+add_filter('post_bkmarks_single_link_html','custom_output_single_link',10,2);
 
 ?>`
 
@@ -88,6 +85,9 @@ add_filter('post_bkmarks_output_single_link','custom_output_single_link',10,2);
 3. Settings page
 
 == Changelog ==
+
+= 2.1.3 =
+* some code improvements + renamed some functions & filters
 
 = 2.1.2 =
 * improved filter_bookmarks_for_post: removed the 'include' arg which was incompatible with 'category', 'category_name', and 'exclude' bookmarks parameters.
