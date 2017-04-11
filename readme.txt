@@ -88,6 +88,9 @@ add_filter('post_bkmarks_single_link_html','custom_output_single_link',10,2);
 
 = 2.1.4 =
 * Fixed ajax actions
+* Updated Font Awesome
+* debug_log() function
+* better way of saving links / handling bulk actions
 
 = 2.1.3 =
 * some code improvements + renamed some functions & filters
