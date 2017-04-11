@@ -49,16 +49,15 @@ function post_bkmarks_ajax_row_action(){
             switch($action){
                 case 'save':
                     $link_id = $success;
-                    $new_link = get_bookmarks(array('include'=>$link_id));
+                    $new_links = get_bookmarks(array('include'=>$link_id));
                     
                     //populate global post (required in Post_Bookmarks_List_Table)
                     global $post;
                     $post = get_post($post_id);
 
                     $links_table = new Post_Bookmarks_List_Table();
-                    $links_table->items = (array)$new_link;
+                    $links_table->items = $new_links;
                     $links_table->prepare_items();
-                    //$links_table->current_link_idx = 0;
                     
                     ob_start();
                     $item = end($links_table->items);

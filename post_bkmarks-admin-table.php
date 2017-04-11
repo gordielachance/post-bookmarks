@@ -234,10 +234,14 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         
         $actions = array();
 
-        $actions['save'] = __('Save items','post-bkmarks');
-        $actions['unlink'] = __('Unlink items','post-bkmarks');
+
         
         if ( current_user_can( 'edit_post' , $post->ID ) ){ 
+            $actions['save'] = __('Save items','post-bkmarks');
+            $actions['unlink'] = __('Unlink items','post-bkmarks');
+        }
+        
+        if ( current_user_can( 'manage_links' ) ){
             $actions['delete'] = __('Delete');
         }
 
@@ -300,7 +304,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             'action'        => __('Action','post-bkmarks')
         );
         
-        if ( ( post_bkmarks()->links_tab != 'attached' ) || ( post_bkmarks()->get_options('links_orderby') != 'custom' ) ){
+        if ( post_bkmarks()->get_options('links_orderby') != 'custom' ){
             unset($columns['reorder']);
         }
         
@@ -358,12 +362,16 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                     'metabox-table-row-draghandle'
                 );
 
-                $input_el = sprintf( '<input type="hidden" name="%s" value="%s"/>',
+                $output = sprintf( '<input type="hidden" name="%s" value="%s"/>',
                                     $this->get_field_name('link_order'),
                                     $this->current_link_idx
                                    );
+                
+                if ( ( post_bkmarks()->links_tab != 'attached' ) && in_array($item->link_id,$this->post_link_ids) ){
+                    $output.= sprintf('<div %s><i class="fa fa-arrows-v" aria-hidden="true"></i></div>',post_bkmarks_get_classes_attr($classes));
+                }
 
-                return $input_el . sprintf('<div %s><i class="fa fa-arrows-v" aria-hidden="true"></i></div>',post_bkmarks_get_classes_attr($classes));
+                return $output;
                 
             break;
                 

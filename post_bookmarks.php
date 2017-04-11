@@ -5,7 +5,7 @@ Description: Adds a new metabox to the editor, allowing you to attach a set of r
 Plugin URI: https://github.com/gordielachance/post-bookmarks
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.1.4
+Version: 2.1.5
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class Post_Bookmarks {
     /**
     * @public string plugin version
     */
-    public $version = '2.1.4';
+    public $version = '2.1.5';
     /**
     * @public string plugin DB version
     */
@@ -584,7 +584,7 @@ class Post_Bookmarks {
         //sanitize
         $link = $this->sanitize_link($link);
         
-        $post_link_ids = $post_link_db_ids = post_bkmarks_get_links_ids_for_post($post_id);
+        $post_link_ids = $post_link_db_ids = (array)post_bkmarks_get_links_ids_for_post($post_id);
 
         if ( !$link['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','post-bookmarks') );
 
@@ -619,10 +619,11 @@ class Post_Bookmarks {
         
         //order - switch positions
         $old_link_order = array_search($link_id, $post_link_ids);
-        if( $old_link_order != $link['link_order'] ){
+        $new_link_order = ( isset($link['link_order']) ) ? $link['link_order'] : 0;
+        if( $old_link_order != $new_link_order ){
             unset($post_link_ids[$old_link_order]); //remove ID
-            array_splice( $post_link_ids, $link['link_order'], 0, $link_id ); //add in position
         }
+        array_splice( $post_link_ids,$new_link_order, 0, $link_id ); //add in position
 
         //order - update if required
         if ($post_link_ids != $post_link_db_ids){
