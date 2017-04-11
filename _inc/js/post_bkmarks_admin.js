@@ -3,26 +3,7 @@ jQuery(function($){
     $(document).ready(function(){
         
         var metabox = $("#post-bookmarks");
-        
-        /**
-        To avoid creating complex ajax functions, trick it!
-        - check a single row checkbox 
-        - set the bulk action
-        - click the bulk action button
-        **/
-        function single_row_fire_bulk_action(row,bulk_action){
-            //add loading class
-            row.addClass('loading');
-            //uncheck all rows
-            var table = row.closest('.wp-list-table').find('.check-column input[type="checkbox"]').prop( "checked", false );
-            //check this row
-            row.find('.check-column input[type="checkbox"]').prop( "checked", true );
-            //set top bulk action
-            $('#post-bkmarks-bulk-action-selector-top').val(bulk_action);
-            //click top bulk button
-            $('#post-bkmarks-doaction').trigger('click');
-        }
-        
+
         /* Row actions */
         //edit
         metabox.find('.row-actions .edit a').live("click", function(event){
@@ -30,33 +11,37 @@ jQuery(function($){
             var row = $(this).parents('tr');
             row.addClass('metabox-table-row-edit');
         });
-        /*
+
         //save
         metabox.find('.row-actions .save a').live("click", function(event){
             event.preventDefault();
 
             var row = $(this).parents('tr');
-            single_row_fire_bulk_action(row,'save');
+            if ( !post_bkmarks_is_row_filled(row) ) return;
+            
+            post_bkmarks_row_action(row,'save');
+
         });
+
         //unlink
         metabox.find('.row-actions .unlink a').live("click", function(event){
             event.preventDefault();
             var row = $(this).parents('tr');
-            single_row_fire_bulk_action(row,'unlink');
+            post_bkmarks_row_action(row,'unlink');
         });
-        //save
+
+        //delete
         metabox.find('.row-actions .delete a').live("click", function(event){
             event.preventDefault();
             var row = $(this).parents('tr');
-            single_row_fire_bulk_action(row,'delete');
+            post_bkmarks_row_action(row,'delete');
         });
-         */
+
 
         // Look for changes in the value
         metabox.find('.metabox-table-row-edit .column-url input').live("change paste", function(event){
             
             var row = $(this).parents('tr');
-            
             var cell_url = $(this).parents('td');
             var link_url = $(this).val().trim();
             
@@ -95,7 +80,7 @@ jQuery(function($){
                     $.ajax({
 
                         type: "post",
-                        url: ajaxurl,
+                        url: post_bkmarks_L10n.ajaxurl,
                         data:ajax_data,
                         dataType: 'json',
                         beforeSend: function() {
@@ -140,11 +125,7 @@ jQuery(function($){
             //check last entry is filled
             var row_filled_last = rows_filled.first(); //skip first item (blank row)
             if (row_filled_last.length > 0) {
-                var first_row_url_input = row_filled_last.find('.column-url input');
-                if( first_row_url_input.val().length === 0 ) {
-                    first_row_url_input.focus();
-                    return;
-                }
+                if ( !post_bkmarks_is_row_filled(row_filled_last) ) return; //abord
             }
 
             var new_row = row_blank.clone();
@@ -171,18 +152,91 @@ jQuery(function($){
 
         // sort links
         ( metabox ).find( 'table #the-list' ).sortable({
-          handle: '.metabox-table-row-draghandle',
+            handle: '.metabox-table-row-draghandle',
 
-          update: function(event, ui) {
-                var all_rows = ( metabox ).find( 'table #the-list tr' );
-                $.each( all_rows, function( key, value ) {
-                  var order_input = $(this).find('.column-reorder input');
-                    order_input.val(key);
-                });
-          }
+            update: function(event, ui) {
+                post_bkmarks_reorder_rows();
+            }
         });
     })
 })
 
+function post_bkmarks_reorder_rows(){
+    var all_rows = jQuery("#post-bookmarks").find( 'table #the-list tr' );
+    jQuery.each( all_rows, function( key, value ) {
+      var order_input = jQuery(this).find('.column-reorder input');
+        order_input.val(key);
+    });
+}
 
+/*
+Checks that the row data is ready to be saved, used to know if we can save the row.
+Focus on row and return false if not.
+*/
+
+function post_bkmarks_is_row_filled(row){
+    var row_url_input = row.find('.column-url input');
+    if( row_url_input.val().trim().length === 0 ) {
+        row_url_input.focus(); //focus on URL field
+        return false;
+    }
+    
+    return true;
+}
+
+function post_bkmarks_row_action(row,row_action){
+    //link categories
+    link_categories = [];
+    var categories_checked = row.find('.column-category input:checked:enabled');
+    categories_checked.each(function() {
+        link_categories.push(jQuery(this).val());
+    });
+
+    var link = {
+        'link_id'       : row.find('.check-column input[type="hidden"]').val(),
+        'link_url'      : row.find('.column-url input').val().trim(),
+        'link_name'     : row.find('.column-name input').val().trim(),
+        'link_target'   : row.find('.column-target input:checked').val(),
+        'link_category' : link_categories,
+        'link_order'    : row.find('.column-reorder input[type="hidden"]').val(),
+    }
+
+    var ajax_data = {
+        'action'        : 'post_bkmarks_row_action',
+        'post_id'       : row.closest('#post-bkmarks-list').attr('data-post-bkmarks-post-id'),
+        'row_action'    : row_action,
+        'ajax_link'     : link
+    };
+
+    jQuery.ajax({
+        type: "post",
+        url: post_bkmarks_L10n.ajaxurl,
+        data:ajax_data,
+        dataType: 'json',
+        beforeSend: function() {
+            row.addClass('loading');
+        },
+        success: function(data){
+            if (data.success === false) {
+                console.log(data);
+            }else{
+                if (row_action == 'save'){
+                    row.html( data.html );
+                    row.removeClass('metabox-table-row-edit');
+                }else if ( (row_action == 'unlink') || (row_action == 'delete') ){
+                    row.remove();
+                    post_bkmarks_reorder_rows();
+                }
+
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            console.log(xhr.status);
+            console.log(thrownError);
+        },
+        complete: function() {
+            row.removeClass('loading');
+        }
+    })
+}
 

@@ -66,7 +66,7 @@ class Post_Bookmarks_Settings {
 
         register_setting(
             'post_bkmarks_option_group', // Option group
-            Post_Bookmarks::$meta_name_options, // Option name
+            Post_Bookmarks::$settings_optionkey, // Option name
             array( $this, 'settings_sanitize' ) // Sanitize
          );
         
@@ -135,21 +135,21 @@ class Post_Bookmarks_Settings {
 
         printf(
             '<p><input type="radio" name="%1$s[display_links]" value="before" %2$s /> %3$s</p>',
-            Post_Bookmarks::$meta_name_options,
+            Post_Bookmarks::$settings_optionkey,
             checked( $option, 'before', false ),
             __('Before content','post-bkmarks')
         );
         
         printf(
             '<p><input type="radio" name="%1$s[display_links]" value="after" %2$s /> %3$s</p>',
-            Post_Bookmarks::$meta_name_options,
+            Post_Bookmarks::$settings_optionkey,
             checked( $option, 'after', false ),
             __('After content','post-bkmarks')
         );
         
         printf(
             '<p><input type="radio" name="%1$s[display_links]" value="manual" %2$s /> %3$s</p>',
-            Post_Bookmarks::$meta_name_options,
+            Post_Bookmarks::$settings_optionkey,
             checked( $option, 'manual', false ),
             __('Manual','post-bkmarks').' <small>— '.sprintf(__('Use the function %s in your theme templates','post-bkmarks'),'<code>post_bkmarks_links_list()</code>').'</small>'
         );
@@ -162,14 +162,14 @@ class Post_Bookmarks_Settings {
 
         printf(
             '<p><input type="radio" name="%1$s[links_orderby]" value="name" %2$s /> %3$s</p>',
-            Post_Bookmarks::$meta_name_options,
+            Post_Bookmarks::$settings_optionkey,
             checked( $option, 'name', false ),
             __('Name')
         );
 
         printf(
             '<p><input type="radio" name="%1$s[links_orderby]" value="custom" %2$s /> %3$s</p>',
-            Post_Bookmarks::$meta_name_options,
+            Post_Bookmarks::$settings_optionkey,
             checked( $option, 'custom', false ),
             __('Custom order','post-bkmarks').' <small>— '.sprintf(__('Use the %s icon while managing custom links for a post to reorder them','post-bkmarks'),'<i class="fa fa-arrows-v"></i>').'</small>'
         );
@@ -181,7 +181,7 @@ class Post_Bookmarks_Settings {
         $option = post_bkmarks()->get_options('get_favicon');
         printf(
             '<p><input type="checkbox" name="%1$s[get_favicon]" value="on" %2$s /> %3$s</p>',
-            Post_Bookmarks::$meta_name_options,
+            Post_Bookmarks::$settings_optionkey,
             checked( $option, 'on', false ),
             __("Load links favicons using the Google API",'post-bkmarks')
         );
@@ -193,21 +193,21 @@ class Post_Bookmarks_Settings {
 
         printf(
             '<p><input type="radio" name="%1$s[default_target]" value="_blank" %2$s /> %3$s</p>',
-            Post_Bookmarks::$meta_name_options,
+            Post_Bookmarks::$settings_optionkey,
             checked( $option, '_blank', false ),
             '<code>_blank</code>'
         );
         
         printf(
             '<p><input type="radio" name="%1$s[default_target]" value="_self" %2$s /> %3$s</p>',
-            Post_Bookmarks::$meta_name_options,
+            Post_Bookmarks::$settings_optionkey,
             checked( $option, '_self', false ),
             '<code>_self</code>'
         );
         
         printf(
             '<p><input type="checkbox" name="%1$s[ignore_target_local]" value="on" %2$s /> %3$s</p>',
-            Post_Bookmarks::$meta_name_options,
+            Post_Bookmarks::$settings_optionkey,
             checked( $option_ignore, 'on', false ),
             __('Ignore target for local links','post-bkmarks')
         );
@@ -222,7 +222,7 @@ class Post_Bookmarks_Settings {
     function reset_options_callback(){
         printf(
             '<input type="checkbox" name="%1$s[reset_options]" value="on"/> %2$s',
-            Post_Bookmarks::$meta_name_options,
+            Post_Bookmarks::$settings_optionkey,
             __("Reset options to their default values.","post_bkmarks")
         );
     }
