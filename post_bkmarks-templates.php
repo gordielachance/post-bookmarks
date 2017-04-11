@@ -30,7 +30,10 @@ function post_bkmarks_get_post_links($post_id = null, $args = null){
 function post_bkmarks_get_links_ids_for_post($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    return get_post_meta( $post_id, '_post_bkmarks_ids', true );
+    if ( $meta = get_post_meta( $post_id, Post_Bookmarks::$link_ids_metakey, true ) ){
+        return array_unique((array)$meta);
+    }
+    return false;
 }
 
 
@@ -95,7 +98,7 @@ function post_bkmarks_links_list($post_id = null, $args = null){
         
         if ($blogroll_str) {
 
-            $links_html = sprintf('<div class="post-bookmarks-list-wrapper">%1s<ul class="post-bookmarks-list">%2s</ul>',$title_el,$blogroll_str);
+            $links_html = sprintf('<div class="post-bookmarks-output-list" data-post-bkmarks-post-id="%s">%1s<ul class="post-bookmarks-list">%2s</ul>',$post_id,$title_el,$blogroll_str);
         }
 
     }

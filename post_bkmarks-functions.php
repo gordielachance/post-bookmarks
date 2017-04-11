@@ -91,6 +91,7 @@ function post_bkmarks_get_existing_link_id($link_url,$link_name = null){
     $r = $wpdb->get_row( $query );
     
     if ($r){
+        post_bkmarks()->debug_log(array('link_id'=>$r->link_id,'link_url'=>$link_url,'link_name'=>$link_name),"post_bkmarks_get_existing_link_id()");
         return $r->link_id;
     }
 
@@ -161,5 +162,10 @@ function post_bkmarks_is_local_url($url){
         return true;
     }
 
+}
 
+function post_bkmarks_sort_links_by_order($a, $b) {
+    if ( !isset($a['link_order']) || !isset($b['link_order']) ) return 0;
+    if((int)$a['link_order'] == (int)$b['link_order']){ return 0 ; }
+    return ($a['link_order'] < $b['link_order']) ? -1 : 1;
 }

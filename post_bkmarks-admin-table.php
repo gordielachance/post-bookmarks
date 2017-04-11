@@ -5,7 +5,6 @@ if(!class_exists('WP_List_Table')){
 }
 
 class Post_Bookmarks_List_Table extends WP_List_Table {
-    
     var $current_link_idx = -1;
     var $links_per_page = -1;
     var $post_link_ids = array(); //IDs of links attached to this post
@@ -30,8 +29,8 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         'per_page'    => $this->links_per_page
         ) );
         $this->items = $this->items;
-
-        $this->post_link_ids = (array)get_post_meta( $post->ID, '_post_bkmarks_ids', true );
+        
+        $this->post_link_ids = (array)post_bkmarks_get_links_ids_for_post($post->ID);
 
     }
 
@@ -56,11 +55,12 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
     override parent function so we can add attributes, etc.
     */
 	public function single_row( $item ) {
-        $this->current_link_idx ++;
         
-		printf( '<tr %s data-link-key="%s" data-link-id="%s">',post_bkmarks_get_classes_attr($item->row_classes),$this->current_link_idx,$item->link_id );
+		printf( '<tr %s>',post_bkmarks_get_classes_attr($item->row_classes) );
 		$this->single_row_columns( $item );
 		echo '</tr>';
+        
+        $this->current_link_idx ++;
 	}
     
     /**
@@ -137,7 +137,6 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
 	}
     
     function get_views() {
-        global $post;
         
         $link_attached = $link_library = null;
         $link_attached_count = $link_library_count = 0;
@@ -232,6 +231,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
      **************************************************************************/
     function get_bulk_actions() {
         global $post;
+        
         $actions = array();
 
         $actions['save'] = __('Save items','post-bkmarks');
@@ -359,7 +359,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                 );
 
                 $input_el = sprintf( '<input type="hidden" name="%s" value="%s"/>',
-                                    $this->get_field_name('order'),
+                                    $this->get_field_name('link_order'),
                                     $this->current_link_idx
                                    );
 
@@ -529,8 +529,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         $is_attached = in_array($item->link_id,$this->post_link_ids);
 
         //save
-        $save_text = ($is_attached) ? __('Save') : __('Save & Link','post-bkmarks');
-        $actions['save'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-save','#',$save_text);
+        $actions['save'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-save','#',__('Save'));
 
         if ( $item->link_id ){
             //edit

@@ -3,7 +3,7 @@ Contributors:grosbouff
 Donate link:http://bit.ly/gbreant
 Tags: links,quick links,related links,custom links, post links
 Requires at least: 3.5
-Tested up to: 4.7.2
+Tested up to: 4.7.3
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -85,6 +85,9 @@ add_filter('post_bkmarks_single_link_html','custom_output_single_link',10,2);
 3. Settings page
 
 == Changelog ==
+
+= 2.1.4 =
+* Fixed ajax actions
 
 = 2.1.3 =
 * some code improvements + renamed some functions & filters

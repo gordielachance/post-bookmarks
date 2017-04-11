@@ -1,6 +1,6 @@
 <?php
 
-function ajax_post_bkmarks_refresh_url(){
+function post_bkmarks_ajax_refresh_url(){
     $result = array(
         'message'   => null,
         'success'   => false,
@@ -30,4 +30,52 @@ function ajax_post_bkmarks_refresh_url(){
     die();
 }
 
-add_action('wp_ajax_post_bkmarks_refresh_url','ajax_post_bkmarks_refresh_url');
+function post_bkmarks_ajax_row_action(){
+    $result = array(
+        'message'   => null,
+        'success'   => false,
+        'input'     => $_POST
+    );
+    
+    $result['action']   = $action = ( isset($_POST['row_action']) ) ? $_POST['row_action'] : null;
+    $result['post_id']  = $post_id = ( isset($_POST['post_id']) ) ? $_POST['post_id'] : null;
+    $result['link_input']  = $link = ( isset($_POST['ajax_link']) ) ? $_POST['ajax_link'] : null;
+
+    if ($action && $post_id && $link){
+        $links = (array)$link;
+        if ( $success = post_bkmarks()->do_single_post_bookmark_action($post_id,$link,$action) ){
+            $result['success'] = true;
+            
+            switch($action){
+                case 'save':
+                    $link_id = $success;
+                    $new_link = get_bookmarks(array('include'=>$link_id));
+                    
+                    //populate global post (required in Post_Bookmarks_List_Table)
+                    global $post;
+                    $post = get_post($post_id);
+
+                    $links_table = new Post_Bookmarks_List_Table();
+                    $links_table->items = (array)$new_link;
+                    $links_table->prepare_items();
+                    //$links_table->current_link_idx = 0;
+                    
+                    ob_start();
+                    $item = end($links_table->items);
+                    $links_table->single_row_columns( $item );
+                    $result['html'] = ob_get_clean();
+
+                break;
+            }
+
+        }
+    }
+
+    header('Content-type: application/json');
+    echo json_encode($result);
+    die(); 
+
+}
+
+add_action('wp_ajax_post_bkmarks_refresh_url','post_bkmarks_ajax_refresh_url');
+add_action('wp_ajax_post_bkmarks_row_action','post_bkmarks_ajax_row_action');
