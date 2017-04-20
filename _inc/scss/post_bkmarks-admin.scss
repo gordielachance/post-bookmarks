@@ -111,6 +111,12 @@
                         display:none;
                     }
                 }
+                
+                .row-actions{
+                    span.save{
+                        display:none;
+                    }
+                }
 
                 &.metabox-table-row-edit{
                     .metabox-table-cell-toggle{

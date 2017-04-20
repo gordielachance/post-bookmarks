@@ -5,7 +5,7 @@ Description: Adds a new metabox to the editor, allowing you to attach a set of r
 Plugin URI: https://github.com/gordielachance/post-bookmarks
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.1.5
+Version: 2.1.6
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class Post_Bookmarks {
     /**
     * @public string plugin version
     */
-    public $version = '2.1.5';
+    public $version = '2.1.6';
     /**
     * @public string plugin DB version
     */
@@ -523,22 +523,43 @@ class Post_Bookmarks {
         $post_link_ids = post_bkmarks_get_links_ids_for_post($post_id);
         
         switch($action){
-            case 'save':
+                
+            case 'attach':
                 
                 if ( !current_user_can( 'edit_post' , $post_id ) ) return false;
-                return $this->save_link($link,$post_id); //returns an ID
+                
+                $link_id = ( isset($link['link_id']) ) ? $link['link_id'] : null;
+                
+                if ( !$link_id ) { //link does not exists, save it first
+                    $link_id = $this->do_single_post_bookmark_action($post_id,$link,'save');
+                }
+                
+                if ( !$link_id ) return false;
+                if ( in_array($link_id,$post_link_ids) ) return true;
+                
+                $post_link_ids[] = $link_id;
+                return update_post_meta( $post_id, Post_Bookmarks::$link_ids_metakey, $post_link_ids );
 
             break;
-            case 'unlink':
+
+            case 'remove':
                 
-                 if ( !current_user_can( 'edit_post' , $post_id ) ) return false;
+                if ( !current_user_can( 'edit_post' , $post_id ) ) return false;
+                if ( !isset($link['link_id']) ) return false;
+                if ( !in_array($link['link_id'],$post_link_ids) ) return true;
 
                 //TO FIX : remove 'post bookmarks' link category if it only belongs to this post
                 
                 $post_link_ids = array_diff( $post_link_ids, array($link['link_id']) );
                 return update_post_meta( $post_id, Post_Bookmarks::$link_ids_metakey, $post_link_ids );
                 
+            case 'save':
+                
+                if ( !current_user_can( 'manage_links' ) ) return false;
+                return $this->save_link($link,$post_id); //returns an ID
 
+            break;
+                
             case 'delete':
                 
                 if ( !current_user_can( 'manage_links' ) ) return false;
@@ -552,7 +573,6 @@ class Post_Bookmarks {
                     return true;
                 }
 
-                
             break;
         }
         
@@ -578,13 +598,12 @@ class Post_Bookmarks {
 
 		return false;
 	}
+    
 
     function save_link($link,$post_id){
 
         //sanitize
         $link = $this->sanitize_link($link);
-        
-        $post_link_ids = $post_link_db_ids = (array)post_bkmarks_get_links_ids_for_post($post_id);
 
         if ( !$link['link_url']) return new WP_Error( 'missing_required',__('A name and url are required for each link','post-bookmarks') );
 
@@ -615,20 +634,6 @@ class Post_Bookmarks {
             $link_id = wp_update_link( $link );
             $this->debug_log(array('post_id'=>$post_id,'link_id'=>$link_id,'link'=>json_encode($link)),"save_link() : updated link");
             
-        }
-        
-        //order - switch positions
-        $old_link_order = array_search($link_id, $post_link_ids);
-        $new_link_order = ( isset($link['link_order']) ) ? $link['link_order'] : 0;
-        if( $old_link_order != $new_link_order ){
-            unset($post_link_ids[$old_link_order]); //remove ID
-        }
-        array_splice( $post_link_ids,$new_link_order, 0, $link_id ); //add in position
-
-        //order - update if required
-        if ($post_link_ids != $post_link_db_ids){
-            $this->debug_log(array('post_id'=>$post_id,'old_order'=>implode(',',(array)$post_link_db_ids),'new_order'=>implode(',',(array)$post_link_ids),'link'=>json_encode($link)),"save_link() : update links order");
-            update_post_meta( $post_id, Post_Bookmarks::$link_ids_metakey, $post_link_ids );
         }
 
         return $link_id;

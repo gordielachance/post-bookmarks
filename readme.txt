@@ -86,6 +86,10 @@ add_filter('post_bkmarks_single_link_html','custom_output_single_link',10,2);
 
 == Changelog ==
 
+= 2.1.6 =
+* Fixed ajax actions
+* links IDs order is now saved (only) with ajax each time links are reordered, and is a standalone PHP action
+
 = 2.1.4 =
 * Fixed ajax actions
 * Updated Font Awesome

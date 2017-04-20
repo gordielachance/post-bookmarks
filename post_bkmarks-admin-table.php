@@ -234,15 +234,14 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         
         $actions = array();
 
-
-        
         if ( current_user_can( 'edit_post' , $post->ID ) ){ 
-            $actions['save'] = __('Save items','post-bkmarks');
-            $actions['unlink'] = __('Unlink items','post-bkmarks');
+            $actions['attach'] = __('Attach','post-bkmarks');
+            $actions['remove'] = __('Remove','post-bkmarks');
         }
         
-        if ( current_user_can( 'manage_links' ) ){
-            $actions['delete'] = __('Delete');
+        if ( current_user_can( 'manage_links' ) ){ 
+            $actions['save'] = __('Save','post-bkmarks');
+            $actions['delete'] = __('Delete','post-bkmarks');
         }
 
         return apply_filters('post_bkmarks_get_bulk_actions',$actions);
@@ -303,13 +302,11 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             'target'        => __('Target','post-bkmarks'),
             'action'        => __('Action','post-bkmarks')
         );
-        
+
         if ( post_bkmarks()->get_options('links_orderby') != 'custom' ){
             unset($columns['reorder']);
         }
-        
 
-        
         return apply_filters('post_bkmarks_list_table_columns',$columns); //allow plugins to filter the columns
     }
     /*
@@ -367,7 +364,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
                                     $this->current_link_idx
                                    );
                 
-                if ( ( post_bkmarks()->links_tab != 'attached' ) && in_array($item->link_id,$this->post_link_ids) ){
+                if ( ( post_bkmarks()->links_tab == 'attached' ) && in_array($item->link_id,$this->post_link_ids) ){
                     $output.= sprintf('<div %s><i class="fa fa-arrows-v" aria-hidden="true"></i></div>',post_bkmarks_get_classes_attr($classes));
                 }
 
@@ -535,20 +532,34 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         $actions = array();
         
         $is_attached = in_array($item->link_id,$this->post_link_ids);
-
-        //save
-        $actions['save'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-save','#',__('Save'));
+        
+        //attach
+        $attach_url = add_query_arg(array('post-bkmarks-action'=>'attach','link_id'=>$item->link_id),get_edit_post_link());
+        $attach_url = wp_nonce_url($attach_url,'post_bkmarks_link','post_bkmarks_link_nonce');
+        $actions['attach'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-attach',$attach_url,__('Attach','post-bkmarks'));
 
         if ( $item->link_id ){
+            
+            if ( $is_attached ){
+                
+                //unset attach link
+                unset($actions['attach']);
+                
+                //remove
+                $remove_url = add_query_arg(array('post-bkmarks-action'=>'remove','link_id'=>$item->link_id),get_edit_post_link());
+                $remove_url = wp_nonce_url($remove_url,'post_bkmarks_link','post_bkmarks_link_nonce');
+                $actions['remove'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-remove',$remove_url,__('Remove','post-bkmarks'));
+            }
+            
             //edit
             $actions['edit'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-edit',get_edit_bookmark_link( $item ),__('Edit'));
             
-            if ( $is_attached ){
-                //unlink
-                $unlink_url = add_query_arg(array('post-bkmarks-action'=>'unlink','link_id'=>$item->link_id),get_edit_post_link());
-                $unlink_url = wp_nonce_url($unlink_url,'post_bkmarks_link','post_bkmarks_link_nonce');
-                $actions['unlink'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-unlink',$unlink_url,__('Unlink','post-bkmarks'));
-            }
+        }
+ 
+        if ( $item->link_id ){
+            
+            //save
+            $actions['save'] = sprintf('<a class="%s" href="%s">%s</a>','post-bkmarks-row-action-save','#',__('Save'));
             
             //delete
             $delete_url = add_query_arg(array('post-bkmarks-action'=>'delete','link_id'=>$item->link_id),get_edit_post_link());

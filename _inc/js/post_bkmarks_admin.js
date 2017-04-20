@@ -3,8 +3,21 @@ jQuery(function($){
     $(document).ready(function(){
         
         var metabox = $("#post-bookmarks");
+        
+        //attach
+        metabox.find('.row-actions .attach a').live("click", function(event){
+            event.preventDefault();
+            var row = $(this).parents('tr');
+            post_bkmarks_row_action(row,'attach');
+        });
 
-        /* Row actions */
+        //remove
+        metabox.find('.row-actions .remove a').live("click", function(event){
+            event.preventDefault();
+            var row = $(this).parents('tr');
+            post_bkmarks_row_action(row,'remove');
+        });
+        
         //edit
         metabox.find('.row-actions .edit a').live("click", function(event){
             event.preventDefault();
@@ -21,13 +34,6 @@ jQuery(function($){
             
             post_bkmarks_row_action(row,'save');
 
-        });
-
-        //unlink
-        metabox.find('.row-actions .unlink a').live("click", function(event){
-            event.preventDefault();
-            var row = $(this).parents('tr');
-            post_bkmarks_row_action(row,'unlink');
         });
 
         //delete
@@ -140,7 +146,6 @@ jQuery(function($){
             
             //check checkbox & set 'Save' action
             new_row.find('.check-column input[type="checkbox"]').prop('checked', true);
-            $('#post-bkmarks-bulk-action-selector-top').val("save");
  
             //add line
             new_row.insertAfter( row_blank );
@@ -156,15 +161,65 @@ jQuery(function($){
 
             update: function(event, ui) {
                 post_bkmarks_reorder_rows();
+                post_bkmarks_update_rows_order();
             }
         });
     })
 })
 
+function post_bkmarks_update_rows_order(){
+    var all_rows = jQuery("#post-bookmarks").find( 'table #the-list tr' );
+    var new_order = [];
+    
+    jQuery.each( all_rows, function( key, value ) {
+        
+        var link_id = jQuery(this).find('input[type="hidden"]').val();
+        if (link_id != 0) {
+            new_order.push(link_id);
+        }
+    });
+    
+    //ajax update order
+    var wrapper = jQuery('#post-bkmarks-list');
+    var table = wrapper.find('table.wp-list-table');
+    
+    var ajax_data = {
+        'action'        : 'post_bkmarks_reorder',
+        'post_id'       : wrapper.attr('data-post-bkmarks-post-id'),
+        'order'         : new_order
+    };
+    
+    jQuery.ajax({
+        type: "post",
+        url: post_bkmarks_L10n.ajaxurl,
+        data:ajax_data,
+        dataType: 'json',
+        beforeSend: function() {
+            table.addClass('loading');
+        },
+        success: function(data){
+            if (data.success === false) {
+                console.log(data);
+            }else{
+                
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            console.log(xhr.status);
+            console.log(thrownError);
+        },
+        complete: function() {
+            table.removeClass('loading');
+        }
+    })
+
+}
+
 function post_bkmarks_reorder_rows(){
     var all_rows = jQuery("#post-bookmarks").find( 'table #the-list tr' );
+
     jQuery.each( all_rows, function( key, value ) {
-      var order_input = jQuery(this).find('.column-reorder input');
+        var order_input = jQuery(this).find('.column-reorder input');
         order_input.val(key);
     });
 }
@@ -185,6 +240,9 @@ function post_bkmarks_is_row_filled(row){
 }
 
 function post_bkmarks_row_action(row,row_action){
+    
+    var wrapper = jQuery('#post-bkmarks-list');
+    
     //link categories
     link_categories = [];
     var categories_checked = row.find('.column-category input:checked:enabled');
@@ -220,10 +278,11 @@ function post_bkmarks_row_action(row,row_action){
             if (data.success === false) {
                 console.log(data);
             }else{
-                if (row_action == 'save'){
-                    row.html( data.html );
+                if ( data.new_html ){
+                    row.html( data.new_html );
                     row.removeClass('metabox-table-row-edit');
-                }else if ( (row_action == 'unlink') || (row_action == 'delete') ){
+                }
+                if ( ( (row_action == 'remove') && ( wrapper.hasClass('metabox-table-tab-attached') ) ) || (row_action == 'delete') ){
                     row.remove();
                     post_bkmarks_reorder_rows();
                 }
