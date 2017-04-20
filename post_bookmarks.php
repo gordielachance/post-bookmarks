@@ -538,7 +538,9 @@ class Post_Bookmarks {
                 if ( in_array($link_id,$post_link_ids) ) return true;
                 
                 $post_link_ids[] = $link_id;
-                return update_post_meta( $post_id, Post_Bookmarks::$link_ids_metakey, $post_link_ids );
+                if ( update_post_meta( $post_id, Post_Bookmarks::$link_ids_metakey, $post_link_ids ) ){
+                    return $link_id;
+                }
 
             break;
 
@@ -566,7 +568,7 @@ class Post_Bookmarks {
                 
                 if ( $link['link_id']){
                     if ( wp_delete_link($link['link_id']) ){
-                        $post_link_ids = array_diff( $post_link_ids, array($link['link_id']) );
+                        $post_link_ids = array_diff( (array)$post_link_ids, array($link['link_id']) );
                         return update_post_meta( $post_id, Post_Bookmarks::$link_ids_metakey, $post_link_ids );
                     }
                 }else{

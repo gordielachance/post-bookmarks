@@ -49,9 +49,8 @@ function post_bkmarks_ajax_row_action(){
             
             switch($action){
                 case 'remove':
-                case 'attach':
                     $refresh_link_row = $link['link_id'];
-                break;
+                case 'attach':
                 case 'save':
                     $refresh_link_row = $success;
                 break;
