@@ -30,7 +30,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         ) );
         $this->items = $this->items;
         
-        $this->post_link_ids = (array)post_bkmarks_get_links_ids_for_post($post->ID);
+        $this->post_link_ids = (array)Post_Bookmarks::get_post_link_ids($post->ID);
 
     }
 
@@ -143,7 +143,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         $link_attached_classes = $link_library_classes = array();
         
         if ( post_bkmarks()->links_tab == 'attached' ) $link_attached_classes[] = 'current';
-        $link_attached_count = count( post_bkmarks_get_tab_links('attached') );
+        $link_attached_count = count( Post_Bookmarks::get_tab_links('attached') );
         
         $link_attached = sprintf(
             __('<a href="%1$s"%2$s>%3$s <span class="count">(<span class="imported-count">%4$s</span>)</span></a>'),
@@ -154,7 +154,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         );
         
         if ( post_bkmarks()->links_tab == 'library' ) $link_library_classes[] = 'current';
-        $link_library_count = count( post_bkmarks_get_tab_links('library') );
+        $link_library_count = count( Post_Bookmarks::get_tab_links('library') );
         
         if ($link_library_count){
             $link_library = sprintf(
@@ -340,7 +340,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
         switch($column_name){
                 
             case 'cb':
-                $post_links_ids = post_bkmarks_get_links_ids_for_post();
+                $post_links_ids = Post_Bookmarks::get_post_link_ids();
 
                 $input_cb = sprintf( '<input type="checkbox" name="%s" value="on"/>',
                                     $this->get_field_name('selected')
@@ -373,7 +373,7 @@ class Post_Bookmarks_List_Table extends WP_List_Table {
             break;
                 
             case 'favicon':
-                return post_bkmarks_get_favicon($item->link_url);
+                return Post_Bookmarks::get_favicon($item->link_url);
             break;
                 
             case 'name':

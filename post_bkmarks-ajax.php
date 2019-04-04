@@ -21,7 +21,7 @@ function post_bkmarks_ajax_refresh_url(){
         }
         
         //favicon
-        $result['favicon'] = post_bkmarks_get_favicon($url);
+        $result['favicon'] = Post_Bookmarks::get_favicon($url);
         
     }
 

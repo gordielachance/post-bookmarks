@@ -3,16 +3,15 @@ Contributors:grosbouff
 Donate link:http://bit.ly/gbreant
 Tags: links,quick links,related links,custom links, post links
 Requires at least: 3.5
-Tested up to: 4.7.3
+Tested up to: 5.1.1
 Stable tag: trunk
 License: GPLv2 or later
 
-Adds a new metabox to the editor, allowing you to attach a set of related links to any post.
-
+Manage links attached to a post through a metabox, and setup how they are displayed in your posts...  With a link favicon.
 
 == Description ==
 
-Adds a new metabox to the editor, allowing you to attach a set of related links to any post.
+Manage links attached to a post through a metabox, and setup how they are displayed in your posts...  With a link favicon.
 
 * Nice GUI
 * Options page
@@ -38,15 +37,15 @@ If you are a plugin developer, [we would like to hear from you](https://github.c
 == Frequently Asked Questions ==
 
 = How can I get only the links attached to a post ? =
-Use the function **post_bkmarks_get_post_links($post_id,$args)**.
-If you want to display those links use the function **post_bkmarks_links_list($post_id,$args)**.
+Use the function **Post_Bookmarks::get_post_links($post_id,$args)**.
+If you want to display those links use the function **Post_Bookmarks::get_link_list($post_id,$args)**.
 
 The two parameters are optionals.
 $args should be an array of parameters - the same you would set when using the native [get_bookmarks()](https://codex.wordpress.org/Function_Reference/get_bookmarks) function.  Example : 
 
 `<?php
 $args = array('category'=>12);
-post_bkmarks_links_list(null,$args);
+Post_Bookmarks::get_link_list(null,$args);
 ?>`
 
 = How can I get only the links NOT attached to a post ? =
@@ -66,7 +65,7 @@ Use the *data-cp-link-domain* attribute, for example :
 
 = How can I change the way links are displayed ? =
 
-Use the filter *post_bkmarks_single_link_html* (located in the function **post_bkmarks_get_single_link_html()**), for example : 
+Use the filter *post_bkmarks_single_link_html* (located in the function **Post_Bookmarks::get_link_html()**), for example : 
 
 `<?php
 
@@ -86,6 +85,9 @@ add_filter('post_bkmarks_single_link_html','custom_output_single_link',10,2);
 
 == Changelog ==
 
+= 2.1.7 =
+* cleaned and updated doc.
+
 = 2.1.6 =
 * Fixed ajax actions
 * links IDs order is now saved (only) with ajax each time links are reordered, and is a standalone PHP action
@@ -101,7 +103,7 @@ add_filter('post_bkmarks_single_link_html','custom_output_single_link',10,2);
 
 = 2.1.2 =
 * improved filter_bookmarks_for_post: removed the 'include' arg which was incompatible with 'category', 'category_name', and 'exclude' bookmarks parameters.
-* improved post_bkmarks_get_tab_links.
+* improved Post_Bookmarks::get_tab_links.
 
 = 2.1.1 =
 * improved row actions

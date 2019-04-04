@@ -151,7 +151,7 @@ class Post_Bookmarks_Settings {
             '<p><input type="radio" name="%1$s[display_links]" value="manual" %2$s /> %3$s</p>',
             Post_Bookmarks::$settings_optionkey,
             checked( $option, 'manual', false ),
-            __('Manual','post-bkmarks').' <small>— '.sprintf(__('Use the function %s in your theme templates','post-bkmarks'),'<code>post_bkmarks_links_list()</code>').'</small>'
+            __('Manual','post-bkmarks').' <small>— '.sprintf(__('Use the function %s in your theme templates','post-bkmarks'),'<code>Post_Bookmarks::get_link_list()</code>').'</small>'
         );
         
         

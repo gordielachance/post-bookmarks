@@ -5,7 +5,7 @@ Description: Adds a new metabox to the editor, allowing you to attach a set of r
 Plugin URI: https://github.com/gordielachance/post-bookmarks
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.1.6
+Version: 2.1.7
 License: GPL2
 */
 
@@ -14,7 +14,7 @@ class Post_Bookmarks {
     /**
     * @public string plugin version
     */
-    public $version = '2.1.6';
+    public $version = '2.1.7';
     /**
     * @public string plugin DB version
     */
@@ -159,7 +159,7 @@ class Post_Bookmarks {
                 //rename post metas
                 $update_posts = $wpdb->prepare( 
                     "UPDATE `".$wpdb->prefix . "postmeta` SET meta_key = '%s' WHERE meta_key = '%s'",
-                    Post_Bookmarks::$link_ids_metakey,
+                    self::$link_ids_metakey,
                     '_custom_post_links_ids'
                 );
                 $wpdb->query($update_posts);
@@ -231,6 +231,7 @@ class Post_Bookmarks {
             if (in_array($post_type,$disabled)) continue;
             $allowed[] = $post_type;
         }
+        
         return $allowed;
     }
 
@@ -326,7 +327,7 @@ class Post_Bookmarks {
         $post_bookmarks = array();
         $post_id = $r['post_bkmarks_for_post'];
         
-        if ( !$pbkm_links_ids = post_bkmarks_get_links_ids_for_post($post_id) ) return array();
+        if ( !$pbkm_links_ids = self::get_post_link_ids($post_id) ) return array();
         
         unset($r['post_bkmarks_for_post']); //avoid infinite loop
         $bookmarks = get_bookmarks($r);
@@ -345,7 +346,7 @@ class Post_Bookmarks {
         //sort custom
         
         if ($r['orderby'] == 'custom'){
-            $link_ids = post_bkmarks_get_links_ids_for_post($post_id);
+            $link_ids = self::get_post_link_ids($post_id);
             $post_bookmarks = post_bkmarks_sort_using_ids_array($post_bookmarks,$link_ids);
         }
 
@@ -362,14 +363,17 @@ class Post_Bookmarks {
         if ( !in_array( $post->post_type, $this->allowed_post_types() ) ) return $content;
 
         $option = $this->get_options('display_links');
-        $links = post_bkmarks_links_list($post->ID);
+        $links = self::get_link_list($post->ID);
+        $title = sprintf('<h3 class="post-bkmarks-section-title">%s</h3>',__('Related links','post-bkmarks'));
+        
+        $append = sprintf('<section class="post-bkmarks-section">%s</section>',$title.$links);
 
         switch($option){
             case 'before':
-                $content = $links."\n".$content;
+                $content = $append."\n".$content;
             break;
             case 'after':
-                $content.= "\n".$links;
+                $content.= "\n".$append;
             break;
         }
 
@@ -416,7 +420,7 @@ class Post_Bookmarks {
         //attached links
         $links_table = new Post_Bookmarks_List_Table();
         
-        $links_table->items = post_bkmarks_get_tab_links();
+        $links_table->items = self::get_tab_links();
         $links_table->prepare_items();
 
         $classes = array('metabox-table-tab','post-bookmarks-output-admin');
@@ -494,7 +498,7 @@ class Post_Bookmarks {
     }
     //TO FIX TO REMOVE
     function update_links_order($post_id,$form_links){
-        $post_link_db_ids = post_bkmarks_get_links_ids_for_post($post_id);
+        $post_link_db_ids = self::get_post_link_ids($post_id);
         $post_link_ids = array();
         foreach((array)$form_links as $link){
             if (!$link['link_id']) continue;
@@ -503,7 +507,7 @@ class Post_Bookmarks {
         }
         
         if ($post_link_ids != $post_link_db_ids){
-            update_post_meta( $post_id, Post_Bookmarks::$link_ids_metakey, $post_link_ids );
+            update_post_meta( $post_id, self::$link_ids_metakey, $post_link_ids );
         }
     }
     
@@ -520,7 +524,7 @@ class Post_Bookmarks {
         $link = $this->sanitize_link($link);
         
         // get existing links IDs for post
-        $post_link_ids = post_bkmarks_get_links_ids_for_post($post_id);
+        $post_link_ids = (array)self::get_post_link_ids($post_id);
         
         switch($action){
                 
@@ -538,7 +542,7 @@ class Post_Bookmarks {
                 if ( in_array($link_id,$post_link_ids) ) return true;
                 
                 $post_link_ids[] = $link_id;
-                if ( update_post_meta( $post_id, Post_Bookmarks::$link_ids_metakey, $post_link_ids ) ){
+                if ( update_post_meta( $post_id, self::$link_ids_metakey, $post_link_ids ) ){
                     return $link_id;
                 }
 
@@ -553,7 +557,7 @@ class Post_Bookmarks {
                 //TO FIX : remove 'post bookmarks' link category if it only belongs to this post
                 
                 $post_link_ids = array_diff( $post_link_ids, array($link['link_id']) );
-                return update_post_meta( $post_id, Post_Bookmarks::$link_ids_metakey, $post_link_ids );
+                return update_post_meta( $post_id, self::$link_ids_metakey, $post_link_ids );
                 
             case 'save':
                 
@@ -569,7 +573,7 @@ class Post_Bookmarks {
                 if ( $link['link_id']){
                     if ( wp_delete_link($link['link_id']) ){
                         $post_link_ids = array_diff( (array)$post_link_ids, array($link['link_id']) );
-                        return update_post_meta( $post_id, Post_Bookmarks::$link_ids_metakey, $post_link_ids );
+                        return update_post_meta( $post_id, self::$link_ids_metakey, $post_link_ids );
                     }
                 }else{
                     return true;
@@ -686,8 +690,170 @@ class Post_Bookmarks {
             error_log($prefix.$message);
         }
     }
-    
-    
+    /*
+     * Generate the list of links for this post
+     */
+    static function get_link_list($post_id = null, $args = null){
+        global $post;
+
+        if (!$post_id) $post_id = $post->ID;
+        if (!$post_id) return false;
+
+        $links_html = null;
+        $title_el = null;
+        $blogroll = array();
+
+        if ( $post_bkmarks = self::get_post_links($post_id,$args) ){
+
+            foreach ((array)$post_bkmarks as $link){
+
+                $link_html = self::get_link_html($link);
+                $link_html = sprintf('<li><i class="fa fa-link" aria-hidden="true"></i>%s</li>',$link_html);
+                $blogroll[] = $link_html;
+
+            }
+
+            $blogroll_str = implode("\n",$blogroll);
+
+
+            if ($blogroll_str) {
+
+                $list_html = sprintf('<ul class="post-bookmarks-list">%2s</ul>',$blogroll_str);
+                $links_html = sprintf('<div class="post-bookmarks-output-list" data-post-bkmarks-post-id="%s">%s%s</div>',$post_id,$title_el,$list_html);
+            }
+
+        }
+
+        return $links_html;
+
+    }
+
+    /*
+     * Get the links attached to a post.
+     * $args should be an array with the same parameters you would set while using the native get_bookmarks() function.
+     * https://codex.wordpress.org/Function_Reference/get_bookmarks
+     */
+
+    static function get_post_links($post_id = null, $args = null){
+        if (!$post_id) $post_id = $post->ID;
+        if (!$post_id) return false;
+
+        $post_args = array(
+            'post_bkmarks_for_post'=>$post_id,
+            'orderby' => post_bkmarks()->get_options('links_orderby')
+        );
+
+        if ($args){
+            $post_args = wp_parse_args($post_args,$args); //priority to the post args
+        }
+
+        return get_bookmarks($post_args);
+
+    }
+
+    /*
+     * Get the list of link IDs attached to a post.
+     */
+
+    static function get_post_link_ids($post_id = null){
+        global $post;
+        if (!$post_id) $post_id = $post->ID;
+        if ( $meta = get_post_meta( $post_id, self::$link_ids_metakey, true ) ){
+            return array_unique((array)$meta);
+        }
+        return false;
+    }
+
+    /*
+     * Template a single link
+     */
+
+    static function get_favicon($url){
+
+        $favicon = null;
+
+        //get domain url
+        if ( $domain = post_bkmarks_get_url_domain($url) && (post_bkmarks()->get_options('get_favicon')=='on') ){
+            //favicon
+            $favicon = sprintf('https://www.google.com/s2/favicons?domain=%s',$url);
+            $favicon_style = sprintf(' style="background-image:url(\'%s\')"',$favicon);
+            $favicon = sprintf('<span class="post-bkmarks-favicon" %s></span>',$favicon_style);
+        }
+
+        return $favicon;
+    }
+
+    /*
+     * Generate the single link output
+     */
+    static function get_link_html($link){
+
+        $link_classes_arr = array(
+            'post-bkmark',
+            'post-bkmark-' . $link->link_id,
+        );
+        $link_classes_arr = apply_filters('post_bkmarks_single_link_classes',$link_classes_arr,$link);
+        $link_classes = post_bkmarks_get_classes_attr($link_classes_arr);
+
+        $link_target_str=null;
+        $favicon = self::get_favicon($link->link_url);
+        $domain = post_bkmarks_get_url_domain($link->link_url);
+
+        if($link->link_target) {
+            if ( (post_bkmarks()->get_options('ignore_target_local')=='on') && post_bkmarks_is_local_url($link->link_url) ){
+                //nix
+            }else{
+                $link_target_str = sprintf('target="%s"',esc_attr($link->link_target) );
+            }
+
+        }
+
+        $link_html = sprintf('<a %s href="%s" %s data-cp-link-domain="%s">%s%s</a>',
+            $link_classes,
+            esc_url($link->link_url),
+            $link_target_str,
+            esc_attr($domain),
+            $favicon,
+            esc_html($link->link_name)
+         );
+
+        return apply_filters('post_bkmarks_single_link_html',$link_html,$link);
+
+    }
+
+    static function get_tab_links($tab = null){
+        global $post;
+        $links = array();
+
+        //current tab
+        if (!$tab) $tab = post_bkmarks()->links_tab;
+
+        $args = array();
+
+        //search filter
+        if ( $search = strtolower(post_bkmarks()->filter_links_text) ){
+            $args['search'] = $search;
+        }
+
+        $args = apply_filters('post_bkmarks_tab_links_args',$args,$tab,$post->ID);
+
+        //attached to the post
+        if ($tab == 'library'){
+            $links = get_bookmarks( $args );
+        }else{
+            $links = self::get_post_links($post->ID,$args);
+        }
+
+        $links = apply_filters('self::get_tab_links',$links,$tab,$post->ID);
+
+        //sanitize links
+        foreach ($links as $key=>$link){
+            $links[$key] = (object)post_bkmarks()->sanitize_link($link);
+        }
+
+        return $links;
+    }
+
 }
 
 function post_bkmarks() {
